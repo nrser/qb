@@ -1,0 +1,117 @@
+---
+  
+# defaults
+# ========
+
+- name: create defaults directory
+  file:
+    path: "{{ role_path }}/defaults"
+    state: directory
+  when: role_defaults
+
+- name: create defaults/main.yml
+  template:
+    src: defaults/main.yml.j2
+    dest: "{{ role_path }}/defaults/main.yml"
+    force: false
+  when: role_defaults
+
+# files
+# =====
+
+- name: create files directory
+  file:
+    path: "{{ role_path }}/files"
+    state: directory
+  when: role_files
+
+# TODO: you might want to remove .gitkeep after the dir has actual contents
+#       but this would keep creating it.
+- name: create a .gitkeep in the files directory
+  copy:
+    content: ""
+    dest: "{{ role_path }}/files/.gitkeep"
+    force: false
+  when: role_files
+
+# handlers
+# ========
+
+- name: create handlers directory
+  file:
+    path: "{{ role_path }}/handlers"
+    state: directory
+  when: role_handlers
+
+- name: create handlers/main.yml
+  template:
+    src: handlers/main.yml.j2
+    dest: "{{ role_path }}/handlers/main.yml"
+    force: false
+  when: role_handlers
+
+# meta
+# ====
+
+- name: create meta directory
+  file:
+    path: "{{ role_path }}/meta"
+    state: directory
+  when: role_meta
+
+- name: create meta/main.yml
+  template:
+    src: meta/main.yml.j2
+    dest: "{{ role_path }}/meta/main.yml"
+    force: false
+  when: role_meta
+
+# tasks
+# =====
+
+- name: create tasks directory
+  file:
+    path: "{{ role_path }}/tasks"
+    state: directory
+  when: role_tasks
+
+- name: create tasks/main.yml
+  template:
+    src: tasks/main.yml.j2
+    dest: "{{ role_path }}/tasks/main.yml"
+    force: false
+  when: role_tasks
+
+# templates
+# =========
+
+- name: create templates directory
+  file:
+    path: "{{ role_path }}/templates"
+    state: directory
+  when: role_templates
+
+# TODO: you might want to remove .gitkeep after the dir has actual contents
+#       but this would keep creating it.
+- name: create a .gitkeep in the templates directory
+  copy:
+    content: ""
+    dest: "{{ role_path }}/templates/.gitkeep"
+    force: false
+  when: role_templates
+
+# vars
+# ====
+
+- name: create vars directory
+  file:
+    path: "{{ role_path }}/vars"
+    state: directory
+  when: role_vars
+
+- name: create vars/main.yml
+  template:
+    src: vars/main.yml.j2
+    dest: "{{ role_path }}/vars/main.yml"
+    force: false
+  when: role_vars

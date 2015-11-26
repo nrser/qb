@@ -1,0 +1,9 @@
+---
+role_name: "{{ role_path | basename }}"
+role_defaults: true
+role_files: false
+role_handlers: false
+role_meta: true
+role_tasks: true
+role_templates: false
+role_vars: false
