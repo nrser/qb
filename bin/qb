@@ -1,0 +1,211 @@
+#!/usr/bin/env ruby
+
+require 'pathname'
+require 'pp'
+require 'yaml'
+require 'optparse'
+
+# constants
+# =========
+
+ROOT = (Pathname.new(__FILE__).dirname + '..').expand_path
+ROLES_DIR = ROOT + 'roles'
+ROLES = Pathname.glob(ROLES_DIR + 'qb.*').map {|path| path.basename.to_s}
+DEBUG_ARGS = ['-d', '--debug']
+
+# globals
+# =======
+
+$debug = false
+
+# @api util
+# *pure*
+#
+# format a debug message with optional key / values to print
+#
+# @param msg [String] message to print.
+# @param dump [Hash] optional hash of keys and vaues to dump.
+def format msg, dump = {}
+  unless dump.empty?
+    msg += "\n" + dump.map {|k, v| "  #{ k }: #{ v.inspect }" }.join("\n")
+  end
+  msg
+end
+
+def debug *args
+  return unless $debug
+  
+  msg, values = case args.length
+  when 0
+    raise ArgumentError, "debug needs at least one argument"
+  when 1
+    if args[0].is_a? Hash
+      ['', args[0]]
+    else
+      [args[0], {}]
+    end
+  when 2
+    [args[0], args[1]]
+  else
+    raise ArgumentError, "debug needs at least one argument"
+  end
+  
+  $stderr.puts("DEBUG " + format(msg, values))
+end
+
+def set_debug! args
+  if DEBUG_ARGS.any? {|arg| args.include? arg}
+    $debug = true
+    debug "ON"
+    DEBUG_ARGS.each {|arg| args.delete arg}
+  end
+end
+
+def parse! role_arg, var_prefix, vars, defaults, args
+  positional = vars.select do |var|
+    var['positional'] == true
+  end
+  
+  positional_banner = if positional.empty?
+    ''
+  else
+    ' ' + positional.map {|var|
+      var['name'].upcase
+    }.join(' ')
+  end
+  
+  options = {}
+  
+  opt_parser = OptionParser.new do |opts|
+    opts.banner = "qb #{ role_arg } [OPTIONS]#{ positional_banner }"
+    
+    vars.each do |var|
+      arg_name = var.fetch 'name'
+      var_name = "#{ var_prefix }_#{ arg_name }"
+      required = var['required'] || false
+      arg_style = required ? :REQUIRED : :OPTIONAL
+      
+      # on_args = [arg_style]
+      on_args = []
+      
+      if var['type'] == 'boolean'
+        if var['short']
+          on_args << "-#{ var['short'] }"
+        end
+        
+        on_args << "--[no-]#{ var['name'] }"
+        
+      else
+        ruby_type = case var['type']
+        when 'string'
+          String
+        else
+          raise ArgumentError, "bad type: #{ var['type'].inspect }"
+        end
+        
+        if var['short']
+          on_args << "-#{ var['short'] } #{ arg_name.upcase }"
+        end
+        
+        on_args << "--#{ var['name'] }=#{ arg_name.upcase }"
+        
+        on_args << ruby_type
+      end
+      
+      # description
+      if var.key? 'description'
+        on_args << var['description'] 
+      else
+        on_args << "set the #{ var_name } variable"
+      end
+      
+      if defaults.key? var_name
+        on_args << "(defaults to #{ defaults[var_name] })"
+      end
+      
+      debug "adding option", name: arg_name, on_args: on_args
+      
+      opts.on(*on_args) do |value|
+        options[var['name']] = value
+      end
+    end
+    
+    # No argument, shows at tail.  This will print an options summary.
+    # Try it and see!
+    opts.on_tail("-h", "--help", "Show this message") do
+      puts opts
+      exit
+    end
+  end
+  
+  opt_parser.parse! args
+  
+  # args.each_with_index do |value, index|
+  #   var_name = positional[index]['name']
+  #   if options.key? var_name
+  #     raise ArgumentError, "don't supply #{ var_name } as option and positionaly"
+  #   else
+  #     options[var_name] = value
+  #   end
+  # end
+  
+  options
+end
+
+def main args
+  set_debug! args
+  debug args: args
+  
+  role_arg = args.shift
+  debug "role arg" => role_arg
+  
+  matches = ROLES.select {|role|
+    role.include? role_arg
+  }
+  debug "role matches" => matches
+  
+  role = case matches.length
+  when 0
+    raise ArgumentError, "no roles match arg #{ role_arg.inspect }"
+  when 1
+    matches[0]
+  else
+    raise ArgumentError, "multiple role matches: #{ matches.inpsect }"
+  end
+  debug role: role
+  
+  role_dir = ROLES_DIR + role
+  
+  defaults = YAML.load (role_dir + 'defaults' + 'main.yml').read
+  meta = YAML.load (role_dir + 'meta' + 'main.yml').read
+  
+  qb_info = meta['qb_info'] || {}
+  vars = qb_info['vars'] || []
+  var_prefix = qb_info['var_prefix'] || role.split('.').last
+  
+  options = parse! role_arg, var_prefix, vars, defaults, args
+  
+  debug options: options
+  
+  playbook_role = {'role' => role}
+  options.each do |arg_name, arg_value|
+    playbook_role["#{ var_prefix }_#{ arg_name }"] = arg_value
+  end
+  
+  playbook = [
+    {
+      'hosts' => 'localhost',
+      'roles' => [playbook_role]
+    }
+  ]
+  
+  debug playbook: playbook
+  
+  File.open './.qb-playbook.yml', 'w' do |f|
+    f.write YAML.dump(playbook)
+  end
+
+  exec "ansible-playbook ./.qb-playbook.yml"
+end
+
+main(ARGV) if __FILE__ == $0

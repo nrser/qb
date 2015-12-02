@@ -1,0 +1,52 @@
+---
+# playbook to setup the dev env for this repo
+- name: dev setup for beiarea/workstations
+
+  hosts: localhost
+
+  vars:
+    # repos that are co-developed
+    repos: []
+    # - owner: nrser
+    #   name: ansible-nrser.sync.rb
+
+    # repos that are used for reference only
+    ref_repos:
+    - owner: ansible
+      name: ansible
+      version: v1.9.4-1
+      dir_name: ansible-v1.9.4
+      depth: 1
+    
+    - owner: nrser
+      name: nrser.env
+
+  tasks:
+  - name: clone co-dev repos
+    git:
+      repo: git@github.com:{{ item.owner }}/{{ item.name }}.git
+      dest: ./repos/{{ item.dir_name | default(item.name) }}
+      version: "{{ item.version | default('HEAD') }}"
+      update: no
+    with_items: repos
+
+  - name: see if the repos have a Gemfile
+    stat:
+      path: "./repos/{{ item.dir_name | default(item.name) }}/Gemfile"
+    with_items: repos
+    register: gemfile_stats
+
+  - name: install bunlde for any that have a Gemfile
+    shell: bash -lc "bundle install --path=./.bundle"
+    args:
+      chdir: "{{ item.invocation.module_complex_args.path | dirname }}"
+    when: item.stat.exists
+    with_items: gemfile_stats.results | default([])
+
+  - name: clone ref repos
+    git:
+      repo: git@github.com:{{ item.owner }}/{{ item.name }}.git
+      dest: ./ref/repos/{{ item.dir_name | default(item.name) }}
+      version: "{{ item.version | default('HEAD') }}"
+      depth: "{{ item.depth | default(0) }}"
+    with_items: ref_repos

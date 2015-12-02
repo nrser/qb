@@ -1,0 +1,37 @@
+---
+# meta file for qb.role
+
+dependencies: []
+# - role: role-name
+
+qb_info:
+  vars:
+  - name: dest
+    positional: true
+    required: true
+    type: string
+    short: p
+  
+  - name: name
+    type: string
+    short: n
+  
+  - name: files
+    type: boolean
+  
+  - name: handler
+    type: boolean
+  
+  - name: meta
+    type: boolean
+    description: create meta/main.yml
+  
+  - name: tasks
+    type: boolean
+  
+  - name: templates
+    type: boolean
+    description: create a templates directory.
+  
+  - name: vars
+    type: boolean

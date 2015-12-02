@@ -1,5 +1,5 @@
 ---
-role_name: "{{ role_path | basename }}"
+role_name: "{{ role_dest | basename }}"
 role_defaults: true
 role_files: false
 role_handlers: false

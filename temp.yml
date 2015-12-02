@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+  roles:
+  # cmd: qb role path=roles/qb.role templates meta
+  # qb role roles/qb.role --templates --meta --path=roles/qb.role
+  # 
+  # how to turn something OFF that defaults to on
+  # qb role --defaults=off
+  # qb role -d off
+  # - role: qb.role
+  #   role_path: ./roles/qb.role
+  #   role_templates: true
+  #   role_meta: true
+  - role: qb.test
