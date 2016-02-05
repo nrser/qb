@@ -226,8 +226,8 @@ def main args
   
   debug input_dir: dir
   
-  # normalize (remove trailing slash)
-  dir = dir[0...-1] if dir.end_with? '/'
+  # normalize to expanded path (has no trailing slash)
+  dir = File.expand_path dir
   
   debug normalized_dir: dir
   
