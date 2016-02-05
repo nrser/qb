@@ -5,6 +5,7 @@ require 'pp'
 require 'yaml'
 require 'optparse'
 require 'json'
+require 'fileutils'
 
 require 'cmds'
 
@@ -223,6 +224,18 @@ def main args
     
   end
   
+  saved_options_path = Pathname.new(dir) + '.qb-options.yml'
+  
+  saved_options = if saved_options_path.exist?
+    YAML.load saved_options_path.read
+  else
+    {}
+  end
+  
+  if saved_options.key? role
+    options = saved_options[role].merge options
+  end
+  
   playbook_role = {'role' => role}
   options.each do |arg_name, arg_value|
     playbook_role["#{ var_prefix }_#{ arg_name }"] = arg_value
@@ -241,6 +254,14 @@ def main args
   
   File.open './.qb-playbook.yml', 'w' do |f|
     f.write YAML.dump(playbook)
+  end
+  
+  unless options.empty?
+    saved_options[role] = options
+    FileUtils.mkdir_p saved_options_path.dirname unless saved_options_path.dirname.exist?
+    saved_options_path.open('w') do |f|
+      f.write YAML.dump(saved_options)
+    end
   end
 
   exec "ansible-playbook ./.qb-playbook.yml"
