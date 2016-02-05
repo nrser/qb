@@ -1,0 +1,19 @@
+#!/usr/bin/ruby
+
+require 'fileutils'
+
+[
+  'bin/console',
+  'bin/setup',
+  'lib',
+  'spec',
+  '.rspec',
+  '.travis.yml',
+  'Gemfile',
+  'LICENSE.txt',
+  'qb.gemspec',
+  'Rakefile',
+].each do |path|
+  `git reset HEAD #{ path }`
+  FileUtils.rm_rf path
+end
