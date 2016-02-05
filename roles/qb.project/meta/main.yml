@@ -14,10 +14,6 @@ qb_info:
     description: github name of directory
     type: string
   
-  - name: dir
-    description: destination directory
-    type: string
-  
   - name: bin
     description: create a /bin directory
     type: boolean

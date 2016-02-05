@@ -24,6 +24,8 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+/tmp
+/dev/repos
 /dev/ref/repos
 
 # prob want to find better way of doing this tempfile stuff in future

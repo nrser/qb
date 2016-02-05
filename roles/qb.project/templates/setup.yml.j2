@@ -1,31 +1,24 @@
 ---
 # playbook to setup the dev env for this repo
-- name: dev setup for nrser/qb
-
+- name: dev setup for {{ project_owner }}/{{ project_name }}
+{% raw %}
   hosts: localhost
 
   vars:
     # repos that are co-developed
     repos: []
+    # example:
     # - owner: nrser
-    #   name: ansible-nrser.sync.rb
+    #   name: qb
 
     # repos that are used for reference only
-    ref_repos:
-    - owner: ansible
-      name: ansible
-      version: v1.9.4-1
-      dir_name: ansible-v1.9.4
-      depth: 1
-    
-    - owner: nrser
-      name: nrser.env
-    
-    - owner: beiarea
-      name: workstations
-    
-    - owner: nrser
-      name: ansible-nrser.profile
+    ref_repos: []
+    # example:
+    # - owner: ansible
+      # name: ansible
+      # version: v1.9.4-1
+      # dir_name: ansible-v1.9.4
+      # depth: 1
 
   tasks:
   - name: clone co-dev repos
@@ -56,3 +49,4 @@
       version: "{{ item.version | default('HEAD') }}"
       depth: "{{ item.depth | default(0) }}"
     with_items: ref_repos
+{% endraw %}

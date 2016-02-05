@@ -1,7 +1,8 @@
 ---
 # tasks file for qb.project
 
-- debug: msg="name {{ project_name | default('(none)') }} dir {{ dir }}"
+# preamble
+# ========
 
 - name: create the directory
   file:
@@ -19,14 +20,122 @@
     chdir: "{{ dir }}"
   when: not dot_git_dir_stat.stat.exists
 
+- name: create .gitignore
+  copy:
+    content: ''
+    dest: "{{ dir }}/.gitignore"
+    force: false
+  register: gitignore
+
+# - name: check out github/gitignore
+#   git:
+#     repo: git@github.com:github/gitignore.git
+#     dest: ./tmp/gitignore
+#     version: master
+#     depth: 1
+
+- name: ignore OSX system artifacts
+  blockinfile:
+    content: "{{ lookup('file', './tmp/gitignore/Global/OSX.gitignore')}}"
+    dest: "{{ dir }}/.gitignore"
+    marker: "\n# {mark} OSX.gitignore\n"
+
+# bin
+# ===
+
+- name: create /bin directory
+  git_mkdir:
+    path: "{{ dir }}/bin"
+  when: project_bin
+
+# dev
+# ===
+
+- name: create /dev and /dev/bin directories
+  git_mkdir:
+    path: "{{ dir }}/dev/bin"
+  when: project_dev
+
+# setup
+# =====
+
+- name: create /dev/setup.yml
+  template:
+    src: setup.yml.j2
+    dest: "{{ dir }}/dev/setup.yml"
+    force: false
+  when: project_setup
+  register: setup_yml
+
+- command: git add dev/setup.yml
+  args:
+    chdir: "{{ dir }}"
+  when: setup_yml.changed
+
+- name: ignore /dev/repos in git
+  lineinfile:
+    line: /dev/repos
+    dest: "{{ dir }}/.gitignore"
+  register: ignore_dev_repos
+
+- name: ignore /dev/ref/repos in git
+  lineinfile:
+    line: /dev/ref/repos
+    dest: "{{ dir }}/.gitignore"
+  register: ignore_dev_ref_repos
+
+# scratch
+# =======
+
+- name: create scratch directory
+  git_mkdir:
+    path: "{{ dir }}/scratch"
+
+# tmp
+# ===
+
+- name: create tmp directory
+  git_mkdir:
+    path: "{{ dir }}/tmp"
+    
+- name: ignore tmp dir in git
+  lineinfile:
+    line: /tmp
+    dest: "{{ dir }}/.gitignore"
+  register: ignore_tmp
+
+# readme
+# ======
+
 - name: create readme
   template:
     src: README.md.j2
     dest: "{{ dir }}/README.md"
   when: project_readme
+  register: readme
+
+- command: git add README.md
+  args:
+    chdir: "{{ dir }}"
+  when: readme.changed
+
+# hub
+# ===
 
 - name: run `hub create`
   command: "hub create{% if project_private %} -p{% endif %}"
   args:
     chdir: "{{ dir }}"
   when: project_hub
+
+# postamble
+# =========
+
+- command: git add .gitignore
+  args:
+    chdir: "{{ dir }}"
+  when: >
+    gitignore.changed or
+    ignore_dev_repos.changed or
+    ignore_dev_ref_repos.changed or
+    ignore_tmp.changed

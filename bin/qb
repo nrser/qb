@@ -233,7 +233,7 @@ def main args
   playbook = [
     {
       'hosts' => 'localhost',
-      'roles' => [playbook_role]
+      'roles' => ['yaegashi.blockinfile', playbook_role]
     }
   ]
   
