@@ -1,0 +1,7 @@
+---
+# tasks file for qb.gem
+
+- name: use bundler to init the gem
+  shell: yes 'n' | bundle gem --no-mit {{ dir | basename }}
+  args:
+    chdir: "{{ dir }}/.."
