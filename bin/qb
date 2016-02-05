@@ -224,6 +224,13 @@ def main args
     
   end
   
+  debug input_dir: dir
+  
+  # normalize (remove trailing slash)
+  dir = dir[0...-1] if dir.end_with? '/'
+  
+  debug normalized_dir: dir
+  
   saved_options_path = Pathname.new(dir) + '.qb-options.yml'
   
   saved_options = if saved_options_path.exist?
