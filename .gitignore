@@ -1,12 +1,6 @@
-/tmp
-/dev/repos
-/dev/ref/repos
-
-# prob want to find better way of doing this tempfile stuff in future
+# temp playbook created by qb for ansible-playbook to consume
 /.qb-playbook.yml
-
 # BEGIN OSX.gitignore
-
 .DS_Store
 .AppleDouble
 .LSOverride
@@ -32,5 +26,7 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
-
 # END OSX.gitignore
+/dev/repos
+/dev/ref/repos
+/tmp

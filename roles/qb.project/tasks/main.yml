@@ -38,7 +38,7 @@
   blockinfile:
     content: "{{ lookup('file', './tmp/gitignore/Global/OSX.gitignore')}}"
     dest: "{{ dir }}/.gitignore"
-    marker: "\n# {mark} OSX.gitignore\n"
+    marker: "# {mark} OSX.gitignore"
 
 # bin
 # ===
@@ -111,6 +111,7 @@
   template:
     src: README.md.j2
     dest: "{{ dir }}/README.md"
+    force: false
   when: project_readme
   register: readme
 
