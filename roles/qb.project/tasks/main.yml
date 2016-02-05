@@ -1,0 +1,32 @@
+---
+# tasks file for qb.project
+
+- debug: msg="name {{ project_name | default('(none)') }} dir {{ dir }}"
+
+- name: create the directory
+  file:
+    path: "{{ dir }}"
+    state: directory
+
+- name: look for .git dir
+  stat:
+    path: "{{ dir }}/.git"
+  register: dot_git_dir_stat
+
+- name: initialize git
+  command: git init
+  args:
+    chdir: "{{ dir }}"
+  when: not dot_git_dir_stat.stat.exists
+
+- name: create readme
+  template:
+    src: README.md.j2
+    dest: "{{ dir }}/README.md"
+  when: project_readme
+
+- name: run `hub create`
+  command: "hub create{% if project_private %} -p{% endif %}"
+  args:
+    chdir: "{{ dir }}"
+  when: project_hub

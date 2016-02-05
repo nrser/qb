@@ -5,13 +5,7 @@ dependencies: []
 # - role: role-name
 
 qb_info:
-  vars:
-  - name: dest
-    positional: true
-    required: true
-    type: string
-    short: p
-  
+  vars:  
   - name: name
     type: string
     short: n

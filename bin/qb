@@ -4,6 +4,9 @@ require 'pathname'
 require 'pp'
 require 'yaml'
 require 'optparse'
+require 'json'
+
+require 'cmds'
 
 # constants
 # =========
@@ -187,10 +190,45 @@ def main args
   
   debug options: options
   
+  # get the target dir
+  dir = case args.length
+  when 0
+    # in this case, a dir has not been provided
+    # 
+    # in some cases (like projects) the dir can be figured out from other
+    # variables. i created a hacky-ass way of dealing with this:
+    # 
+    # when the sole positional arg is missing, we look for a `qb/get_dir`
+    # executable in the role. if it exists, call it with the JSON encoded
+    # options passed over STDIN. if the execuable succeeds, the result is
+    # taken as dir.
+    # 
+    get_dir_path = role_dir + 'qb' + 'get_dir'
+    
+    unless get_dir_path.exist?
+      raise "no dir argument provided and no qb/get_dir exe found"
+    end
+    
+    Cmds.chomp! get_dir_path.to_s do
+      JSON.dump options
+    end
+    
+  when 1
+    # there is a single positional arg, which is used as dir
+    args[0]
+    
+  else
+    # there are multiple positional args, which is not allowed
+    raise "can't supply more than one argument"
+    
+  end
+  
   playbook_role = {'role' => role}
   options.each do |arg_name, arg_value|
     playbook_role["#{ var_prefix }_#{ arg_name }"] = arg_value
   end
+  
+  playbook_role['dir'] = dir
   
   playbook = [
     {

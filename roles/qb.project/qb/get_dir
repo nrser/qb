@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'pp'
+
+options = JSON.parse STDIN.read
+
+name = options['name']
+owner = options['owner'] || ENV.fetch('GITHUB_USER')
+
+abort unless name
+
+puts "#{ ENV.fetch('GITHUB_ROOT') }/#{ owner }/#{ name }"
