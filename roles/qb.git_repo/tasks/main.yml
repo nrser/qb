@@ -1,0 +1,9 @@
+---
+# tasks file for qb.git_repo
+
+- name: initialize git
+  command: git init
+  args:
+    chdir: "{{ dir }}"
+    creates: "{{ dir }}/.git"
+  

@@ -1,45 +1,6 @@
 ---
 # tasks file for qb.project
 
-# preamble
-# ========
-
-- name: create the directory
-  file:
-    path: "{{ dir }}"
-    state: directory
-
-- name: look for .git dir
-  stat:
-    path: "{{ dir }}/.git"
-  register: dot_git_dir_stat
-
-- name: initialize git
-  command: git init
-  args:
-    chdir: "{{ dir }}"
-  when: not dot_git_dir_stat.stat.exists
-
-- name: create .gitignore
-  copy:
-    content: ''
-    dest: "{{ dir }}/.gitignore"
-    force: false
-  register: gitignore
-
-# - name: check out github/gitignore
-#   git:
-#     repo: git@github.com:github/gitignore.git
-#     dest: ./tmp/gitignore
-#     version: master
-#     depth: 1
-
-- name: ignore OSX system artifacts
-  blockinfile:
-    content: "{{ lookup('file', './tmp/gitignore/Global/OSX.gitignore')}}"
-    dest: "{{ dir }}/.gitignore"
-    marker: "# {mark} OSX.gitignore"
-
 # bin
 # ===
 
@@ -136,7 +97,6 @@
   args:
     chdir: "{{ dir }}"
   when: >
-    gitignore.changed or
     ignore_dev_repos.changed or
     ignore_dev_ref_repos.changed or
     ignore_tmp.changed

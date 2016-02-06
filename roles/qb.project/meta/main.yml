@@ -1,8 +1,9 @@
 ---
 # meta file for qb.project
 
-dependencies: []
-# - role: role-name
+dependencies:
+- role: qb.gitignore
+  gitignore_name: Global/OSX
 
 qb_info:
   vars:

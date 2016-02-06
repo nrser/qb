@@ -1,0 +1,31 @@
+---
+# tasks file for qb.gitignore
+
+- name: check out nrser/gitignore
+  git:
+    repo: git@github.com:nrser/gitignore.git
+    dest: ./tmp/gitignore
+    version: master
+    depth: 1
+    update: "{{ gitignore_update }}"
+
+- name: create .gitignore
+  copy:
+    content: ''
+    dest: "{{ dir }}/.gitignore"
+    force: false
+  register: gitignore_created
+
+- name: add the gitignore
+  blockinfile:
+    content: "{{ lookup('file', './tmp/gitignore/' + gitignore_name + '.gitignore') }}"
+    dest: "{{ dir }}/.gitignore"
+    marker: "# {mark} {{ gitignore_name }}.gitignore"
+  register: gitignore_added
+
+- command: git add -f .gitignore
+  args:
+    chdir: "{{ dir }}"
+  when: >
+    gitignore_created.changed or
+    gitignore_added.changed
