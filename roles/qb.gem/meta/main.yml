@@ -1,5 +1,6 @@
 ---
 # meta file for qb.gem
 
-dependencies: []
-# - role: role-name
+dependencies:
+- role: qb.gitignore
+  gitignore_name: Ruby
