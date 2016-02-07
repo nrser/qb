@@ -6,3 +6,20 @@
     src: .rspec
     dest: "{{ dir }}/.rspec"
     force: false
+
+# /.travis.yml
+# ============
+
+- name: get ruby version
+  command: ruby -e "puts RUBY_VERSION"
+  register: gem_ruby_version
+
+- name: get bundler version
+  command: bundle --version
+  register: gem_bundler_version
+
+- name: add .travis.yml
+  template:
+    src: .travis.yml.j2
+    dest: "{{ dir }}/.travis.yml"
+    force: false

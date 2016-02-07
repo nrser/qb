@@ -1,0 +1,4 @@
+language: ruby
+rvm:
+  - {{ gem_ruby_version.stdout }}
+before_install: gem install bundler -v {{ gem_bundler_version.stdout |  regex_replace('.*(\d+\.\d+\.\d+)$', '\\1') }}
