@@ -1,2 +1,8 @@
 ---
 # tasks file for qb.gem
+
+- name: add .rspec
+  copy:
+    src: .rspec
+    dest: "{{ dir }}/.rspec"
+    force: false
