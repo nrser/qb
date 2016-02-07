@@ -4,3 +4,5 @@
 dependencies:
 - role: qb.gitignore
   gitignore_name: Ruby
+- role: qb.gitignore
+  gitignore_name: Gem

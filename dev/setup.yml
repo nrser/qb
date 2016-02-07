@@ -6,9 +6,9 @@
 
   vars:
     # repos that are co-developed
-    repos: []
-    # - owner: nrser
-    #   name: ansible-nrser.sync.rb
+    repos:
+    - owner: nrser
+      name: gitignore
 
     # repos that are used for reference only
     ref_repos:
