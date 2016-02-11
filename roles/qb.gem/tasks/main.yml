@@ -23,3 +23,19 @@
     src: .travis.yml.j2
     dest: "{{ dir }}/.travis.yml"
     force: false
+
+# /<name>.gemspec
+
+- name: get git user.name
+  command: git config user.name
+  register: git_user_name
+
+- name: get git user.email
+  command: git config user.email
+  register: git_user_email
+
+- name: add {{ gem_name }}.gemspec
+  template:
+    src: gemspec.j2
+    dest: "{{ dir }}/{{ gem_name }}.gemspec"
+    force: false

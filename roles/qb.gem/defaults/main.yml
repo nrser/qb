@@ -1,2 +1,15 @@
 ---
 # defaults file for qb.gem
+
+# like some_gem
+gem_name: "{{ dir | basename }}"
+
+# folder in /lib as you would use in `require some_gem`
+gem_dirname: "{{ gem_name }}"
+
+# the ruby constant (class or module name), like "SomeGem"
+gem_constant: "{{ gem_dirname | ruby_constantize }}"
+
+gem_license: null
+
+gem_allowed_push_host: null
