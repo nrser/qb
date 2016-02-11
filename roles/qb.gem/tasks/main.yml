@@ -13,10 +13,12 @@
 - name: get ruby version
   command: ruby -e "puts RUBY_VERSION"
   register: gem_ruby_version
+  changed_when: false
 
 - name: get bundler version
   command: bundle --version
   register: gem_bundler_version
+  changed_when: false
 
 - name: add .travis.yml
   template:
@@ -29,13 +31,24 @@
 - name: get git user.name
   command: git config user.name
   register: git_user_name
+  changed_when: false
 
 - name: get git user.email
   command: git config user.email
   register: git_user_email
+  changed_when: false
 
 - name: add {{ gem_name }}.gemspec
   template:
     src: gemspec.j2
     dest: "{{ dir }}/{{ gem_name }}.gemspec"
     force: false
+
+# /Gemfile
+
+- name: add Gemfile
+  template:
+    src: Gemfile.j2
+    dest: "{{ dir }}/Gemfile"
+    force: false
+    
