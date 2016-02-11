@@ -6,24 +6,24 @@ require '{{ gem_dirname }}/version'
 Gem::Specification.new do |spec|
   spec.name          = "{{ gem_name }}"
   spec.version       = {{ gem_constant }}::VERSION
-  spec.authors       = [{{ git_user_name.stdout | to_json }}]
-  spec.email         = [{{ git_user_email.stdout | to_json }}]
+  spec.authors       = {{ gem_authors | to_json }}
+  spec.email         = {{ gem_emails | to_json }}
 
   spec.summary       = %q{TODO: Write a short summary, because Rubygems requires one.}
   spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "https://github.com/{{ git_user_name.stdout }}/{{ dir | basename }}"
-  {% if gem_license %}
+  spec.homepage      = "https://github.com/{{ git_user_name }}/{{ dir | basename }}"
+  {% if gem_license is defined -%}
   spec.license       = "{{ gem_license }}"
-  {% endif %}
+  {%- endif %}
   
-  {% if gem_allowed_push_host %}
+  {% if gem_allowed_push_host is defined -%}
   # Prevent pushing this gem to RubyGems.org
   if spec.respond_to?(:metadata)
     spec.metadata['allowed_push_host'] = "{{ gem_allowed_push_host }}"
   else
     raise "RubyGems 2.0 or newer is required to protect against public gem pushes."
   end
-  {% endif %}
+  {%- endif %}
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = "exe"

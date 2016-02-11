@@ -257,7 +257,13 @@ def main args
   playbook = [
     {
       'hosts' => 'localhost',
-      'roles' => ['yaegashi.blockinfile', playbook_role]
+      'pre_tasks' => [
+        {'qb_facts' => nil},
+      ],
+      'roles' => [
+        'yaegashi.blockinfile',
+        playbook_role
+      ],
     }
   ]
   

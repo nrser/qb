@@ -11,4 +11,9 @@
   #   role_path: ./roles/qb.role
   #   role_templates: true
   #   role_meta: true
-  - role: qb.test
+  # - role: qb.test
+  
+  tasks:
+  - qb_facts:
+  
+  - debug: msg="{{ git_user_name }}"

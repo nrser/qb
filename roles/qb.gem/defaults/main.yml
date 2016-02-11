@@ -10,6 +10,8 @@ gem_dirname: "{{ gem_name }}"
 # the ruby constant (class or module name), like "SomeGem"
 gem_constant: "{{ gem_dirname | ruby_constantize }}"
 
-gem_license: null
+gem_authors:
+- "{{ git_user_name }}"
 
-gem_allowed_push_host: null
+gem_emails:
+- "{{ git_user_email }}"

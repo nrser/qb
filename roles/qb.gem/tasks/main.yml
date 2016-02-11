@@ -1,7 +1,7 @@
 ---
 # tasks file for qb.gem
 
-- name: add .rspec
+- name: add /.rspec
   copy:
     src: .rspec
     dest: "{{ dir }}/.rspec"
@@ -20,23 +20,13 @@
   register: gem_bundler_version
   changed_when: false
 
-- name: add .travis.yml
+- name: add /.travis.yml
   template:
     src: .travis.yml.j2
     dest: "{{ dir }}/.travis.yml"
     force: false
 
 # /<name>.gemspec
-
-- name: get git user.name
-  command: git config user.name
-  register: git_user_name
-  changed_when: false
-
-- name: get git user.email
-  command: git config user.email
-  register: git_user_email
-  changed_when: false
 
 - name: add {{ gem_name }}.gemspec
   template:
@@ -46,9 +36,18 @@
 
 # /Gemfile
 
-- name: add Gemfile
+- name: add /Gemfile
   template:
     src: Gemfile.j2
     dest: "{{ dir }}/Gemfile"
     force: false
-    
+
+# /LICENSE.txt
+
+- name: add /LICENSE.txt
+  template:
+    src: "{{ gem_license }}-LICENSE.txt.j2"
+    dest: "{{ dir }}/LICENSE.txt"
+    force: false
+  when: gem_license is defined
+
