@@ -51,3 +51,9 @@
     force: false
   when: gem_license is defined
 
+# /Rakefile
+
+- name: add /Rakefile
+  copy:
+    src: Rakefile
+    dest: "{{ dir }}/Rakefile"
