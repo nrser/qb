@@ -1,14 +1,7 @@
 ---
 # tasks file for qb.gem
 
-- name: add /.rspec
-  copy:
-    src: .rspec
-    dest: "{{ dir }}/.rspec"
-    force: false
-
-# /.travis.yml
-# ============
+# preamble... should move to facts?
 
 - name: get ruby version
   command: ruby -e "puts RUBY_VERSION"
@@ -20,13 +13,33 @@
   register: gem_bundler_version
   changed_when: false
 
+# ok, actual work....
+
+- name: add /bin/console
+  template:
+    src: console.j2
+    dest: "{{ dir }}/bin/console"
+    force: false
+    mode: a+x
+
+- name: add /bin/setup
+  copy:
+    src: setup
+    dest: "{{ dir }}/bin/setup"
+    force: false
+    mode: a+x
+
+- name: add /.rspec
+  copy:
+    src: .rspec
+    dest: "{{ dir }}/.rspec"
+    force: false
+
 - name: add /.travis.yml
   template:
     src: .travis.yml.j2
     dest: "{{ dir }}/.travis.yml"
     force: false
-
-# /<name>.gemspec
 
 - name: add {{ gem_name }}.gemspec
   template:
@@ -34,15 +47,11 @@
     dest: "{{ dir }}/{{ gem_name }}.gemspec"
     force: false
 
-# /Gemfile
-
 - name: add /Gemfile
   template:
     src: Gemfile.j2
     dest: "{{ dir }}/Gemfile"
     force: false
-
-# /LICENSE.txt
 
 - name: add /LICENSE.txt
   template:
@@ -50,8 +59,6 @@
     dest: "{{ dir }}/LICENSE.txt"
     force: false
   when: gem_license is defined
-
-# /Rakefile
 
 - name: add /Rakefile
   copy:
