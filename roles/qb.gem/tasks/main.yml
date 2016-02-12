@@ -51,6 +51,23 @@
     dest: "{{ dir }}/lib/{{ gem_dirname }}/version.rb"
     force: false
 
+- name: create /spec
+  file:
+    path: "{{ dir }}/spec"
+    state: directory
+
+- name: add /spec/spec_helper.rb
+  template:
+    src: spec_helper.rb.j2
+    dest: "{{ dir }}/spec/spec_helper.rb"
+    force: false
+
+- name: add /spec/<dirname>_spec.rb
+  template:
+    src: spec.rb.j2
+    dest: "{{ dir }}/spec/{{ gem_dirname }}_spec.rb"
+    force: false
+
 - name: add /.rspec
   copy:
     src: .rspec

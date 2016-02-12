@@ -2,6 +2,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-bundle install
+# TODO: should i change this to always use --path= in the gem role?
+#       will i even use this with dev/setup.yml?
+bundle install --path=./.bundle
 
 # Do any other automated setup that you need to do here
