@@ -91,7 +91,10 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+
+# ruby uses this!
+# lib/
+
 lib64/
 parts/
 sdist/

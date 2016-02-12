@@ -29,6 +29,28 @@
     force: false
     mode: a+x
 
+- name: create /lib
+  file:
+    path: "{{ dir }}/lib"
+    state: directory
+
+- name: add /lib/<dirname>.rb
+  template:
+    src: module.rb.j2
+    dest: "{{ dir }}/lib/{{ gem_dirname }}.rb"
+    force: false
+
+- name: create /lib/<dirname>
+  file:
+    path: "{{ dir }}/lib/{{ gem_dirname }}"
+    state: directory
+
+- name: add /lib/<dirname>/version.rb
+  template:
+    src: version.rb.j2
+    dest: "{{ dir }}/lib/{{ gem_dirname }}/version.rb"
+    force: false
+
 - name: add /.rspec
   copy:
     src: .rspec
