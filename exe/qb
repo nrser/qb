@@ -269,7 +269,10 @@ def main args
   
   debug playbook: playbook
   
-  File.open './.qb-playbook.yml', 'w' do |f|
+  playbook_path = ROOT + '.qb-playbook.yml'
+  debug playbook_path: playbook_path.to_s
+  
+  playbook_path.open('w') do |f|
     f.write YAML.dump(playbook)
   end
   
@@ -280,8 +283,13 @@ def main args
       f.write YAML.dump(saved_options)
     end
   end
-
-  exec "ansible-playbook ./.qb-playbook.yml"
+  
+  Dir.chdir ROOT do
+    # install requirements
+    Cmds.stream! "ansible-galaxy install --ignore-errors -r %s", [ROOT + 'requirements.yml']
+    
+    Cmds.stream! "ansible-playbook %s", [playbook_path.to_s]
+  end
 end
 
 main(ARGV) # if __FILE__ == $0 # doesn't work with gem stub or something?
