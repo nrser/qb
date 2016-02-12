@@ -284,4 +284,4 @@ def main args
   exec "ansible-playbook ./.qb-playbook.yml"
 end
 
-main(ARGV) if __FILE__ == $0
+main(ARGV) # if __FILE__ == $0 # doesn't work with gem stub or something?
