@@ -18,9 +18,18 @@
 
 - name: add the gitignore
   blockinfile:
+    # content: "{{ ('#' * 78) + '\n' + lookup('file', './tmp/gitignore/' + gitignore_name + '.gitignore') + '\n' + ('#' * 78) }}"
     content: "{{ lookup('file', './tmp/gitignore/' + gitignore_name + '.gitignore') }}"
     dest: "{{ dir }}/.gitignore"
-    marker: "# {mark} {{ gitignore_name }}.gitignore"
+    beginmarker: |
+      {{ '#' * 78 }}
+      # BEGIN {{ gitignore_name }}.gitignore
+      #
+    endmarker: |
+      #
+      # END {{ gitignore_name }}.gitignore
+      {{ '#' * 78 }}
+      
   register: gitignore_added
 
 - command: git add -f .gitignore

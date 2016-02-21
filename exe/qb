@@ -16,6 +16,7 @@ ROOT = (Pathname.new(__FILE__).dirname + '..').expand_path
 ROLES_DIR = ROOT + 'roles'
 ROLES = Pathname.glob(ROLES_DIR + 'qb.*').map {|path| path.basename.to_s}
 DEBUG_ARGS = ['-d', '--debug']
+TMP_DIR = ROOT + 'tmp'
 
 # globals
 # =======
@@ -261,7 +262,7 @@ def main args
         {'qb_facts' => nil},
       ],
       'roles' => [
-        'yaegashi.blockinfile',
+        'nrser.blockinfile',
         playbook_role
       ],
     }
@@ -286,7 +287,9 @@ def main args
   
   Dir.chdir ROOT do
     # install requirements
-    Cmds.stream! "ansible-galaxy install --ignore-errors -r %s", [ROOT + 'requirements.yml']
+    unless (TMP_DIR + 'roles').directory?
+      Cmds.stream! "ansible-galaxy install --ignore-errors -r %s", [ROOT + 'requirements.yml']
+    end
     
     Cmds.stream! "ansible-playbook %s", [playbook_path.to_s]
   end

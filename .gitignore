@@ -1,9 +1,13 @@
 # temp playbook created by qb for ansible-playbook to consume
 /.qb-playbook.yml
+
 /dev/repos
 /dev/ref/repos
 /tmp
+
+##############################################################################
 # BEGIN Global/OSX.gitignore
+#
 .DS_Store
 .AppleDouble
 .LSOverride
@@ -29,8 +33,13 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+#
 # END Global/OSX.gitignore
+##############################################################################
+
+##############################################################################
 # BEGIN Ruby.gitignore
+#
 /*.gem
 *.rbc
 /.config
@@ -67,13 +76,23 @@ build/
 
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
 .rvmrc
+#
 # END Ruby.gitignore
+##############################################################################
+
+##############################################################################
 # BEGIN Gem.gitignore
+#
 /Gemfile.lock
 /.ruby-version
 /.ruby-gemset
+#
 # END Gem.gitignore
+##############################################################################
+
+##############################################################################
 # BEGIN Python.gitignore
+#
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -91,10 +110,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-
-# ruby uses this!
-# lib/
-
+lib/
 lib64/
 parts/
 sdist/
@@ -143,4 +159,6 @@ target/
 
 # pyenv
 .python-version
+#
 # END Python.gitignore
+##############################################################################
