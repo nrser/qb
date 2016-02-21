@@ -110,7 +110,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/ (needed for ruby gem)
 lib64/
 parts/
 sdist/
