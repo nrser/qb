@@ -55,7 +55,7 @@ def main():
     if (not os.path.exists(keep_path)) and (not contians_files(path)):
         open(os.path.join(path, '.gitkeep'), 'a').close()
         with cd(path):
-            subprocess.check_call(['git', 'add', '.gitkeep'])
+            subprocess.check_call(['git', 'add', '-f', '.gitkeep'])
         changed = True
 
     module.exit_json(
