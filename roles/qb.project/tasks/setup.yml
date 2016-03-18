@@ -1,0 +1,36 @@
+# setup
+# =====
+
+- name: create dev/setup.yml
+  template:
+    src: setup.yml.j2
+    dest: "{{ dir }}/dev/setup.yml"
+    force: false
+
+- name: create dev/ansible.cfg
+  copy:
+    src: ansible.cfg
+    dest: "{{ dir }}/dev/ansible.cfg"
+    force: false
+
+- name: create dev/hosts
+  copy:
+    src: hosts
+    dest: "{{ dir }}/dev/hosts"
+    force: false
+
+- name: create dev/requirements.yml
+  copy:
+    src: requirements.yml
+    dest: "{{ dir }}/dev/requirements.yml"
+    force: false
+
+- name: ignore dev/repos in git
+  lineinfile:
+    line: /dev/repos
+    dest: "{{ dir }}/.gitignore"
+
+- name: ignore dev/ref/repos in git
+  lineinfile:
+    line: /dev/ref/repos
+    dest: "{{ dir }}/.gitignore"

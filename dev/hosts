@@ -1,0 +1,2 @@
+# connection to the local machine for dev/setup.yml
+localhost ansible_connection=local

@@ -20,30 +20,8 @@
 # setup
 # =====
 
-- name: create /dev/setup.yml
-  template:
-    src: setup.yml.j2
-    dest: "{{ dir }}/dev/setup.yml"
-    force: false
+- include: setup.yml
   when: project_setup
-  register: setup_yml
-
-- command: git add dev/setup.yml
-  args:
-    chdir: "{{ dir }}"
-  when: setup_yml.changed
-
-- name: ignore /dev/repos in git
-  lineinfile:
-    line: /dev/repos
-    dest: "{{ dir }}/.gitignore"
-  register: ignore_dev_repos
-
-- name: ignore /dev/ref/repos in git
-  lineinfile:
-    line: /dev/ref/repos
-    dest: "{{ dir }}/.gitignore"
-  register: ignore_dev_ref_repos
 
 # scratch
 # =======
@@ -89,14 +67,3 @@
   args:
     chdir: "{{ dir }}"
   when: project_hub
-
-# postamble
-# =========
-
-- command: git add .gitignore
-  args:
-    chdir: "{{ dir }}"
-  when: >
-    ignore_dev_repos.changed or
-    ignore_dev_ref_repos.changed or
-    ignore_tmp.changed

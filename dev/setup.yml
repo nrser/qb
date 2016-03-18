@@ -4,56 +4,35 @@
 
   hosts: localhost
 
-  vars:
+  pre_tasks:
+  - name: load dev_setup facts
+    dev_setup_facts:
+
+  roles:
+  - role: nrser.dev_setup
     # repos that are co-developed
-    repos:
+    dev_setup_repos:
     - owner: nrser
       name: gitignore
 
-    # repos that are used for reference only
-    ref_repos:
-    - owner: ansible
-      name: ansible
-      version: v1.9.4-1
-      dir_name: ansible-v1.9.4
-      depth: 1
-    
-    - owner: nrser
-      name: nrser.env
-    
-    - owner: beiarea
-      name: workstations
-    
-    - owner: nrser
-      name: ansible-nrser.profile
+    # sources that are used for reference only
+    dev_setup_refs:
+      github:
+      - owner: ansible
+        name: ansible
+        version: v1.9.4-1
+        dir_name: ansible-v1.9.4
+        depth: 1
+      
+      - owner: nrser
+        name: nrser.env
+      
+      - owner: beiarea
+        name: workstations
+      
+      - owner: nrser
+        name: ansible-nrser.profile
+      
+      archive: []
 
   tasks:
-  - name: clone co-dev repos
-    git:
-      repo: git@github.com:{{ item.owner }}/{{ item.name }}.git
-      dest: ./repos/{{ item.dir_name | default(item.name) }}
-      version: "{{ item.version | default('HEAD') }}"
-      update: no
-    with_items: repos
-
-  - name: see if the repos have a Gemfile
-    stat:
-      path: "./repos/{{ item.dir_name | default(item.name) }}/Gemfile"
-    with_items: repos
-    register: gemfile_stats
-
-  - name: install bunlde for any that have a Gemfile
-    shell: bash -lc "bundle install --path=./.bundle"
-    args:
-      chdir: "{{ item.invocation.module_complex_args.path | dirname }}"
-    when: item.stat.exists
-    with_items: gemfile_stats.results | default([])
-
-  - name: clone ref repos
-    git:
-      repo: git@github.com:{{ item.owner }}/{{ item.name }}.git
-      dest: ./ref/repos/{{ item.dir_name | default(item.name) }}
-      version: "{{ item.version | default('HEAD') }}"
-      depth: "{{ item.depth | default(0) }}"
-      update: no
-    with_items: ref_repos
