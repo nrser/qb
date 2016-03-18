@@ -55,4 +55,5 @@
       dest: ./ref/repos/{{ item.dir_name | default(item.name) }}
       version: "{{ item.version | default('HEAD') }}"
       depth: "{{ item.depth | default(0) }}"
+      update: no
     with_items: ref_repos
