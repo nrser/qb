@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+# stub instead of `bundle exec qb ...`
+require 'bundler/setup'
+load 'exe/qb'
