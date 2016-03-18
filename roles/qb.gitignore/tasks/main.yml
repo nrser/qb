@@ -14,11 +14,9 @@
     content: ''
     dest: "{{ dir }}/.gitignore"
     force: false
-  register: gitignore_created
 
-- name: add the gitignore
+- name: modify .gitignore
   blockinfile:
-    # content: "{{ ('#' * 78) + '\n' + lookup('file', './tmp/gitignore/' + gitignore_name + '.gitignore') + '\n' + ('#' * 78) }}"
     content: "{{ lookup('file', './tmp/gitignore/' + gitignore_name + '.gitignore') }}"
     dest: "{{ dir }}/.gitignore"
     beginmarker: |
@@ -29,12 +27,3 @@
       #
       # END {{ gitignore_name }}.gitignore
       {{ '#' * 78 }}
-      
-  register: gitignore_added
-
-- command: git add -f .gitignore
-  args:
-    chdir: "{{ dir }}"
-  when: >
-    gitignore_created.changed or
-    gitignore_added.changed
