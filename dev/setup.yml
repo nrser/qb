@@ -14,6 +14,9 @@
     dev_setup_repos:
     - owner: nrser
       name: gitignore
+      
+    - owner: nrser
+      name: ansible-nrser.dev_setup
 
     # sources that are used for reference only
     dev_setup_refs:
