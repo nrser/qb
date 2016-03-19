@@ -157,12 +157,30 @@ def parse! role_arg, var_prefix, vars, defaults, args
   options
 end
 
+def help
+  puts <<-END
+syntax:
+
+    qb ROLE [OPTIONS] DIRECTORY
+
+use `qb ROLE -h` for role options.
+  
+available roles:
+
+END
+  puts ROLES
+  puts
+  exit 1
+end
+
 def main args
   set_debug! args
   debug args: args
   
   role_arg = args.shift
   debug "role arg" => role_arg
+  
+  help if role_arg.nil? || ['-h', '--help', 'help'].include?(role_arg)
   
   matches = ROLES.select {|role|
     role.include? role_arg
@@ -171,11 +189,15 @@ def main args
   
   role = case matches.length
   when 0
-    raise ArgumentError, "no roles match arg #{ role_arg.inspect }"
+    puts "ERROR - no roles match arg #{ role_arg.inspect }\n\n"
+    help
   when 1
     matches[0]
   else
-    raise ArgumentError, "multiple role matches: #{ matches.inpsect }"
+    puts "ERROR - multiple role matches:\n\n"
+    puts matches
+    puts
+    exit 1
   end
   debug role: role
   
