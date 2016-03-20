@@ -34,3 +34,8 @@
   lineinfile:
     line: /dev/ref/tmp
     dest: "{{ dir }}/.gitignore"
+
+- name: ignore dev/roles/tmp (where galaxy downloads to)
+  lineinfile:
+    line: /dev/roles/tmp
+    dest: "{{ dir }}/.gitignore"
