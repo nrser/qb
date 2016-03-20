@@ -159,6 +159,8 @@ end
 
 def help
   puts <<-END
+version: #{ QB::VERSION }
+
 syntax:
 
     qb ROLE [OPTIONS] DIRECTORY
