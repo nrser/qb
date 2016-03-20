@@ -23,6 +23,10 @@ qb_info:
     description: create a /dev directory
     type: boolean
   
+  - name: dev_bin
+    description: create a dev/bin directory
+    type: boolean
+  
   - name: setup
     description: create a /dev/setup.yml playbook
     type: boolean

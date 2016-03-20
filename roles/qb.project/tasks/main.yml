@@ -12,10 +12,15 @@
 # dev
 # ===
 
-- name: create /dev and /dev/bin directories
+- name: create /dev
+  git_mkdir:
+    path: "{{ dir }}/dev"
+  when: project_dev or project_setup
+
+- name: create /dev/bin directory
   git_mkdir:
     path: "{{ dir }}/dev/bin"
-  when: project_dev
+  when: project_dev and project_dev_bin
 
 # setup
 # =====
