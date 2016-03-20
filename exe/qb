@@ -9,6 +9,8 @@ require 'fileutils'
 
 require 'cmds'
 
+require 'qb'
+
 # constants
 # =========
 
