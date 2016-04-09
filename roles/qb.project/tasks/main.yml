@@ -57,12 +57,6 @@
     dest: "{{ dir }}/README.md"
     force: false
   when: project_readme
-  register: readme
-
-- command: git add README.md
-  args:
-    chdir: "{{ dir }}"
-  when: readme.changed
 
 # hub
 # ===
