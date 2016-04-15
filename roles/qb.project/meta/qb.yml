@@ -1,0 +1,45 @@
+---
+vars:
+- name: owner
+  desciption: github owner of directory
+  type: string
+
+- name: name
+  description: github name of directory
+  type: string
+
+- name: bin
+  description: create a /bin directory
+  type: boolean
+
+- name: dev
+  description: create a /dev directory
+  type: boolean
+
+- name: dev_bin
+  description: create a dev/bin directory
+  type: boolean
+
+- name: setup
+  description: create a /dev/setup.yml playbook
+  type: boolean
+
+- name: scratch
+  description: create a /scratch directory
+  type: boolean
+
+- name: tmp
+  description: create a /tmp directory
+  type: boolean
+
+- name: readme
+  description: create a /README.md file
+  type: boolean
+
+- name: hub
+  description: run `hub create` in the directory
+  type: boolean
+
+- name: private
+  description: create as private when using hub
+  type: boolean

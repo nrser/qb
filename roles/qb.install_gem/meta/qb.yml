@@ -1,0 +1,6 @@
+---
+vars:
+- name: rubies
+  description: rubies to install for
+  required: false
+  type: string

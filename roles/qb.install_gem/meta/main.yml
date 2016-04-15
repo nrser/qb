@@ -1,0 +1,12 @@
+---
+# meta file for qb.role
+allow_duplicates: yes
+
+dependencies:
+- role: qb.build_gem
+
+- role: nrser.rbenv_gem
+  rbenv_gem_rubies: "{{ install_gem_rubies }}"
+  rbenv_gem_name: "{{ build_gem_name }}"
+  rbenv_gem_source: "{{ build_gem_path }}"
+  rbenv_gem_state: present

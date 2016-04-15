@@ -1,0 +1,26 @@
+---
+
+vars:  
+- name: name
+  type: string
+  short: n
+
+- name: files
+  type: boolean
+
+- name: handler
+  type: boolean
+
+- name: meta
+  type: boolean
+  description: create meta/main.yml
+
+- name: tasks
+  type: boolean
+
+- name: templates
+  type: boolean
+  description: create a templates directory.
+
+- name: vars
+  type: boolean

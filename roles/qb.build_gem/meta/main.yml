@@ -1,5 +1,6 @@
 ---
 # meta file for qb.role
+allow_duplicates: yes
 
 dependencies: []
 # - role: role-name

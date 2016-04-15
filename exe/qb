@@ -14,8 +14,8 @@ require 'qb'
 # constants
 # =========
 
-ROOT = (Pathname.new(__FILE__).dirname + '..').expand_path
-ROLES_DIR = ROOT + 'roles'
+ROOT = QB::ROOT
+ROLES_DIR = QB::ROLES_DIR
 ROLES = Pathname.glob(ROLES_DIR + 'qb.*').map {|path| path.basename.to_s}
 DEBUG_ARGS = ['-d', '--debug']
 TMP_DIR = ROOT + 'tmp'
@@ -37,6 +37,14 @@ def format msg, dump = {}
     msg += "\n" + dump.map {|k, v| "  #{ k }: #{ v.inspect }" }.join("\n")
   end
   msg
+end
+
+def role? pathname
+  pathname.directory? && pathname.join('meta', 'qb.yml').file?
+end
+
+def role_matches
+  
 end
 
 def debug *args
@@ -172,7 +180,7 @@ use `qb ROLE -h` for role options.
 available roles:
 
 END
-  puts ROLES
+  puts QB.available_roles
   puts
   exit 1
 end
@@ -186,9 +194,7 @@ def main args
   
   help if role_arg.nil? || ['-h', '--help', 'help'].include?(role_arg)
   
-  matches = ROLES.select {|role|
-    role.include? role_arg
-  }
+  matches = QB.role_matches role_arg
   debug "role matches" => matches
   
   role = case matches.length
@@ -205,14 +211,13 @@ def main args
   end
   debug role: role
   
-  role_dir = ROLES_DIR + role
+  role_dir = role.path
   
   defaults = YAML.load (role_dir + 'defaults' + 'main.yml').read
-  meta = YAML.load (role_dir + 'meta' + 'main.yml').read
+  qb_meta = YAML.load((role_dir + 'meta' + 'qb.yml').read) || {}
   
-  qb_info = meta['qb_info'] || {}
-  vars = qb_info['vars'] || []
-  var_prefix = qb_info['var_prefix'] || role.split('.').last
+  vars = qb_meta['vars'] || []
+  var_prefix = qb_meta['var_prefix'] || role.namespaceless
   
   options = parse! role_arg, var_prefix, vars, defaults, args
   
@@ -270,11 +275,11 @@ def main args
     {}
   end
   
-  if saved_options.key? role
-    options = saved_options[role].merge options
+  if saved_options.key? role.name
+    options = saved_options[role.name].merge options
   end
   
-  playbook_role = {'role' => role}
+  playbook_role = {'role' => role.name}
   options.each do |arg_name, arg_value|
     playbook_role["#{ var_prefix }_#{ arg_name }"] = arg_value
   end
@@ -304,7 +309,7 @@ def main args
   end
   
   unless options.empty?
-    saved_options[role] = options
+    saved_options[role.rel_path] = options
     FileUtils.mkdir_p saved_options_path.dirname unless saved_options_path.dirname.exist?
     saved_options_path.open('w') do |f|
       f.write YAML.dump(saved_options)
@@ -314,10 +319,13 @@ def main args
   Dir.chdir ROOT do
     # install requirements
     unless (TMP_DIR + 'roles').directory?
-      Cmds.stream! "ansible-galaxy install --ignore-errors -r %s", [ROOT + 'requirements.yml']
+      Bundler.with_clean_env do
+        Cmds.stream! "ansible-galaxy install --ignore-errors -r %s", [ROOT + 'requirements.yml']
+      end
     end
-    
-    Cmds.stream! "ansible-playbook %s", [playbook_path.to_s]
+    Bundler.with_clean_env do
+      Cmds.stream! "ansible-playbook %s", [playbook_path.to_s]
+    end
   end
 end
 

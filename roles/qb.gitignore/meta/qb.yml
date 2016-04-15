@@ -1,0 +1,6 @@
+---
+vars:
+- name: name
+  desciption: name of gitignore
+  required: true
+  type: string

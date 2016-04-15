@@ -5,10 +5,3 @@ allow_duplicates: yes
 
 dependencies:
 - role: qb.git_repo
-
-qb_info:
-  vars:
-  - name: name
-    desciption: name of gitignore
-    required: true
-    type: string
