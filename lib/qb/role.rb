@@ -31,5 +31,9 @@ module QB
     def namespaceless
       @name.split('.', 2).last
     end
+    
+    def options_key
+      @rel_path.to_s
+    end
   end
 end

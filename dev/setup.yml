@@ -20,6 +20,9 @@
     
     - owner: nrser
       name: ansible-nrser.rbenv_gem
+    
+    - owner: nrser
+      name: cmds
 
     # sources that are used for reference only
     dev_setup_refs:

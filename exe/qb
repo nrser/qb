@@ -288,8 +288,8 @@ def main args
     {}
   end
   
-  if saved_options.key? role.name
-    options = saved_options[role.name].merge options
+  if saved_options.key? role.options_key
+    options = saved_options[role.options_key].merge options
   end
   
   playbook_role = {'role' => role.name}
@@ -322,22 +322,33 @@ def main args
   end
   
   unless options.empty?
-    saved_options[role.rel_path] = options
+    saved_options[role.options_key] = options
     FileUtils.mkdir_p saved_options_path.dirname unless saved_options_path.dirname.exist?
     saved_options_path.open('w') do |f|
       f.write YAML.dump(saved_options)
     end
   end
   
+  tmp_roles_path = QB::ROOT + 'tmp' + 'roles'
+  
+  ansible_roles_path = (
+    [tmp_roles_path] +
+    QB.role_dirs
+  ).join(':')
+  
   Dir.chdir ROOT do
     # install requirements
     unless (TMP_DIR + 'roles').directory?
       with_clean_env do
-        Cmds.stream! "ansible-galaxy install --ignore-errors -r %s", [ROOT + 'requirements.yml']
+        Cmds.stream! "ANSIBLE_ROLES_PATH=<%= roles_path %> ansible-galaxy install --ignore-errors -r <%= req_path%>",
+          req_path: (ROOT + 'requirements.yml'),
+          roles_path: tmp_roles_path.to_s
       end
     end
     with_clean_env do
-      Cmds.stream! "ansible-playbook %s", [playbook_path.to_s]
+      Cmds.stream! "ANSIBLE_ROLES_PATH=<%= roles_path %> ansible-playbook <%= playbook_path %>", 
+        roles_path: ansible_roles_path,
+        playbook_path: playbook_path.to_s
     end
   end
 end
