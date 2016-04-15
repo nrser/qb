@@ -1,3 +1,7 @@
 - src: https://github.com/nrser/ansible-role-blockinfile.git
   name: nrser.blockinfile
   version: v0.6.nrser.1
+- src: https://github.com/nrser/ansible-nrser.rbenv_gem.git
+  name: nrser.rbenv_gem
+  version: v0.1.2
+  

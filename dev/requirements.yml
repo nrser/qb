@@ -3,7 +3,7 @@
   version: v0.1.0
 - name: nrser.rbenv_gem
   src: https://github.com/nrser/ansible-nrser.rbenv_gem.git
-  version: v0.1.1
+  version: v0.1.2
 - name: nrser.rbenv
   src: https://github.com/nrser/ansible-nrser.rbenv.git
   version: v0.1.1
