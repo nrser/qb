@@ -211,10 +211,14 @@ def main args
   end
   debug role: role
   
-  role_dir = role.path
+  defaults_path = role.path + 'defaults' + 'main.yml'
+  defaults = if defaults_path.file?
+    YAML.load defaults_path.read
+  else
+    {}
+  end
   
-  defaults = YAML.load (role_dir + 'defaults' + 'main.yml').read
-  qb_meta = YAML.load((role_dir + 'meta' + 'qb.yml').read) || {}
+  qb_meta = YAML.load((role.path + 'meta' + 'qb.yml').read) || {}
   
   vars = qb_meta['vars'] || []
   var_prefix = qb_meta['var_prefix'] || role.namespaceless
@@ -236,7 +240,7 @@ def main args
     # options passed over STDIN. if the execuable succeeds, the result is
     # taken as dir.
     # 
-    get_dir_path = role_dir + 'qb' + 'get_dir'
+    get_dir_path = role.path + 'qb' + 'get_dir'
     
     unless get_dir_path.exist?
       raise "no dir argument provided and no qb/get_dir exe found"
