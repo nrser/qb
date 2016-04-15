@@ -167,6 +167,15 @@ def parse! role_arg, var_prefix, vars, defaults, args
   options
 end
 
+# needed for to clean the env if using bundler (like in dev)
+def with_clean_env &block
+  if defined? Bundler
+    Bundler.with_clean_env &block
+  else
+    block.call
+  end
+end
+
 def help
   puts <<-END
 version: #{ QB::VERSION }
@@ -323,11 +332,11 @@ def main args
   Dir.chdir ROOT do
     # install requirements
     unless (TMP_DIR + 'roles').directory?
-      Bundler.with_clean_env do
+      with_clean_env do
         Cmds.stream! "ansible-galaxy install --ignore-errors -r %s", [ROOT + 'requirements.yml']
       end
     end
-    Bundler.with_clean_env do
+    with_clean_env do
       Cmds.stream! "ansible-playbook %s", [playbook_path.to_s]
     end
   end
