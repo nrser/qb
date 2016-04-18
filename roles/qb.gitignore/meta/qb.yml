@@ -1,4 +1,6 @@
 ---
+save_options: false
+  
 vars:
 - name: name
   desciption: name of gitignore

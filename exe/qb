@@ -237,6 +237,8 @@ def main args
   
   debug options: options
   
+  cwd = Dir.getwd
+  
   # get the target dir
   dir = case args.length
   when 0
@@ -244,7 +246,7 @@ def main args
     # 
     # in some cases (like projects) the dir can be figured out in other ways:
     # 
-    QB.get_default_dir qb_meta, Dir.getwd, options
+    QB.get_default_dir qb_meta, cwd, options
     
   when 1
     # there is a single positional arg, which is used as dir
@@ -252,7 +254,7 @@ def main args
     
   else
     # there are multiple positional args, which is not allowed
-    raise "can't supply more than one argument"
+    raise "can't supply more than one argument: #{ args.inspect }"
     
   end
   
@@ -285,6 +287,8 @@ def main args
   end
   
   playbook_role['dir'] = dir
+  playbook_role['qb_dir'] = dir
+  playbook_role['qb_cwd'] = cwd
   
   playbook = [
     {
@@ -308,7 +312,10 @@ def main args
     f.write YAML.dump(playbook)
   end
   
-  unless options.empty?
+  unless (
+    options.empty? ||
+    (qb_meta.key?('save_options') && qb_meta['save_options'] == false)
+  )
     saved_options[role.options_key] = options
     FileUtils.mkdir_p saved_options_path.dirname unless saved_options_path.dirname.exist?
     saved_options_path.open('w') do |f|
