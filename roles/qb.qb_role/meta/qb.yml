@@ -1,5 +1,5 @@
 ---
-# meta/qb.yml file for qb.role
+# meta/qb.yml file for qb.qb_role
 # 
 # qb settings for this role. see README.md for more info.
 #
@@ -11,7 +11,7 @@ var_prefix: null
 default_dir: null
 
 vars:  
-- name: role_name
+- name: name
   type: string
   description: name of the role.
   short: n

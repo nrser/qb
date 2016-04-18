@@ -1,5 +1,6 @@
 ---
-role_name: "{{ dir | basename }}"
+# can't be named `role_name` 'cause ansible sets that?
+role_role_name: "{{ dir | basename }}"
 role_defaults: true
 role_files: false
 role_handlers: false

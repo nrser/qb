@@ -1,0 +1,10 @@
+---
+# defaults file for qb.qb_role
+qb_role_name: "{{ dir | basename }}"
+qb_role_defaults: true
+qb_role_files: false
+qb_role_handlers: false
+qb_role_meta: true
+qb_role_tasks: true
+qb_role_templates: false
+qb_role_vars: false

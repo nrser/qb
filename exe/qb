@@ -92,7 +92,8 @@ def parse! role_arg, var_prefix, vars, defaults, args
   options = {}
   
   opt_parser = OptionParser.new do |opts|
-    opts.banner = "qb #{ role_arg } [OPTIONS]#{ positional_banner }"
+    # opts.banner = "qb #{ role_arg } [OPTIONS]#{ positional_banner }"
+    opts.banner = "qb #{ role_arg } [OPTIONS] DIRECTORY"
     
     vars.each do |var|
       arg_name = var.fetch 'name'

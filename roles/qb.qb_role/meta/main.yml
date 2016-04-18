@@ -1,0 +1,15 @@
+---
+# meta file for qb.qb_role
+
+allow_duplicates: yes
+
+dependencies: 
+- role: qb.role
+  role_role_name: "{{ qb_role_name }}"
+  role_defaults: "{{ qb_role_defaults }}"
+  role_files: "{{ qb_role_files }}"
+  role_handlers: "{{ qb_role_handlers }}"
+  role_meta: "{{ qb_role_meta }}"
+  role_tasks: "{{ qb_role_tasks }}"
+  role_templates: "{{ qb_role_templates }}"
+  role_vars: "{{ qb_role_vars }}"

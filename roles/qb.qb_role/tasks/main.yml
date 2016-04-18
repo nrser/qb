@@ -1,0 +1,13 @@
+---
+# tasks file for qb.qb_role
+
+- name: create meta directory
+  file:
+    path: "{{ dir }}/meta"
+    state: directory
+
+- name: create meta/qb.yml
+  template:
+    src: qb.yml.j2
+    dest: "{{ dir }}/meta/qb.yml"
+    force: false

@@ -1,5 +1,5 @@
 ---
-# meta file for qb.role
+# meta file for qb.install_gem
 allow_duplicates: yes
 
 dependencies:
