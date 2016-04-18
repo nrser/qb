@@ -1,3 +1,5 @@
+require 'nrser/extras'
+
 require "qb/version"
 
 module QB
@@ -42,6 +44,29 @@ module QB
       # select any that have that string in them
       role.rel_path.to_s.include? input
     }
+  end
+  
+  def self.get_default_dir qb_meta, cwd, options
+    key = 'default_dir'
+    case qb_meta[key]
+    when nil
+      # there is no get_dir info in meta/qb.yml, can't get the dir
+      raise "unable to infer default directory: no '#{ key }' key in meta/qb.yml"
+      
+    when 'git_root'
+      NRSER.git_root cwd
+      
+    when Hash
+      if qb_meta[key].key? 'exe'
+        exe_path = qb_meta[key]['exe']
+        
+        Cmds.chomp! exe_path do
+          JSON.dump options
+        end
+      else
+        raise "not sure to process '#{ key }' in metea/qb.yml"
+      end
+    end
   end
 end
 

@@ -24,4 +24,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec"
   
   spec.add_dependency "cmds", ">= 0.0.9"
+  spec.add_dependency "nrser-extras", ">= 0.0.3"
 end

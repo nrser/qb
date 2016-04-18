@@ -1,4 +1,7 @@
 ---
+default_dir:
+  exe: qb/get_dir
+  
 vars:
 - name: owner
   desciption: github owner of directory
