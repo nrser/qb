@@ -1,3 +1,3 @@
 module QB
-  VERSION = "0.1.10.dev"
+  VERSION = "0.1.10"
 end
