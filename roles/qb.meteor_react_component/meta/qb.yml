@@ -20,11 +20,17 @@ vars:
 #   required: false
 #   type: boolean # boolean (default) | string
 #   short: e
-- name: path
-  description: "symbolic path to the view component (ex: 'posts/tiles')"
+- name: dir
+  description: directory under imports/ui that the component goes in
   required: true
   type: string
   short: p
+
+- name: class
+  description: component class name
+  required: true
+  type: string
+  short: c
 
 - name: data
   description: add ReactDataMixin
@@ -49,3 +55,14 @@ vars:
   required: false
   type: boolean
   short: f
+
+- name: index_import
+  description: create an export * line for this component in imports/ui/index.js
+  required: false
+  type: boolean
+
+- name: default
+  description: if true exports the component as the default from the module
+  required: false
+  type: boolean
+  

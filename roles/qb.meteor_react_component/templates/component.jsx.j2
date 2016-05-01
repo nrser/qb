@@ -20,7 +20,7 @@ import * as Util from '/imports/util';
 
 const log = Util.logger('{{ component_logger_name }}');
 
-export default class {{ component_class_name }} extends Component {
+export {% if component_default %}default{% endif %} class {{ component_class }} extends Component {
   constructor() {
     super();
   } // constructor()
@@ -47,7 +47,7 @@ export default class {{ component_class_name }} extends Component {
   
   render() {
     return (
-      <{{ component_root }} className="{{ component_class_name }}">
+      <{{ component_root }} className="{{ component_class }}">
         { this.renderContent() }
       </{{ component_root }}>
     );
@@ -56,20 +56,20 @@ export default class {{ component_class_name }} extends Component {
   // hook methods
   // ===========
   
-} // {{ component_class_name }}
+} // {{ component_class }}
 
-{{ component_class_name }}.propTypes = {
+{{ component_class }}.propTypes = {
   
 } // propTypes
 
 {% if component_data -%}
 // mixin that calls `component.getMeteorData()`
-reactMixin({{ component_class_name }}.prototype, ReactDataMixin);
+reactMixin({{ component_class}}.prototype, ReactDataMixin);
 {% endif %}
 
 {% if component_blaze -%}
 // register component globally to be used by Blaze
-Template.registerHelper('{{ component_class_name }}', () => {
-  return {{ component_class_name }};
+Template.registerHelper('{{ component_class}}', () => {
+  return {{ component_class }};
 });
 {% endif %}

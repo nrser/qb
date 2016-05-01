@@ -1,41 +1,44 @@
 ---
-# tasks file for qb.meteor_react_component
-- component_facts:
-    path: "{{ component_path }}"
+- name: set logger name
+  set_fact:
+    component_logger_name: "imports:ui:{{ component_dir | regex_replace('/', ':')}}:{{ component_class }}"
+    component_path: "{{ qb_dir }}/imports/ui/{{ component_dir }}/{{ component_class }}.jsx"
+    component_style_path: "{{ qb_dir }}/client/styles/{{ component_dir }}/{{ component_class }}.import.less"
 
 - name: create component directory
   file:
-    path: "{{ qb_dir }}/imports/ui/{{ component_dir }}"
+    path: "{{ component_path | dirname }}"
     state: directory
     recurse: true
 
-- name: "create {{ component_class_name }} component"
+- name: "create {{ component_class }} component"
   template:
     src: component.jsx.j2
-    dest: "{{ qb_dir }}/imports/ui/{{ component_dir }}/{{ component_dashed }}.jsx"
+    dest: "{{ component_path }}"
     force: "{{ component_force }}"
 
 - name: add import line to imports/ui/index.js
   lineinfile:
     dest: "{{ qb_dir }}/imports/ui/index.js"
-    line: "export * from './{{ component_dir }}/{{ component_dashed }}.jsx';"
-  when: component_blaze
+    line: "export * from './{{ component_dir }}/{{ component_class }}.jsx';"
+    create: true
+  when: component_index_import
 
 - name: create styles directory
   file:
-    path: "{{ qb_dir }}/client/styles/{{ component_dir }}"
+    path: "{{ component_style_path | dirname }}"
     state: directory
     recurse: true
 
 - name: create a stylesheet for it
   template:
     src: style.import.less.j2
-    dest: "{{ qb_dir }}/client/styles/{{ component_dir }}/{{ component_dashed }}.import.less"
+    dest: "{{ component_style_path }}"
     force: "{{ component_force }}"
 
 - name: add import line to client/styles/index.less
   lineinfile:
     dest: "{{ qb_dir }}/client/styles/index.less"
-    line: '@import "{{ component_dir }}/{{ component_dashed }}.import.less";'
+    line: '@import "{{ component_dir }}/{{ component_class }}.import.less";'
     create: true
     
