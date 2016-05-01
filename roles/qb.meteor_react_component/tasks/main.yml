@@ -1,0 +1,41 @@
+---
+# tasks file for qb.meteor_react_component
+- component_facts:
+    path: "{{ component_path }}"
+
+- name: create component directory
+  file:
+    path: "{{ qb_dir }}/imports/ui/{{ component_dir }}"
+    state: directory
+    recurse: true
+
+- name: "create {{ component_class_name }} component"
+  template:
+    src: component.jsx.j2
+    dest: "{{ qb_dir }}/imports/ui/{{ component_dir }}/{{ component_dashed }}.jsx"
+    force: "{{ component_force }}"
+
+- name: add import line to imports/ui/index.js
+  lineinfile:
+    dest: "{{ qb_dir }}/imports/ui/index.js"
+    line: "export * from './{{ component_dir }}/{{ component_dashed }}.jsx';"
+  when: component_blaze
+
+- name: create styles directory
+  file:
+    path: "{{ qb_dir }}/client/styles/{{ component_dir }}"
+    state: directory
+    recurse: true
+
+- name: create a stylesheet for it
+  template:
+    src: style.import.less.j2
+    dest: "{{ qb_dir }}/client/styles/{{ component_dir }}/{{ component_dashed }}.import.less"
+    force: "{{ component_force }}"
+
+- name: add import line to client/styles/index.less
+  lineinfile:
+    dest: "{{ qb_dir }}/client/styles/index.less"
+    line: '@import "{{ component_dir }}/{{ component_dashed }}.import.less";'
+    create: true
+    

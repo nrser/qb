@@ -1,0 +1,75 @@
+// standard imports
+import { Meteor } from 'meteor/meteor';
+import { _ } from 'meteor/underscore';
+import { check } from 'meteor/check';
+
+// react imports
+import React, { Component, PropTypes } from 'react';
+import ReactDOM from 'react-dom';
+{% if component_data -%}
+import { createContainer, ReactMeteorData } from 'meteor/react-meteor-data';
+{% endif %}
+
+// other package imports
+{% if component_blaze -%}
+import { Template } from 'meteor/templating';
+{% endif %}
+
+// project imports
+import * as Util from '/imports/util';
+
+const log = Util.logger('{{ component_logger_name }}');
+
+export default class {{ component_class_name }} extends Component {
+  constructor() {
+    super();
+  } // constructor()
+  
+  {% if component_data -%}
+  getMeteorData() {
+    return {
+    };
+  } // getMeteorData()
+  {% endif %}
+  
+  // helper methods
+  // ==============
+  
+  // action methods
+  // ==============
+  
+  // render methods
+  // ==============
+  
+  renderContent() {
+    
+  } // renderContent()
+  
+  render() {
+    return (
+      <{{ component_root }} className="{{ component_class_name }}">
+        { this.renderContent() }
+      </{{ component_root }}>
+    );
+  } // render()
+  
+  // hook methods
+  // ===========
+  
+} // {{ component_class_name }}
+
+{{ component_class_name }}.propTypes = {
+  
+} // propTypes
+
+{% if component_data -%}
+// mixin that calls `component.getMeteorData()`
+reactMixin({{ component_class_name }}.prototype, ReactDataMixin);
+{% endif %}
+
+{% if component_blaze -%}
+// register component globally to be used by Blaze
+Template.registerHelper('{{ component_class_name }}', () => {
+  return {{ component_class_name }};
+});
+{% endif %}

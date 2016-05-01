@@ -1,0 +1,6 @@
+---
+# defaults file for qb.meteor_react_component
+component_data: false
+component_root: div
+component_blaze: false
+component_force: false

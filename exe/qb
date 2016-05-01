@@ -23,8 +23,6 @@ TMP_DIR = ROOT + 'tmp'
 # globals
 # =======
 
-$debug = false
-
 # @api util
 # *pure*
 #
@@ -48,29 +46,12 @@ def role_matches
 end
 
 def debug *args
-  return unless $debug
-  
-  msg, values = case args.length
-  when 0
-    raise ArgumentError, "debug needs at least one argument"
-  when 1
-    if args[0].is_a? Hash
-      ['', args[0]]
-    else
-      [args[0], {}]
-    end
-  when 2
-    [args[0], args[1]]
-  else
-    raise ArgumentError, "debug needs at least one argument"
-  end
-  
-  $stderr.puts("DEBUG " + format(msg, values))
+  QB.debug *args
 end
 
 def set_debug! args
   if DEBUG_ARGS.any? {|arg| args.include? arg}
-    $debug = true
+    QB.debug = true
     debug "ON"
     DEBUG_ARGS.each {|arg| args.delete arg}
   end
@@ -246,7 +227,7 @@ def main args
     # 
     # in some cases (like projects) the dir can be figured out in other ways:
     # 
-    QB.get_default_dir qb_meta, cwd, options
+    QB.get_default_dir role, qb_meta, cwd, options
     
   when 1
     # there is a single positional arg, which is used as dir

@@ -1,0 +1,51 @@
+---
+# meta/qb.yml file for qb.meteor_react_component
+# 
+# qb settings for this role. see README.md for more info.
+#
+
+# prefix for role variables
+# use a shorter name 
+var_prefix: 'component'
+
+# how to get a default for `dir` if it's not provided as the 
+default_dir: false
+  # exe: qb/get_dir
+
+save_options: false
+
+vars:
+# - name: example
+#   description: an example of a variable.
+#   required: false
+#   type: boolean # boolean (default) | string
+#   short: e
+- name: path
+  description: "symbolic path to the view component (ex: 'posts/tiles')"
+  required: true
+  type: string
+  short: p
+
+- name: data
+  description: add ReactDataMixin
+  required: false
+  type: boolean
+  short: m
+
+- name: root
+  description: root element name
+  required: false
+  type: string
+  short: r
+
+- name: blaze
+  description: register class name as a global Blaze template helper
+  required: false
+  type: boolean
+  short: b
+
+- name: force
+  description: overwrite existing file
+  required: false
+  type: boolean
+  short: f

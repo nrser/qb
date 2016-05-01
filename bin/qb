@@ -1,4 +1,13 @@
 #!/usr/bin/env ruby
 # stub instead of `bundle exec qb ...`
-require 'bundler/setup'
-load 'exe/qb'
+
+# so you know you're using the local repo version (vs an installed gem)...
+puts "*** LOADING REPO VERSION ***\n\n"
+
+root = File.dirname(File.realpath(File.join(__FILE__, '..')))
+
+Dir.chdir root do
+  require 'bundler/setup'
+end
+
+load File.join(root, 'exe/qb')
