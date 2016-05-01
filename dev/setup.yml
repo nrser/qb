@@ -23,6 +23,12 @@
     
     - owner: nrser
       name: cmds
+    
+    - owner: nrser
+      name: ansible-nrser.nodenv
+    
+    - owner: nrser
+      name: ansible-nrser.rbenv
 
     # sources that are used for reference only
     dev_setup_refs:
