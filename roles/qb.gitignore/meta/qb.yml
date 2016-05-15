@@ -6,3 +6,4 @@ vars:
   desciption: name of gitignore
   required: true
   type: string
+  short: n
