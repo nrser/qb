@@ -17,7 +17,7 @@ require 'qb'
 ROOT = QB::ROOT
 ROLES_DIR = QB::ROLES_DIR
 ROLES = Pathname.glob(ROLES_DIR + 'qb.*').map {|path| path.basename.to_s}
-DEBUG_ARGS = ['-d', '--debug']
+DEBUG_ARGS = ['-D', '--debug']
 TMP_DIR = ROOT + 'tmp'
 
 # globals
