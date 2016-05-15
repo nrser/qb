@@ -7,7 +7,7 @@
 - name: check out nrser/gitignore
   git:
     repo: git@github.com:nrser/gitignore.git
-    dest: "{{ gitignore_repo}}"
+    dest: "{{ gitignore_repo }}"
     version: v{{ gitignore_version }}
     depth: 1
     update: false
