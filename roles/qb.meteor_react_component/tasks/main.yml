@@ -3,7 +3,7 @@
   set_fact:
     component_logger_name: "imports:ui:{{ component_dir | regex_replace('/', ':')}}:{{ component_class }}"
     component_path: "{{ qb_dir }}/imports/ui/{{ component_dir }}/{{ component_class }}.jsx"
-    component_style_path: "{{ qb_dir }}/client/styles/{{ component_dir }}/{{ component_class }}.import.less"
+    component_style_path: "{{ qb_dir }}/imports/ui/{{ component_dir }}/{{ component_class }}.import.less"
 
 - name: create component directory
   file:
@@ -39,6 +39,6 @@
 - name: add import line to client/styles/index.less
   lineinfile:
     dest: "{{ qb_dir }}/client/styles/index.less"
-    line: '@import "{{ component_dir }}/{{ component_class }}.import.less";'
+    line: '@import "/imports/ui/{{ component_dir }}/{{ component_class }}.import.less";'
     create: true
     

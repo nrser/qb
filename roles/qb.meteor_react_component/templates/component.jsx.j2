@@ -1,13 +1,15 @@
 // standard imports
 import { Meteor } from 'meteor/meteor';
 import { _ } from 'meteor/underscore';
-import { check } from 'meteor/check';
+import { check, match, Maybe, Match } from 'meteor/nrser:util';
+import * as Util from 'meteor/nrser:util';
 
 // react imports
 import React, { Component, PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 {% if component_data -%}
 import { createContainer, ReactMeteorData } from 'meteor/react-meteor-data';
+import reactMixin from 'react-mixin';  
 {% endif %}
 
 // other package imports
@@ -16,11 +18,15 @@ import { Template } from 'meteor/templating';
 {% endif %}
 
 // project imports
-import * as Util from '/imports/util';
+
+// other component imports
+import {
+  
+} from '/imports/ui';
 
 const log = Util.logger('{{ component_logger_name }}');
 
-export {% if component_default %}default{% endif %} class {{ component_class }} extends Component {
+export {% if component_default %}default {% endif %}class {{ component_class }} extends Component {
   constructor() {
     super();
   } // constructor()
@@ -64,7 +70,7 @@ export {% if component_default %}default{% endif %} class {{ component_class }} 
 
 {% if component_data -%}
 // mixin that calls `component.getMeteorData()`
-reactMixin({{ component_class}}.prototype, ReactDataMixin);
+reactMixin({{ component_class}}.prototype, ReactMeteorData);
 {% endif %}
 
 {% if component_blaze -%}
