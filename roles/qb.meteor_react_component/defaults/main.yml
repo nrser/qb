@@ -6,3 +6,4 @@ component_blaze: false
 component_force: false
 component_index_import: true
 component_default: false
+component_stylesheet: true

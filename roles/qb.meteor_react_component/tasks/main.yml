@@ -35,10 +35,19 @@
     src: style.import.less.j2
     dest: "{{ component_style_path }}"
     force: "{{ component_force }}"
+  when: component_stylesheet
 
 - name: add import line to client/styles/index.less
   lineinfile:
     dest: "{{ qb_dir }}/client/styles/index.less"
     line: '@import "/imports/ui/{{ component_dir }}/{{ component_class }}.import.less";'
     create: true
+  when: component_stylesheet
+
+- name: create a blaze wrapper for it
+  template:
+    src: wrapper.html.j2
+    dest: "{{ qb_dir }}/imports/ui/{{ component_dir }}/{{ component_class }}.html"
+    force: "{{ component_force }}"
+  when: component_blaze
     

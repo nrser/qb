@@ -24,7 +24,7 @@ vars:
   description: directory under imports/ui that the component goes in
   required: true
   type: string
-  short: p
+  short: d
 
 - name: class
   description: component class name
@@ -45,7 +45,9 @@ vars:
   short: r
 
 - name: blaze
-  description: register class name as a global Blaze template helper
+  description: >
+    register class name as a global Blaze template helper and create
+    a .html template for the component.
   required: false
   type: boolean
   short: b
@@ -63,6 +65,13 @@ vars:
 
 - name: default
   description: if true exports the component as the default from the module
+  required: false
+  type: boolean
+
+- name: stylesheet
+  description: >
+    when true generates a <component-name>.import.less file next to the 
+    component and imports it in client/styles/index.less
   required: false
   type: boolean
   

@@ -1,7 +1,7 @@
 // standard imports
 import { Meteor } from 'meteor/meteor';
 import { _ } from 'meteor/underscore';
-import { check, match, Maybe, Match } from 'meteor/nrser:util';
+import { check, match, Match } from 'meteor/nrser:util';
 import * as Util from 'meteor/nrser:util';
 
 // react imports
@@ -12,10 +12,13 @@ import { createContainer, ReactMeteorData } from 'meteor/react-meteor-data';
 import reactMixin from 'react-mixin';  
 {% endif %}
 
-// other package imports
 {% if component_blaze -%}
+// blaze imports
 import { Template } from 'meteor/templating';
+import './{{ component_class }}.html';
 {% endif %}
+
+// other package imports
 
 // project imports
 
@@ -75,7 +78,7 @@ reactMixin({{ component_class}}.prototype, ReactMeteorData);
 
 {% if component_blaze -%}
 // register component globally to be used by Blaze
-Template.registerHelper('{{ component_class}}', () => {
+Template.registerHelper('{{ component_class }}', () => {
   return {{ component_class }};
 });
 {% endif %}
