@@ -1,3 +1,6 @@
 [submodule "roles/nrser.blockinfile"]
 	path = roles/nrser.blockinfile
 	url = git@github.com:nrser/ansible-role-blockinfile
+[submodule "roles/nrser.rbenv_gem"]
+	path = roles/nrser.rbenv_gem
+	url = git@github.com:nrser/ansible-nrser.rbenv_gem.git
