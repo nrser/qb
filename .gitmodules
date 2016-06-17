@@ -1,0 +1,3 @@
+[submodule "roles/nrser.blockinfile"]
+	path = roles/nrser.blockinfile
+	url = git@github.com:nrser/ansible-role-blockinfile
