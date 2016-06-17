@@ -313,13 +313,13 @@ def main args
   
   Dir.chdir ROOT do
     # install requirements
-    unless (TMP_DIR + 'roles').directory?
-      with_clean_env do
-        Cmds.stream! "ANSIBLE_ROLES_PATH=<%= roles_path %> ansible-galaxy install --ignore-errors -r <%= req_path%>",
-          req_path: (ROOT + 'requirements.yml'),
-          roles_path: tmp_roles_path.to_s
-      end
-    end
+    # unless (TMP_DIR + 'roles').directory?
+    #   with_clean_env do
+    #     Cmds.stream! "ANSIBLE_ROLES_PATH=<%= roles_path %> ansible-galaxy install --ignore-errors -r <%= req_path%>",
+    #       req_path: (ROOT + 'requirements.yml'),
+    #       roles_path: tmp_roles_path.to_s
+    #   end
+    # end
     with_clean_env do
       Cmds.stream! "ANSIBLE_ROLES_PATH=<%= roles_path %> ansible-playbook <%= playbook_path %>", 
         roles_path: ansible_roles_path,
