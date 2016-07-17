@@ -6,7 +6,13 @@ puts "*** LOADING REPO VERSION ***\n\n"
 
 root = File.dirname(File.realpath(File.join(__FILE__, '..')))
 
+puts "source: #{ root }"
+
 Dir.chdir root do
+  puts "commit: #{ `git rev-parse HEAD` }"
+  puts "branch:"
+  puts `git branch`
+  
   require 'bundler/setup'
 end
 

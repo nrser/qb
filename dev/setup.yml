@@ -51,3 +51,7 @@
       archive: []
 
   tasks:
+  - name: install gems
+    bundler:
+      chdir: "{{ dev_setup_project_root }}"
+      gem_path: ./.bundle
