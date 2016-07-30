@@ -1,0 +1,20 @@
+---
+- name: bootstrap dev setup for {{ project_owner }}/{{ project_name }}
+{% raw %}
+  hosts: localhost
+    
+  tasks:
+  - name: clone nrser/dev_setup repo
+    git:
+      repo: git@github.com:nrser/dev_setup.git
+      dest: ./lib/dev_setup
+      update: true
+      version: master
+      recursive: true
+  
+  - name: checkout master in all dev_setup submodules
+    command: git submodule foreach git checkout master
+    args:
+      chdir: ./lib/dev_setup
+
+{% endraw %}

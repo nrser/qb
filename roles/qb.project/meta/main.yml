@@ -4,4 +4,5 @@
 dependencies:
 - role: qb.gitignore
   gitignore_name: Global/OSX
+  gitignore_force: "{{ project_force }}"
     

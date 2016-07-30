@@ -1,41 +1,42 @@
 # setup
 # =====
 
+- name: create dev/bootstrap.yml
+  template:
+    src: bootstrap.yml.j2
+    dest: "{{ project_dev_dir }}/bootstrap.yml"
+    force: "{{ project_force }}"
+
 - name: create dev/setup.yml
   template:
     src: setup.yml.j2
-    dest: "{{ dir }}/dev/setup.yml"
-    force: false
+    dest: "{{ project_dev_dir }}/setup.yml"
+    force: "{{ project_force }}"
 
 - name: create dev/ansible.cfg
   copy:
     src: ansible.cfg
-    dest: "{{ dir }}/dev/ansible.cfg"
-    force: false
+    dest: "{{ project_dev_dir }}/ansible.cfg"
+    force: "{{ project_force }}"
 
 - name: create dev/hosts
   copy:
     src: hosts
-    dest: "{{ dir }}/dev/hosts"
-    force: false
+    dest: "{{ project_dev_dir }}/hosts"
+    force: "{{ project_force }}"
 
-- name: create dev/requirements.yml
+- name: create /dev/.gitignore
   copy:
-    src: requirements.yml
-    dest: "{{ dir }}/dev/requirements.yml"
-    force: false
+    content: ''
+    dest: "{{ project_dev_gitignore }}"
+    force: "{{ project_force }}"
 
-- name: ignore dev/repos in git
+- name: ingore setup related stuff
   lineinfile:
-    line: /dev/repos
-    dest: "{{ dir }}/.gitignore"
-
-- name: ignore dev/ref/tmp in git
-  lineinfile:
-    line: /dev/ref/tmp
-    dest: "{{ dir }}/.gitignore"
-
-- name: ignore dev/roles/tmp (where galaxy downloads to)
-  lineinfile:
-    line: /dev/roles/tmp
-    dest: "{{ dir }}/.gitignore"
+    line: "{{ item }}"
+    dest: "{{ project_dev_gitignore }}"
+  with_items:
+  - /repos
+  - /ref/tmp
+  - /lib/dev_setup
+  - "*.pyc"

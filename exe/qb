@@ -116,8 +116,16 @@ def parse! role_arg, var_prefix, vars, defaults, args
         on_args << "set the #{ var_name } variable"
       end
       
-      if defaults.key? var_name
-        on_args << "(defaults to #{ defaults[var_name] })"
+      on_args << if defaults.key? var_name
+        if var['type'] == 'boolean'
+          if defaults[var_name]
+            "default --#{ var['name'] }"
+          else
+            "default --no-#{ var['name'] }"
+          end
+        else
+          "default = #{ defaults[var_name] }"
+        end
       end
       
       debug "adding option", name: arg_name, on_args: on_args

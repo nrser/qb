@@ -1,27 +1,16 @@
 ---
 # tasks file for qb.gitignore
 
-- set_fact:
-    gitignore_repo: ./tmp/gitignore-{{ gitignore_version }}
-
-- name: check out nrser/gitignore
-  git:
-    repo: git@github.com:nrser/gitignore.git
-    dest: "{{ gitignore_repo }}"
-    version: v{{ gitignore_version }}
-    depth: 1
-    update: false
-
 - name: create .gitignore
   copy:
     content: ''
-    dest: "{{ dir }}/.gitignore"
-    force: false
+    dest: "{{ qb_dir }}/.gitignore"
+    force: "{{ gitignore_force }}"
 
 - name: modify .gitignore
   blockinfile:
-    content: "{{ lookup('file', gitignore_repo + '/' + gitignore_name + '.gitignore') }}"
-    dest: "{{ dir }}/.gitignore"
+    content: "{{ lookup('file', './files/gitignore/' + gitignore_name + '.gitignore') }}"
+    dest: "{{ qb_dir }}/.gitignore"
     beginmarker: |
       {{ '#' * 78 }}
       # BEGIN {{ gitignore_name }}.gitignore

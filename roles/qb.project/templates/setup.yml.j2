@@ -7,10 +7,12 @@
   pre_tasks:
   - name: load dev_setup facts
     dev_setup_facts:
+    tags:
+    - always
 
   roles:
   - role: nrser.dev_setup
-    # repos that are co-developed
+    # repos that are co-developed but don't make sense as submodules
     dev_setup_repos: []
     # example:
     # - owner: nrser

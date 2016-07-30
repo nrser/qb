@@ -16,7 +16,9 @@ vars:
   type: boolean
 
 - name: dev
-  description: create a /dev directory
+  description: >
+    create a /dev directory. if this is false, then none of the stuff under
+    /dev will be created, even if those options are provided.
   type: boolean
 
 - name: dev_bin
@@ -46,3 +48,9 @@ vars:
 - name: private
   description: create as private when using hub
   type: boolean
+
+- name: force
+  description: force all file and directory creation
+  type: boolean
+  short: f
+  

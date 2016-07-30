@@ -1,0 +1,36 @@
+---
+
+- set_fact:
+    project_dev_dir: "{{ qb_dir }}/dev"
+
+- set_fact:
+    project_dev_gitignore: "{{ project_dev_dir }}/.gitignore"
+
+# dev
+# ====
+
+- name: create /dev
+  git_mkdir:
+    path: "{{ project_dev_dir }}"
+
+# dev/bin
+# ========
+
+- name: create /dev/bin directory
+  git_mkdir:
+    path: "{{ project_dev_dir }}/bin"
+  when: project_dev_bin
+
+# scratch
+# =======
+
+- name: create scratch directory
+  git_mkdir:
+    path: "{{ project_dev_dir }}/scratch"
+  when: project_scratch
+
+# setup
+# =====
+
+- include: setup.yml
+  when: project_setup

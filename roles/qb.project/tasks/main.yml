@@ -6,46 +6,26 @@
 
 - name: create /bin directory
   git_mkdir:
-    path: "{{ dir }}/bin"
+    path: "{{ qb_dir }}/bin"
   when: project_bin
 
 # dev
 # ===
 
-- name: create /dev
-  git_mkdir:
-    path: "{{ dir }}/dev"
-  when: project_dev or project_setup
-
-- name: create /dev/bin directory
-  git_mkdir:
-    path: "{{ dir }}/dev/bin"
-  when: project_dev and project_dev_bin
-
-# setup
-# =====
-
-- include: setup.yml
-  when: project_setup
-
-# scratch
-# =======
-
-- name: create scratch directory
-  git_mkdir:
-    path: "{{ dir }}/scratch"
+- include: dev.yml
+  when: project_dev
 
 # tmp
 # ===
 
 - name: create tmp directory
   git_mkdir:
-    path: "{{ dir }}/tmp"
+    path: "{{ qb_dir }}/tmp"
     
 - name: ignore tmp dir in git
   lineinfile:
     line: /tmp
-    dest: "{{ dir }}/.gitignore"
+    dest: "{{ qb_dir }}/.gitignore"
   register: ignore_tmp
 
 # readme
@@ -54,8 +34,8 @@
 - name: create readme
   template:
     src: README.md.j2
-    dest: "{{ dir }}/README.md"
-    force: false
+    dest: "{{ qb_dir }}/README.md"
+    force: "{{ project_force }}"
   when: project_readme
 
 # hub
@@ -64,5 +44,5 @@
 - name: run `hub create`
   command: "hub create{% if project_private %} -p{% endif %}"
   args:
-    chdir: "{{ dir }}"
+    chdir: "{{ qb_dir }}"
   when: project_hub
