@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+require 'json'
+
+HERE = File.dirname(__FILE__)
+GITIGNORE_DIR = File.expand_path File.join HERE, '..', 'files', 'gitignore'
+
+names = Dir.chdir(GITIGNORE_DIR) do
+  Dir['**/*.gitignore'].map {|path|
+    path.match(/(.*)\.gitignore/)[1]
+  }
+end
+
+puts JSON.pretty_generate({
+  save_options: false,
+  
+  vars: [
+    {
+      name: "name",
+      description: "name of gitignore",
+      required: true,
+      type: {
+        one_of: names,
+      },
+      short: 'n',
+    },
+  ],
+})

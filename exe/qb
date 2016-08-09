@@ -57,7 +57,7 @@ def set_debug! args
   end
 end
 
-def parse! role_arg, var_prefix, vars, defaults, args
+def parse! role, var_prefix, vars, defaults, args
   positional = vars.select do |var|
     var['positional'] == true
   end
@@ -73,8 +73,8 @@ def parse! role_arg, var_prefix, vars, defaults, args
   options = {}
   
   opt_parser = OptionParser.new do |opts|
-    # opts.banner = "qb #{ role_arg } [OPTIONS]#{ positional_banner }"
-    opts.banner = "qb #{ role_arg } [OPTIONS] DIRECTORY"
+    # opts.banner = "qb #{ role.name } [OPTIONS]#{ positional_banner }"
+    opts.banner = "qb #{ role.name } [OPTIONS] DIRECTORY"
     
     vars.each do |var|
       arg_name = var.fetch 'name'
@@ -96,6 +96,21 @@ def parse! role_arg, var_prefix, vars, defaults, args
         ruby_type = case var['type']
         when 'string'
           String
+        when Hash
+          if var['type'].key? 'one_of'
+            klass = Class.new
+            opts.accept(klass) {|value|
+              if var['type']['one_of'].include? value
+                value
+              else
+                raise ArgumentError, "argument '#{ var['name'] }' must be " +
+                  "one of: #{ var['type']['one_of'].join(', ') }"
+              end
+            }
+            klass
+          else 
+            raise ArgumentError, "bad type: #{ var['type'].inspect }"
+          end
         else
           raise ArgumentError, "bad type: #{ var['type'].inspect }"
         end
@@ -217,12 +232,18 @@ def main args
     {}
   end
   
-  qb_meta = YAML.load((role.path + 'meta' + 'qb.yml').read) || {}
+  qb_meta = if (role.path + 'meta' + 'qb').exist?
+    YAML.load Cmds.out! (role.path + 'meta' + 'qb').realpath.to_s
+  elsif (role.path + 'meta' + 'qb.yml').exist?
+    YAML.load (role.path + 'meta' + 'qb.yml').read
+  else
+    {}
+  end
   
   vars = qb_meta['vars'] || []
   var_prefix = qb_meta['var_prefix'] || role.namespaceless
   
-  options = parse! role_arg, var_prefix, vars, defaults, args
+  options = parse! role, var_prefix, vars, defaults, args
   
   debug options: options
   
