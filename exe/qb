@@ -61,7 +61,7 @@ class OneOf
   # initialize 
 end
 
-def parse! role_arg, role, var_prefix, vars, defaults, args
+def parse! role, var_prefix, vars, defaults, args
   positional = vars.select do |var|
     var['positional'] == true
   end
@@ -78,7 +78,7 @@ def parse! role_arg, role, var_prefix, vars, defaults, args
   
   opt_parser = OptionParser.new do |opts|    
     # opts.banner = "qb #{ role_arg } [OPTIONS]#{ positional_banner }"
-    opts.banner = "qb #{ role_arg } [OPTIONS] DIRECTORY"
+    opts.banner = "qb #{ role.name } [OPTIONS] DIRECTORY"
     
     vars.each do |var|
       arg_name = var.fetch 'name'
@@ -120,7 +120,10 @@ def parse! role_arg, role, var_prefix, vars, defaults, args
         when 'string'
           String
         else
-          raise ArgumentError, "bad type: #{ var['type'].inspect }"
+          raise QB::RoleSytaxError.new NRSER.squish <<-END
+            arg definition for '#{ arg_name }' has bad 'type':
+            #{ var['type'].inspect }. please see #{ role.path }/meta/qb.yml
+          END
         end
         
         if var['short']
@@ -245,7 +248,7 @@ def main args
   vars = qb_meta['vars'] || []
   var_prefix = qb_meta['var_prefix'] || role.namespaceless
   
-  options = parse! role_arg, role, var_prefix, vars, defaults, args
+  options = parse! role, var_prefix, vars, defaults, args
   
   debug options: options
   
