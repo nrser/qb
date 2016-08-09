@@ -7,5 +7,7 @@ vars:
   required: true
   type:
     one_of:
-      exe: qb/get_names.rb
+      data():
+        command: qb/get_names.rb
+        format: json
   short: n
