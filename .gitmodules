@@ -7,3 +7,6 @@
 [submodule "roles/qb.gitignore/files/gitignore"]
 	path = roles/qb.gitignore/files/gitignore
 	url = git@github.com:nrser/gitignore.git
+[submodule "lib/lidempo"]
+	path = lib/lidempo
+	url = git@github.com:nrser/lidempo.git

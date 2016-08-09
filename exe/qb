@@ -57,7 +57,11 @@ def set_debug! args
   end
 end
 
-def parse! role_arg, var_prefix, vars, defaults, args
+class OneOf
+  # initialize 
+end
+
+def parse! role_arg, role, var_prefix, vars, defaults, args
   positional = vars.select do |var|
     var['positional'] == true
   end
@@ -72,7 +76,7 @@ def parse! role_arg, var_prefix, vars, defaults, args
   
   options = {}
   
-  opt_parser = OptionParser.new do |opts|
+  opt_parser = OptionParser.new do |opts|    
     # opts.banner = "qb #{ role_arg } [OPTIONS]#{ positional_banner }"
     opts.banner = "qb #{ role_arg } [OPTIONS] DIRECTORY"
     
@@ -85,7 +89,9 @@ def parse! role_arg, var_prefix, vars, defaults, args
       # on_args = [arg_style]
       on_args = []
       
-      if var['type'] == 'boolean'
+      type = var['type']
+      
+      if type == 'boolean'
         if var['short']
           on_args << "-#{ var['short'] }"
         end
@@ -93,7 +99,24 @@ def parse! role_arg, var_prefix, vars, defaults, args
         on_args << "--[no-]#{ var['name'] }"
         
       else
-        ruby_type = case var['type']
+        ruby_type = case type
+        when Hash
+          if type.key? 'one_of'
+            klass = Class.new
+            exe = File.join role.path, type['one_of']['exe']
+            values = JSON.load Cmds.out! exe
+            opts.accept(klass) {|value|
+              if values.include? value
+                value
+              else
+                raise ArgumentError, "#{ var['name'] } must be one of:\n#{ values.join(", ") }"
+              end
+            }
+            klass
+            
+          else
+            raise ArgumentError, "bad type: #{ var['type'].inspect }"
+          end
         when 'string'
           String
         else
@@ -148,7 +171,7 @@ def parse! role_arg, var_prefix, vars, defaults, args
   # args.each_with_index do |value, index|
   #   var_name = positional[index]['name']
   #   if options.key? var_name
-  #     raise ArgumentError, "don't supply #{ var_name } as option and positionaly"
+  #     raise ArgumentError, "don't supply #{ var_name } as option and positionally"
   #   else
   #     options[var_name] = value
   #   end
@@ -222,7 +245,7 @@ def main args
   vars = qb_meta['vars'] || []
   var_prefix = qb_meta['var_prefix'] || role.namespaceless
   
-  options = parse! role_arg, var_prefix, vars, defaults, args
+  options = parse! role_arg, role, var_prefix, vars, defaults, args
   
   debug options: options
   

@@ -5,5 +5,7 @@ vars:
 - name: name
   desciption: name of gitignore
   required: true
-  type: string
+  type:
+    one_of:
+      exe: qb/get_names.rb
   short: n
