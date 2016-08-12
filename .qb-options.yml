@@ -4,3 +4,5 @@ qb.gem:
   license: MIT
 qb.project:
   dev_bin: false
+qb.install_gem:
+  rubies: global

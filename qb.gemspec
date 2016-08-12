@@ -44,7 +44,7 @@ Gem::Specification.new do |spec|
     commit = `git rev-parse HEAD`.strip
     
     spec.metadata = {
-      "built" => Time.now,
+      "built" => Time.now.to_s,
       "branch" => `git rev-parse --abbrev-ref HEAD`.strip,
       "commit" => commit,
       "browse" => "https://github.com/nrser/qb/tree/#{ commit }",
