@@ -1,4 +1,6 @@
 ---
+default_dir: cwd
+  
 vars:
 - name: rubies
   description: rubies to install for

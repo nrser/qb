@@ -18,7 +18,8 @@
     build_gem_name: "{{ build_gem_name_result.stdout }}"
     build_gem_version: "{{ build_gem_version_result.stdout }}"
 
-- command: "gem build {{ build_gem_name }}.gemspec"
+- name: build gem
+  command: "gem build {{ build_gem_name }}.gemspec"
   args:
     chdir: "{{ dir }}"
 

@@ -181,9 +181,18 @@ def with_clean_env &block
   end
 end
 
+def metadata
+  if QB.gemspec.metadata
+    "metadata:\n" + QB.gemspec.metadata.map {|key, value|
+      "  #{ key }: #{ value }"
+    }.join("\n")
+  end
+end
+
 def help
   puts <<-END
 version: #{ QB::VERSION }
+#{ metadata }
 
 syntax:
 

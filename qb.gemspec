@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'qb/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "qb"
+  spec.name          = QB::GEM_NAME
   spec.version       = QB::VERSION
   spec.authors       = ["nrser"]
   spec.email         = ["neil@ztkae.com"]
@@ -39,4 +39,15 @@ Gem::Specification.new do |spec|
   
   spec.add_dependency "cmds", ">= 0.0.9"
   spec.add_dependency "nrser-extras", ">= 0.0.3"
+  
+  if QB::VERSION.end_with? '.dev'
+    commit = `git rev-parse HEAD`.strip
+    
+    spec.metadata = {
+      "built" => Time.now,
+      "branch" => `git rev-parse --abbrev-ref HEAD`.strip,
+      "commit" => commit,
+      "browse" => "https://github.com/nrser/qb/tree/#{ commit }",
+    }
+  end
 end

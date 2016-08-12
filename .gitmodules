@@ -7,3 +7,6 @@
 [submodule "roles/qb.gitignore/files/gitignore"]
 	path = roles/qb.gitignore/files/gitignore
 	url = git@github.com:nrser/gitignore.git
+[submodule "roles/nrser.rb"]
+	path = roles/nrser.rb
+	url = git@github.com:nrser/ansible-nrser.rb.git
