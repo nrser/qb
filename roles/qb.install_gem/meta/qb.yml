@@ -1,5 +1,7 @@
 ---
 default_dir: cwd
+
+save_options: false
   
 vars:
 - name: rubies
