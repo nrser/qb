@@ -38,7 +38,8 @@ def format msg, dump = {}
 end
 
 def role? pathname
-  pathname.directory? && pathname.join('meta', 'qb.yml').file?
+  pathname.directory? &&
+  ['qb.yml', 'qb'].any? {|fn| pathname.join('meta', fn).file?}
 end
 
 def role_matches
