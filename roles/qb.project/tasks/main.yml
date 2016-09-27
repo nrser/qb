@@ -42,7 +42,7 @@
 # ===
 
 - name: run `hub create`
-  command: "hub create{% if project_private %} -p{% endif %}"
+  command: "hub create{% if project_private %} -p{% endif %} {{ project_owner }}/{{ project_name }}"
   args:
     chdir: "{{ qb_dir }}"
   when: project_hub
