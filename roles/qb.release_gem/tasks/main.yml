@@ -1,0 +1,84 @@
+---
+# tasks file for qb.release_gem
+
+- name: get gem and version info
+  vars.rb:
+    namespace: release_gem
+    bind:
+      qb_dir: "{{ qb_dir }}"
+    src: |
+      spec = Gem::Specification::load(Dir.glob("#{ qb_dir }/*.gemspec")[0])
+      name = spec.name
+      
+      segments = spec.version.segments.dup
+      segments.pop while segments.any? {|s| s.is_a? String}
+      
+      segments[-1] = segments[-1].succ
+      segments << 'dev'
+      
+      next_version = segments.join('.')
+      
+      # match = /^(\d+)\.(\d+)\.(\d+)(\.dev)?$/.match(current_version)
+      
+      # if current_version.ends_with? '.dev'
+      # end
+      
+      {
+        'name' => name,
+        'current_version' => spec.version.version,
+        'release_version' => spec.version.release,
+        'next_version' => next_version,
+        'version_path' => "#{ qb_dir }/lib/#{ name }/version.rb",
+      }
+  
+- debug:
+    msg: >
+      current: {{ release_gem_current_version }} | 
+      release: {{ release_gem_release_version }} | 
+      next: {{ release_gem_next_version }}
+
+- name: "change version to release version {{ release_gem_release_version }}"
+  replace:
+    dest: "{{ release_gem_version_path }}"
+    regexp: "VERSION\\s*=\\s*\"{{ release_gem_current_version }}\""
+    replace: "VERSION = \"{{ release_gem_release_version }}\""
+
+- name: add release version to git
+  command: "git add {{ release_gem_version_path }}"
+  args:
+    chdir: "{{ qb_dir }}"
+
+- name: commit release version
+  command: git commit -m "bump to v{{ release_gem_release_version }}"
+  args:
+    chdir: "{{ qb_dir }}"
+
+- name: release with bundler
+  shell: bundle exec rake release
+  args:
+    chdir: "{{ qb_dir }}"
+
+- name: "change version to next version {{ release_gem_next_version }}"
+  replace:
+    dest: "{{ release_gem_version_path }}"
+    regexp: "VERSION\\s*=\\s*\"{{ release_gem_release_version }}\""
+    replace: "VERSION = \"{{ release_gem_next_version }}\""
+
+- name: add next dev version to git
+  command: "git add {{ release_gem_version_path }}"
+  args:
+    chdir: "{{ qb_dir }}"
+
+- name: commit next dev version
+  command: git commit -m "start {{ release_gem_next_version }}"
+  args:
+    chdir: "{{ qb_dir }}"
+
+- name: push next dev version
+  command: git push
+  args:
+    chdir: "{{ qb_dir }}"
+
+- debug:
+    msg: >
+      v{{ release_gem_release_version }} released.

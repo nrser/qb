@@ -1,0 +1,7 @@
+---
+# meta file for qb.release_gem
+
+allow_duplicates: yes
+
+dependencies:
+- role: nrser.rb
