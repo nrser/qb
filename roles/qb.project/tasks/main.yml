@@ -21,12 +21,14 @@
 - name: create tmp directory
   git_mkdir:
     path: "{{ qb_dir }}/tmp"
+  when: project_tmp
     
 - name: ignore tmp dir in git
   lineinfile:
     line: /tmp
     dest: "{{ qb_dir }}/.gitignore"
   register: ignore_tmp
+  when: project_tmp
 
 # readme
 # ======

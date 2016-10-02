@@ -45,3 +45,20 @@ vars:
   type: boolean
   description: create vars/main.yml
   short: v
+
+- name: project
+  type: boolean
+  description: create a project repo for this role
+
+- name: project_owner
+  type: string
+  description: the github owner of the project repo
+  
+- name: project_name
+  type: string
+  description: the github name of the project repo
+
+- name: project_hub
+  type: boolean
+  description: switch to `hub create` the project repo
+  

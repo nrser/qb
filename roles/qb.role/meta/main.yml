@@ -1,5 +1,18 @@
 ---
 # meta file for qb.role
 
-dependencies: []
-# - role: role-name
+dependencies:
+- role: qb.project
+  project_owner: "{{ role_project_owner }}"
+  project_name: "{{ role_project_name }}"
+  project_bin: "{{ role_project_bin }}"
+  project_dev: "{{ role_project_dev }}"
+  project_dev_bin: "{{ role_project_dev_bin }}"
+  project_setup: "{{ role_project_setup }}"
+  project_scratch: "{{ role_project_scratch }}"
+  project_tmp: "{{ role_project_tmp }}"
+  project_readme: "{{ role_project_readme }}"
+  project_hub: "{{ role_project_hub }}"
+  project_private: "{{ role_project_private }}"
+  project_force: "{{ role_project_force }}"
+  when: role_project
