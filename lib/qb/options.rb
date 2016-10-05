@@ -1,16 +1,8 @@
 require 'optparse'
+require 'weakref'
 
 module QB
   module Options
-    # small struct to hold the differnt names of the option now that including
-    # makes it more complicated
-    Option = Struct.new :qb_meta_name,
-                        :cli_option_name,
-                        :ansible_var_name,
-                        :required,
-                        :save,
-                        :value
-    
     # errors
     # ======
     
@@ -26,129 +18,186 @@ module QB
       end
     end
     
-    def self.include_role opts, options, include_var
-      role_name = include_var['include']
+    def self.cli_ize_name option_name
+      option_name.gsub '_', '-'
+    end
+    
+    def self.var_ize_name option_name
+      option_name.gsub '-', '_'
+    end
+    
+    # 
+    class Option
+      # the role that this option is for
+      # attr_reader :role
+      
+      # the entry from the qb metadata for this option
+      attr_reader :meta
+      
+      # array of strings representing how this option was included
+      # empty for top-level options
+      attr_reader :include_path
+      
+      # the name of the option in the qb metadata, equal to #meta['name']
+      attr_reader :meta_name
+      
+      # the name that this option will be available in the cli as
+      attr_reader :cli_name
+      
+      # the name that the value will be passed to ansible as
+      attr_reader :var_name
+      
+      # the value of the option, or `nil` if we never assign one
+      attr_accessor :value
+      
+      def initialize role, meta, include_path
+        # @role = WeakRef.new role
+        @meta = meta
+        @include_path = include_path
+        
+        @meta_name = meta.fetch 'name'
+        
+        @cli_name = if @include_path.empty?
+          Options.cli_ize_name @meta_name
+        else
+          "#{ @include_path.join('-') }-#{ Options.cli_ize_name @meta_name }"
+        end
+        
+        @var_name = if role.var_prefix
+          "#{ role.var_prefix }_#{ Options.var_ize_name @meta_name }"
+        else
+          Options.var_ize_name @meta_name
+        end
+        
+        @value = nil
+      end
+      
+      # if the option is required in the cli
+      def required?
+        !!meta_or(['required', 'require'], false)
+      end
+      
+      # if we should save the option value in .qb-options.yml
+      def save?
+        !!meta_or('save', true)
+      end
+      
+      def description
+        value = meta_or 'description',
+          "set the #{ @var_name } role variable"
+          
+        if @meta['type'].is_a?(Hash) && @meta['type'].key?('one_of')
+          line_break = "\n" + "\t" * 5
+          value += " options:" + 
+            "#{ line_break }#{ @meta['type']['one_of'].join(line_break) }"
+        end
+        
+        value
+      end
+      
+      private
+      
+      # get the value at the first found of the keys or the default.
+      def meta_or keys, default
+        keys = [keys] if keys.is_a? String
+        keys.each do |key|
+          if @meta.key? key
+            return @meta[key]
+          end
+        end
+        default
+      end
+      
+    end # Option
+    
+    def self.include_role opts, options, include_meta, include_path
+      role_name = include_meta['include']
       role = QB::Role.require role_name
-      include_as = include_var['as'] || role.namespaceless
+      include_as = include_meta['as'] || role.namespaceless
       
       QB.debug "including #{ role.name } as #{ include_as }"
       
-      add opts, options, role, include_as
+      add opts, options, role, include_path + [include_as]
     end
     
     # add the options from a role to the OptionParser
-    def self.add opts, options, role, include_as = nil
+    def self.add opts, options, role, include_path = []
       QB.debug "adding options", "role" => role
       
-      role.vars.each do |var|
-        if var.key? 'include'
-          # we don't support nested includes
-          unless include_as.nil?
-            raise NestedIncludeError.new
-          end
-          
-          include_role opts, options, var
+      role.options.each do |option_meta|
+        if option_meta.key? 'include'
+          include_role opts, options, option_meta, include_path
           
         else
           # create an option
+          option = Option.new role, option_meta, include_path
           
-          # variable's name in meta
-          qb_meta_name = var.fetch 'name'
-          
-          # name that will be used in QB cli
-          cli_option_name = if include_as
-            "#{ include_as }_#{ qb_meta_name }"
+          arg_style = if option.required?
+            :REQUIRED
           else
-            qb_meta_name
+            :OPTIONAL
           end
-          
-          # name that is passed to ansible role
-          ansible_var_name = "#{ role.var_prefix }_#{ qb_meta_name }"
-          
-          required = var['required'] || false
-          save = if var.key? 'save'
-            !!var['save']
-          else
-            true
-          end
-          
-          option = options[cli_option_name] = Option.new qb_meta_name,
-                                                cli_option_name,
-                                                ansible_var_name,
-                                                required,
-                                                save,
-                                                nil
-          
-          arg_style = required ? :REQUIRED : :OPTIONAL
           
           # on_args = [arg_style]
           on_args = []
           
-          if var['type'] == 'boolean'
+          if option.meta['type'] == 'boolean'
             # don't use short names when included (for now)
-            if include_as.nil? && var['short']
-              on_args << "-#{ var['short'] }"
+            if include_path.empty? && option.meta['short']
+              on_args << "-#{ option.meta['short'] }"
             end
             
-            on_args << "--[no-]#{ cli_option_name }"
+            on_args << "--[no-]#{ option.cli_name }"
             
           else
-            ruby_type = case var['type']
+            ruby_type = case option.meta['type']
+            when nil
+              raise ArgumentError,
+                "must provide type in qb metadata for option #{ option.meta_name }"
             when 'string'
               String
             when Hash
-              if var['type'].key? 'one_of'
+              if option.meta['type'].key? 'one_of'
                 klass = Class.new
                 opts.accept(klass) {|value|
-                  if var['type']['one_of'].include? value
+                  if option.meta['type']['one_of'].include? value
                     value
                   else
-                    raise ArgumentError, "argument '#{ cli_option_name }' must be " +
-                      "one of: #{ var['type']['one_of'].join(', ') }"
+                    raise ArgumentError,
+                      "option '#{ option.cli_name }' must be one of: #{ option.meta['type']['one_of'].join(', ') }"
                   end
                 }
                 klass
               else 
-                raise ArgumentError, "bad type: #{ var['type'].inspect }"
+                raise ArgumentError,
+                  "bad type for option #{ option.meta_name }: #{ option.meta['type'].inspect }"
               end
             else
-              raise ArgumentError, "bad type: #{ var['type'].inspect }"
+              raise ArgumentError,
+                "bad type for option #{ option.meta_name }: #{ option.meta['type'].inspect }"
             end
             
             # don't use short names when included (for now)
-            if include_as.nil? && var['short']
-              on_args << "-#{ var['short'] } #{ cli_option_name.upcase }"
+            if include_path.empty? && option.meta['short']
+              on_args << "-#{ option.meta['short'] } #{ option.cli_name.upcase }"
             end
             
-            on_args << "--#{ cli_option_name }=#{ cli_option_name.upcase }"
+            on_args << "--#{ option.cli_name }=#{ option.cli_name.upcase }"
             
             on_args << ruby_type
           end
           
-          # description
-          description = if var.key? 'description'
-            var['description'] 
-          else
-            "set the #{ ansible_var_name } variable"
-          end
+          on_args << option.description
           
-          if var['type'].is_a?(Hash) && var['type'].key?('one_of')
-            lb = "\n" + "\t" * 5
-            description += " options:" + 
-              "#{ lb }#{ var['type']['one_of'].join(lb) }"
-          end
-          
-          on_args << description
-          
-          if role.defaults.key? ansible_var_name
-            on_args << if var['type'] == 'boolean'
-              if role.defaults[ansible_var_name]
-                "default --#{ cli_option_name }"
+          if role.defaults.key? option.var_name
+            on_args << if option.meta['type'] == 'boolean'
+              if role.defaults[option.var_name]
+                "default --#{ option.cli_name }"
               else
-                "default --no-#{ cli_option_name }"
+                "default --no-#{ option.cli_name }"
               end
             else
-              "default = #{ role.defaults[ansible_var_name] }"
+              "default = #{ role.defaults[option.var_name] }"
             end
           end
           
@@ -161,6 +210,8 @@ module QB
             
             option.value = value
           end
+          
+          options[option.cli_name] = option
         end
       end # each var
     end # add 

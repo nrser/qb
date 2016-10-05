@@ -143,7 +143,15 @@ def main args
   saved_options_path = Pathname.new(dir) + '.qb-options.yml'
   
   saved_options = if saved_options_path.exist?
-    YAML.load(saved_options_path.read).tap {|saved_options|
+    # convert old _ separated names to - separated
+    YAML.load(saved_options_path.read).map {|role_options_key, role_options|
+      [
+        role_options_key,
+        role_options.map {|name, value|
+          [QB::Options.cli_ize_name(name), value]
+        }.to_h
+      ]
+    }.to_h.tap {|saved_options|
       debug "found saved options", saved_options
     }
   else
@@ -156,8 +164,8 @@ def main args
     
     debug "found saved options for role", role_saved_options
     
-    role_saved_options.each do |cli_option_name, value|
-      option = options[cli_option_name]
+    role_saved_options.each do |option_cli_name, value|
+      option = options[option_cli_name]
       
       if option.value.nil?
         debug "setting from saved options", option: option, value: value
@@ -181,7 +189,7 @@ def main args
   }
   
   set_options.values.each do |option|
-    playbook_role[option.ansible_var_name] = option.value
+    playbook_role[option.var_name] = option.value
   end
   
   playbook = [
@@ -216,12 +224,12 @@ def main args
   # save the options back
   if (
     # we set some options that we can save
-    set_options.values.select {|o| o.save }.length > 0 &&
+    set_options.values.select {|o| o.save? }.length > 0 &&
     # the role says to save options
     role.save_options
   )
     saved_options[role.options_key] = set_options.select{|key, option|
-      option.save
+      option.save?
     }.map {|key, option|
       [key, option.value]
     }.to_h

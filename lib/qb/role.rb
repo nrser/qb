@@ -183,10 +183,13 @@ module QB
       meta['var_prefix'] || namespaceless
     end
     
-    # gets the vars from the metadata, defaulting to [] if noe defined.
-    def vars
-      meta['vars'] || []
+    # get the options from the metadata, defaulting to [] if none defined
+    def options
+      meta['options'] || meta['opts'] || meta['vars'] || []
     end
+    
+    # old name
+    alias_method :vars, :options
     
     # loads the defaults from defaults/main.yml, caching by default
     def load_defaults cache = true
