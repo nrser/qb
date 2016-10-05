@@ -2,7 +2,4 @@
 # meta file for qb.project
 
 dependencies:
-- role: qb.gitignore
-  gitignore_name: Global/OSX
-  gitignore_force: "{{ project_force }}"
-    
+- role: qb.git_repo
