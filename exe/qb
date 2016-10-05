@@ -3,7 +3,6 @@
 require 'pathname'
 require 'pp'
 require 'yaml'
-require 'optparse'
 require 'json'
 require 'fileutils'
 
@@ -37,15 +36,6 @@ def format msg, dump = {}
   msg
 end
 
-def role? pathname
-  pathname.directory? &&
-  ['qb.yml', 'qb'].any? {|fn| pathname.join('meta', fn).file?}
-end
-
-def role_matches
-  
-end
-
 def debug *args
   QB.debug *args
 end
@@ -56,129 +46,6 @@ def set_debug! args
     debug "ON"
     DEBUG_ARGS.each {|arg| args.delete arg}
   end
-end
-
-def parse! role, var_prefix, vars, defaults, args
-  positional = vars.select do |var|
-    var['positional'] == true
-  end
-  
-  positional_banner = if positional.empty?
-    ''
-  else
-    ' ' + positional.map {|var|
-      var['name'].upcase
-    }.join(' ')
-  end
-  
-  options = {}
-  
-  opt_parser = OptionParser.new do |opts|
-    # opts.banner = "qb #{ role.name } [OPTIONS]#{ positional_banner }"
-    opts.banner = "qb #{ role.name } [OPTIONS] DIRECTORY"
-    
-    vars.each do |var|
-      arg_name = var.fetch 'name'
-      var_name = "#{ var_prefix }_#{ arg_name }"
-      required = var['required'] || false
-      arg_style = required ? :REQUIRED : :OPTIONAL
-      
-      # on_args = [arg_style]
-      on_args = []
-      
-      if var['type'] == 'boolean'
-        if var['short']
-          on_args << "-#{ var['short'] }"
-        end
-        
-        on_args << "--[no-]#{ var['name'] }"
-        
-      else
-        ruby_type = case var['type']
-        when 'string'
-          String
-        when Hash
-          if var['type'].key? 'one_of'
-            klass = Class.new
-            opts.accept(klass) {|value|
-              if var['type']['one_of'].include? value
-                value
-              else
-                raise ArgumentError, "argument '#{ var['name'] }' must be " +
-                  "one of: #{ var['type']['one_of'].join(', ') }"
-              end
-            }
-            klass
-          else 
-            raise ArgumentError, "bad type: #{ var['type'].inspect }"
-          end
-        else
-          raise ArgumentError, "bad type: #{ var['type'].inspect }"
-        end
-        
-        if var['short']
-          on_args << "-#{ var['short'] } #{ arg_name.upcase }"
-        end
-        
-        on_args << "--#{ var['name'] }=#{ arg_name.upcase }"
-        
-        on_args << ruby_type
-      end
-      
-      # description
-      description = if var.key? 'description'
-        var['description'] 
-      else
-        "set the #{ var_name } variable"
-      end
-      
-      if var['type'].is_a?(Hash) && var['type'].key?('one_of')
-        lb = "\n" + "\t" * 5
-        description += " options:" + 
-          "#{ lb }#{ var['type']['one_of'].join(lb) }"
-      end
-      
-      on_args << description
-      
-      if defaults.key? var_name
-        on_args << if var['type'] == 'boolean'
-          if defaults[var_name]
-            "default --#{ var['name'] }"
-          else
-            "default --no-#{ var['name'] }"
-          end
-        else
-          "default = #{ defaults[var_name] }"
-        end
-      end
-      
-      debug "adding option", name: arg_name, on_args: on_args
-      
-      opts.on(*on_args) do |value|
-        options[var['name']] = value
-      end
-    end
-    
-    # No argument, shows at tail.  This will print an options summary.
-    # Try it and see!
-    opts.on_tail("-h", "--help", "Show this message") do
-      puts opts
-      exit
-    end
-  end
-  
-  opt_parser.parse! args
-  
-  # args.each_with_index do |value, index|
-  #   var_name = positional[index]['name']
-  #   if options.key? var_name
-  #     raise ArgumentError, "don't supply #{ var_name } as option and positionaly"
-  #   else
-  #     options[var_name] = value
-  #   end
-  # end
-  
-  options
 end
 
 # needed for to clean the env if using bundler (like in dev)
@@ -212,7 +79,7 @@ use `qb ROLE -h` for role options.
 available roles:
 
 END
-  puts QB.available_roles
+  puts QB::Role.available
   puts
   exit 1
 end
@@ -226,42 +93,18 @@ def main args
   
   help if role_arg.nil? || ['-h', '--help', 'help'].include?(role_arg)
   
-  matches = QB.role_matches role_arg
-  debug "role matches" => matches
-  
-  role = case matches.length
-  when 0
-    puts "ERROR - no roles match arg #{ role_arg.inspect }\n\n"
+  begin
+    role = QB::Role.require role_arg
+  rescue QB::Role::NoMatchesError => e
+    puts "ERROR - #{ e.message }\n\n"
+    # exits with status code 1
     help
-  when 1
-    matches[0]
-  else
-    puts "ERROR - multiple role matches:\n\n"
-    puts matches
-    puts
+  rescue QB::Role::MultipleMatchesError => e
+    puts "ERROR - #{ e.message }\n\n"
     exit 1
   end
-  debug role: role
   
-  defaults_path = role.path + 'defaults' + 'main.yml'
-  defaults = if defaults_path.file?
-    YAML.load(defaults_path.read) || {}
-  else
-    {}
-  end
-  
-  qb_meta = if (role.path + 'meta' + 'qb').exist?
-    YAML.load Cmds.out! (role.path + 'meta' + 'qb').realpath.to_s
-  elsif (role.path + 'meta' + 'qb.yml').exist?
-    YAML.load (role.path + 'meta' + 'qb.yml').read
-  else
-    {}
-  end
-  
-  vars = qb_meta['vars'] || []
-  var_prefix = qb_meta['var_prefix'] || role.namespaceless
-  
-  options = parse! role, var_prefix, vars, defaults, args
+  options = QB::Options.parse! role, args
   
   debug options: options
   
@@ -274,7 +117,7 @@ def main args
     # 
     # in some cases (like projects) the dir can be figured out in other ways:
     # 
-    QB.get_default_dir role, qb_meta, cwd, options
+    QB.get_default_dir role, cwd, options
     
   when 1
     # there is a single positional arg, which is used as dir
@@ -311,16 +154,18 @@ def main args
   
   playbook_role = {'role' => role.name}
   options.each do |arg_name, arg_value|
-    playbook_role["#{ var_prefix }_#{ arg_name }"] = arg_value
+    playbook_role["#{ role.var_prefix }_#{ arg_name }"] = arg_value
   end
-  
-  playbook_role['dir'] = dir
-  playbook_role['qb_dir'] = dir
-  playbook_role['qb_cwd'] = cwd
   
   playbook = [
     {
       'hosts' => 'localhost',
+      'vars' => {
+        'qb_dir' => dir,
+        # depreciated due to mass potential for conflict
+        'dir' => dir,
+        'qb_cwd' => cwd,
+      },
       'pre_tasks' => [
         {'qb_facts' => nil},
       ],
@@ -342,7 +187,7 @@ def main args
   
   unless (
     options.empty? ||
-    (qb_meta.key?('save_options') && qb_meta['save_options'] == false)
+    (qb.meta.key?('save_options') && qb.meta['save_options'] == false)
   )
     saved_options[role.options_key] = options
     FileUtils.mkdir_p saved_options_path.dirname unless saved_options_path.dirname.exist?
@@ -355,7 +200,7 @@ def main args
   
   ansible_roles_path = (
     [tmp_roles_path] +
-    QB.role_dirs
+    QB::Role.search_path
   ).join(':')
   
   Dir.chdir ROOT do
