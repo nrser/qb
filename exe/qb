@@ -106,7 +106,7 @@ def main args
   
   options = QB::Options.parse! role, args
   
-  debug options: options
+  debug "options set on cli", options.select {|k, o| !o.value.nil?}
   
   cwd = Dir.getwd
   
@@ -129,12 +129,12 @@ def main args
     
   end
   
-  debug input_dir: dir
+  debug "input_dir", dir
   
   # normalize to expanded path (has no trailing slash)
   dir = File.expand_path dir
   
-  debug normalized_dir: dir
+  debug "normalized_dir", dir
   
   # create the dir if it doesn't exist (so don't have to cover this in
   # every role)
@@ -143,29 +143,51 @@ def main args
   saved_options_path = Pathname.new(dir) + '.qb-options.yml'
   
   saved_options = if saved_options_path.exist?
-    YAML.load saved_options_path.read
+    YAML.load(saved_options_path.read).tap {|saved_options|
+      debug "found saved options", saved_options
+    }
   else
+    debug "no saved options"
     {}
   end
   
   if saved_options.key? role.options_key
-    options = saved_options[role.options_key].merge options
+    role_saved_options = saved_options[role.options_key]
+    
+    debug "found saved options for role", role_saved_options
+    
+    role_saved_options.each do |cli_option_name, value|
+      option = options[cli_option_name]
+      
+      if option.value.nil?
+        debug "setting from saved options", option: option, value: value
+        
+        option.value = value
+      end
+    end
   end
   
+  set_options = options.select {|k, o| !o.value.nil?}
+  
+  debug "set options", set_options
+  
   playbook_role = {'role' => role.name}
-  options.each do |arg_name, arg_value|
-    playbook_role["#{ role.var_prefix }_#{ arg_name }"] = arg_value
+  
+  playbook_vars = {
+    'qb_dir' => dir,
+    # depreciated due to mass potential for conflict
+    'dir' => dir,
+    'qb_cwd' => cwd,
+  }
+  
+  set_options.values.each do |option|
+    playbook_role[option.ansible_var_name] = option.value
   end
   
   playbook = [
     {
       'hosts' => 'localhost',
-      'vars' => {
-        'qb_dir' => dir,
-        # depreciated due to mass potential for conflict
-        'dir' => dir,
-        'qb_cwd' => cwd,
-      },
+      'vars' => playbook_vars,
       'pre_tasks' => [
         {'qb_facts' => nil},
       ],
@@ -176,7 +198,7 @@ def main args
     }
   ]
   
-  debug playbook: playbook
+  debug "playbook", playbook
   
   playbook_path = ROOT + '.qb-playbook.yml'
   debug playbook_path: playbook_path.to_s
@@ -186,10 +208,14 @@ def main args
   end
   
   unless (
-    options.empty? ||
-    (qb.meta.key?('save_options') && qb.meta['save_options'] == false)
+    # we didn't set any options 
+    set_options.empty? ||
+    # the role meta says not to save options
+    (role.meta.key?('save_options') && role.meta['save_options'] == false)
   )
-    saved_options[role.options_key] = options
+    saved_options[role.options_key] = set_options.map {|key, option|
+      [key, option.value]
+    }.to_h
     FileUtils.mkdir_p saved_options_path.dirname unless saved_options_path.dirname.exist?
     saved_options_path.open('w') do |f|
       f.write YAML.dump(saved_options)

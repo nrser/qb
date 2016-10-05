@@ -18,34 +18,35 @@ module QB
   end
   
   def self.debug *args
-    return unless @@debug
+    return unless @@debug && args.length > 0
     
-    msg, values = case args.length
-    when 0
-      raise ArgumentError, "debug needs at least one argument"
-    when 1
-      if args[0].is_a? Hash
-        ['', args[0]]
-      else
-        [args[0], {}]
-      end
-    when 2
-      [args[0], args[1]]
-    else
-      raise ArgumentError, "debug needs at least one argument"
+    header = 'DEBUG'
+    
+    if args[0].is_a? String
+      header += " " + args.shift
     end
     
-    $stderr.puts("DEBUG " + format(msg, values))
+    dumpObj = case args.length
+    when 0
+      header
+    when 1
+      {header => args[0]}
+    else
+      {header => args}
+    end
+    
+    # $stderr.puts("DEBUG " + format(msg, values))
+    $stderr.puts YAML.dump(dumpObj)
   end
   
   def self.get_default_dir role, cwd, options
     debug "get_default_dir",  role: role,
-                              meta: qb.meta,
+                              meta: role.meta,
                               cwd: cwd,
                               options: options
     
     key = 'default_dir'
-    case qb.meta[key]
+    case role.meta[key]
     when nil, false
       # there is no get_dir info in meta/qb.yml, can't get the dir
       raise "unable to infer default directory: no '#{ key }' key in meta/qb.yml"
@@ -61,9 +62,13 @@ module QB
     when Hash
       debug "qb meta option is a Hash"
       
-      if qb.meta[key].key? 'exe'
-        exe_path = qb.meta[key]['exe']
-        exe_input_data = options
+      if role.meta[key].key? 'exe'
+        exe_path = role.meta[key]['exe']
+        exe_input_data = Hash[
+          options.map {|option|
+            [option.cli_option_name, option.value]
+          }
+        ]
         
         unless exe_path.start_with?('~') || exe_path.start_with?('/')
           exe_path = File.join(role.path, exe_path)

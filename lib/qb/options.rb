@@ -2,34 +2,55 @@ require 'optparse'
 
 module QB
   module Options
-    def self.include_role 
+    # small struct to hold the differnt names of the option now that including
+    # makes it more complicated
+    Option = Struct.new :qb_meta_name,
+                        :cli_option_name,
+                        :ansible_var_name,
+                        :required,
+                        :value
+    
+    # errors
+    # ======
+    
+    # base for errors in the module, extends QB:Error
+    class Error < QB::Error
+    end
+    
+    # raised when an included role includes another, which we don't support
+    # (for now)
+    class NestedIncludeError < Error
+      def initialize
+        super "can't nest role includes"
+      end
+    end
+    
+    def self.include_role opts, options, include_var
+      role_name = include_var['include']
+      role = QB::Role.require role_name
+      include_as = include_var['as'] || role.namespaceless
       
+      QB.debug "including #{ role.name } as #{ include_as }"
+      
+      add opts, options, role, include_as
     end
     
     # add the options from a role to the OptionParser
-    def self.add opts, role, include_as = nil
-      QB.debug "adding options for #{ role }"
+    def self.add opts, options, role, include_as = nil
+      QB.debug "adding options", "role" => role
       
       role.vars.each do |var|
         if var.key? 'include'
-          case var['include']
-          when String
-            role_name = var['include']
-            role = QB::Role.require role_name
-            include_as = role.namespaceless
-          when Hash
-            role_name = var['include'].fetch 'role'
-            role = QB::Role.require role_name
-            include_as = var['include']['as'] || role.namespaceless
-          else
-            raise TypeError.new "include must be string or hash, found #{ var['include'].inspect }"
+          # we don't support nested includes
+          unless include_as.nil?
+            raise NestedIncludeError.new
           end
           
-          QB.debug "including #{ role.name } as #{ include_as }"
-          
-          add opts, role, include_as
+          include_role opts, options, var
           
         else
+          # create an option
+          
           # variable's name in meta
           qb_meta_name = var.fetch 'name'
           
@@ -44,6 +65,12 @@ module QB
           ansible_var_name = "#{ role.var_prefix }_#{ qb_meta_name }"
           
           required = var['required'] || false
+          
+          option = options[cli_option_name] = Option.new qb_meta_name,
+                                                cli_option_name,
+                                                ansible_var_name,
+                                                required,
+                                                nil
           
           arg_style = required ? :REQUIRED : :OPTIONAL
           
@@ -109,19 +136,23 @@ module QB
           if role.defaults.key? ansible_var_name
             on_args << if var['type'] == 'boolean'
               if role.defaults[ansible_var_name]
-                "default --#{ var['name'] }"
+                "default --#{ cli_option_name }"
               else
-                "default --no-#{ var['name'] }"
+                "default --no-#{ cli_option_name }"
               end
             else
               "default = #{ role.defaults[ansible_var_name] }"
             end
           end
           
-          QB.debug "adding option", name: cli_option_name, on_args: on_args
+          QB.debug "adding option", option: option, on_args: on_args
           
           opts.on(*on_args) do |value|
-            options[var['name']] = value
+            QB.debug  "setting option",
+                      option: option,
+                      value: value
+            
+            option.value = value
           end
         end
       end # each var
@@ -133,7 +164,7 @@ module QB
       opt_parser = OptionParser.new do |opts|
         opts.banner = "qb #{ role.name } [OPTIONS] DIRECTORY"
         
-        add opts, role
+        add opts, options, role
         
         # No argument, shows at tail.  This will print an options summary.
         # Try it and see!
