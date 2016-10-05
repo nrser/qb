@@ -1,0 +1,20 @@
+---
+# vars file for qb.role
+
+# overriding the qb.project defaults has to happen here - values in 
+# defaults/main.yml **will not** be visible to the included role
+
+# the name of the project repo, which defaults to "ansible-<role-name>"
+project_name: "ansible-{{ role_role_name }}"
+
+# rest of the project variables default to false except readme
+project_bin: false
+project_dev: false
+project_dev_bin: false
+project_setup: false
+project_scratch: false
+project_tmp: false
+project_readme: true
+project_hub: false
+project_private: false
+project_force: false

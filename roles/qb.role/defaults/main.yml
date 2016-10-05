@@ -9,23 +9,5 @@ role_tasks: true
 role_templates: false
 role_vars: false
 
-# switch to init a project repo for the role
+# init a project repo for the role
 role_project: false
-
-# owner if the repo, which defauts to the `GITHUB_USER` env var
-role_project_owner: "{{ ansible_env.GITHUB_USER }}"
-
-# the name of the project repo, which defaults to "ansible-<role-name>"
-role_project_name: "ansible-{{ role_role_name }}"
-
-# rest of the project variables default to false except readme
-role_project_bin: false
-role_project_dev: false
-role_project_dev_bin: false
-role_project_setup: false
-role_project_scratch: false
-role_project_tmp: false
-role_project_readme: true
-role_project_hub: false
-role_project_private: false
-role_project_force: false

@@ -49,16 +49,7 @@ vars:
 - name: project
   type: boolean
   description: create a project repo for this role
+  short: p
 
-- name: project_owner
-  type: string
-  description: the github owner of the project repo
-  
-- name: project_name
-  type: string
-  description: the github name of the project repo
-
-- name: project_hub
-  type: boolean
-  description: switch to `hub create` the project repo
+- include: qb.project
   
