@@ -18,6 +18,10 @@ module QB
       end
     end
     
+    # raised when there's bad option metadata 
+    class MetadataError < Error
+    end
+    
     def self.cli_ize_name option_name
       option_name.gsub '_', '-'
     end
@@ -113,11 +117,24 @@ module QB
     def self.include_role opts, options, include_meta, include_path
       role_name = include_meta['include']
       role = QB::Role.require role_name
-      include_as = include_meta['as'] || role.namespaceless
+      new_include_path = if include_meta.key? 'as'
+        case include_meta['as']
+        when nil, false
+          # include it in with the parent role's options
+          include_path
+        when String
+          include_path + [include_meta['as']]
+        else
+          raise MetadataError.new,
+            "bad 'as' value: #{ include_meta.inspect }"
+        end
+      else
+        include_path + [role.namespaceless]
+      end
       
-      QB.debug "including #{ role.name } as #{ include_as }"
+      QB.debug "including #{ role.name } as #{ new_include_path.join('-') }"
       
-      add opts, options, role, include_path + [include_as]
+      add opts, options, role, new_include_path
     end
     
     # add the options from a role to the OptionParser
@@ -152,7 +169,7 @@ module QB
           else
             ruby_type = case option.meta['type']
             when nil
-              raise ArgumentError,
+              raise MetadataError,
                 "must provide type in qb metadata for option #{ option.meta_name }"
             when 'string'
               String
@@ -163,17 +180,17 @@ module QB
                   if option.meta['type']['one_of'].include? value
                     value
                   else
-                    raise ArgumentError,
+                    raise MetadataError,
                       "option '#{ option.cli_name }' must be one of: #{ option.meta['type']['one_of'].join(', ') }"
                   end
                 }
                 klass
               else 
-                raise ArgumentError,
+                raise MetadataError,
                   "bad type for option #{ option.meta_name }: #{ option.meta['type'].inspect }"
               end
             else
-              raise ArgumentError,
+              raise MetadataError,
                 "bad type for option #{ option.meta_name }: #{ option.meta['type'].inspect }"
             end
             

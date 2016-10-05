@@ -10,38 +10,6 @@ var_prefix: null
 # how to get a default for `dir` if it's not provided as the 
 default_dir: null
 
-vars:  
-- name: name
-  type: string
-  description: name of the role.
-  short: n
-
-- name: files
-  type: boolean
-  description: create a files directory.
-  short: f
-
-- name: handlers
-  type: boolean
-  description: create handlers/main.yml
-  short: a
-
-- name: meta
-  type: boolean
-  description: create meta/main.yml
-  short: m
-
-- name: tasks
-  type: boolean
-  description: create tasks/main.yml
-  short: t
-
-- name: templates
-  type: boolean
-  description: create a templates directory.
-  short: e
-
-- name: vars
-  type: boolean
-  description: create vars/main.yml
-  short: v
+options:
+- include: qb.role
+  as: null
