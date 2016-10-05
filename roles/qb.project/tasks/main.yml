@@ -21,6 +21,8 @@
 - name: create tmp directory
   git_mkdir:
     path: "{{ qb_dir }}/tmp"
+    # have to explicitly commit it since it's ignored 
+    commit: true
   when: project_tmp
     
 - name: ignore tmp dir in git

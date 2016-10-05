@@ -38,13 +38,15 @@ def cd(newdir):
 def main():
     module = AnsibleModule(
         argument_spec = dict(
-            path=dict(required=True),
+            path=dict(required = True),
+            commit=dict(required = False, default = False, type = 'bool'),
         ),
         supports_check_mode = False,
     )
     
     changed = False
     path = module.params['path']
+    commit = module.params['commit']
     
     if os.path.isdir(path) is False:
         mkdir_p(path)
@@ -54,8 +56,9 @@ def main():
     
     if (not os.path.exists(keep_path)) and (not contians_files(path)):
         open(os.path.join(path, '.gitkeep'), 'a').close()
-        with cd(path):
-            subprocess.check_call(['git', 'add', '-f', '.gitkeep'])
+        if commit is True:
+            with cd(path):
+                subprocess.check_call(['git', 'add', '-f', '.gitkeep'])
         changed = True
 
     module.exit_json(
