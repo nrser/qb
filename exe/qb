@@ -189,6 +189,12 @@ def main args
       'hosts' => 'localhost',
       'vars' => playbook_vars,
       'pre_tasks' => [
+        # need ansible 2.1.2.0 at least to run
+        {
+          'assert' => {
+            'that' => "'ansible 2.1.2' in lookup('pipe', 'ansible --version')",
+          },
+        },
         {'qb_facts' => nil},
       ],
       'roles' => [
