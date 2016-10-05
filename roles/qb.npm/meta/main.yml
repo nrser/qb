@@ -1,0 +1,14 @@
+---
+# meta file for qb.npm
+
+allow_duplicates: yes
+
+dependencies:
+- role: qb.gitignore
+  gitignore_name: Node
+  gitignore_force: "{{ npm_force }}"
+  
+- role: qb.project
+  project_private: "{{ npm_private }}"
+  project_force: "{{ npm_force }}"
+  when: npm_project

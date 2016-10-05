@@ -8,6 +8,7 @@ module QB
                         :cli_option_name,
                         :ansible_var_name,
                         :required,
+                        :save,
                         :value
     
     # errors
@@ -65,11 +66,17 @@ module QB
           ansible_var_name = "#{ role.var_prefix }_#{ qb_meta_name }"
           
           required = var['required'] || false
+          save = if var.key? 'save'
+            !!var['save']
+          else
+            true
+          end
           
           option = options[cli_option_name] = Option.new qb_meta_name,
                                                 cli_option_name,
                                                 ansible_var_name,
                                                 required,
+                                                save,
                                                 nil
           
           arg_style = required ? :REQUIRED : :OPTIONAL

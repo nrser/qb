@@ -1,0 +1,16 @@
+---
+# defaults file for qb.npm
+npm_force: false
+
+# package.json stuff
+npm_name: "{{ qb_dir | basename }}"
+npm_scoped_name: "{{ ('@' + npm_scope + '/' + npm_name) if (npm_scope is defined) else npm_name }}"
+npm_private: true
+npm_version: "0.1.0"
+npm_description: "{{ npm_scoped_name }} package"
+npm_main: "index.js"
+npm_keywords: []
+npm_license: "{{ 'UNLICENSED' if npm_private else 'ISC' }}"
+npm_author: "{{ npm_scope if (npm_scope is defined) else ansible_env.GITHUB_USER }}"
+
+npm_project: false

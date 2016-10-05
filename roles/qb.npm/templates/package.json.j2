@@ -1,0 +1,13 @@
+{
+  "name": "{{ npm_scoped_name }}",
+  "private": {{ 'true' if npm_private else 'false' }},
+  "version": "{{ npm_version }}",
+  "description": "{{ npm_description }}",
+  "main": "{{ npm_main }}",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": {{ npm_keywords | to_json }},
+  "author": "{{ npm_author }}",
+  "license": "{{ npm_license }}"
+}

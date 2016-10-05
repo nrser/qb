@@ -213,16 +213,23 @@ def main args
     f.write YAML.dump(playbook)
   end
   
-  unless (
-    # we didn't set any options 
-    set_options.empty? ||
-    # the role meta says not to save options
-    (role.meta.key?('save_options') && role.meta['save_options'] == false)
+  # save the options back
+  if (
+    # we set some options that we can save
+    set_options.values.select {|o| o.save }.length > 0 &&
+    # the role says to save options
+    role.save_options
   )
-    saved_options[role.options_key] = set_options.map {|key, option|
+    saved_options[role.options_key] = set_options.select{|key, option|
+      option.save
+    }.map {|key, option|
       [key, option.value]
     }.to_h
-    FileUtils.mkdir_p saved_options_path.dirname unless saved_options_path.dirname.exist?
+    
+    unless saved_options_path.dirname.exist?
+      FileUtils.mkdir_p saved_options_path.dirname
+    end
+    
     saved_options_path.open('w') do |f|
       f.write YAML.dump(saved_options)
     end

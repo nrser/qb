@@ -208,5 +208,13 @@ module QB
     def defaults
       @defaults || load_defaults
     end
+    
+    def save_options
+      if meta.key? 'save_options'
+        !!meta['save_options']
+      else
+        true
+      end
+    end
   end
 end
