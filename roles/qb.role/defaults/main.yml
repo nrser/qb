@@ -9,5 +9,12 @@ role_tasks: true
 role_templates: false
 role_vars: false
 
+# galaxy
+role_galaxy: false
+role_author: "{{ git_user_name }}"
+role_description: "{{ role_role_name }} ansible role."
+role_license: "BSD"
+role_min_ansible_version: 2.1.2.0
+
 # init a project repo for the role
 role_project: false

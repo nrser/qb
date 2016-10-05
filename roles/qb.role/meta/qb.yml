@@ -16,6 +16,11 @@ vars:
   description: name of the role.
   short: n
 
+- name: defaults
+  type: boolean
+  description: create a defaults directory.
+  short: d
+
 - name: files
   type: boolean
   description: create a files directory.
@@ -45,6 +50,11 @@ vars:
   type: boolean
   description: create vars/main.yml
   short: v
+
+- name: galaxy
+  type: boolean
+  description: include galaxy info in meta/main.yml
+  short: g
 
 - name: project
   type: boolean

@@ -5,3 +5,11 @@ allow_duplicates: yes
 
 dependencies: []
 # - role: role-name
+
+{% if role_galaxy %}
+galaxy_info:
+  author: {{ role_author | to_json }}
+  description: {{ role_description | to_json }}
+  license: {{ role_license | to_json }}
+  min_ansible_version: {{ role_min_ansible_version | to_json }}
+{% endif %}
