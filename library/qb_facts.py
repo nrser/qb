@@ -55,7 +55,10 @@ def main():
         ''' % (gemspec_path(qb_dir))
         
         spec_json = subprocess.check_output(['ruby', '-e', ruby])
-        facts['gem'] = json.loads(spec_json)
+        gem = json.loads(spec_json)
+        gem['gemspec_path'] = gemspec_path(qb_dir)
+        
+        facts['gem'] = gem
     
     # depreciated namespaceless names
     facts['git_user_name'] = facts['qb_git_user_name']
