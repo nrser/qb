@@ -180,12 +180,12 @@ module QB
     # passing them to the role. defaults to `#namespaceless` unless specified
     # in meta.
     def var_prefix
-      meta['var_prefix'] || namespaceless
+      meta_or 'var_prefix', namespaceless
     end
     
     # get the options from the metadata, defaulting to [] if none defined
     def options
-      meta['options'] || meta['opts'] || meta['vars'] || []
+      meta_or ['options', 'opts', 'vars'], []
     end
     
     # old name
@@ -223,11 +223,26 @@ module QB
     end
     
     def save_options
-      if meta.key? 'save_options'
-        !!meta['save_options']
-      else
-        true
+      !!meta_or('save_options', true)
+    end
+    
+    # if the exe should auto-make the directory. this is nice for most roles
+    # but some need it to be missing
+    def mkdir
+      !!meta_or('mkdir', true)
+    end
+    
+    private
+    
+    # get the value at the first found of the keys or the default.
+    def meta_or keys, default
+      keys = [keys] if keys.is_a? String
+      keys.each do |key|
+        if meta.key? key
+          return meta[key]
+        end
       end
+      default
     end
   end
 end

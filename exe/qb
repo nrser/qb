@@ -138,7 +138,9 @@ def main args
   
   # create the dir if it doesn't exist (so don't have to cover this in
   # every role)
-  FileUtils.mkdir_p dir unless File.exists? dir
+  if role.mkdir
+    FileUtils.mkdir_p dir unless File.exists? dir
+  end
   
   saved_options_path = Pathname.new(dir) + '.qb-options.yml'
   
