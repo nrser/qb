@@ -10,7 +10,12 @@ var_prefix: null
 # how to get a default for `dir` if it's not provided as the 
 default_dir: null
 
-vars:  
+vars:
+- name: force
+  type: boolean
+  description: force operations (overwrite)
+  short: f
+
 - name: role_name
   type: string
   description: name of the role.
@@ -24,7 +29,7 @@ vars:
 - name: files
   type: boolean
   description: create a files directory.
-  short: f
+  short: i
 
 - name: handlers
   type: boolean

@@ -13,7 +13,7 @@
   template:
     src: defaults/main.yml.j2
     dest: "{{ dir }}/defaults/main.yml"
-    force: false
+    force: "{{ role_force }}"
   when: role_defaults
 
 # files
@@ -31,7 +31,7 @@
   copy:
     content: ""
     dest: "{{ dir }}/files/.gitkeep"
-    force: false
+    force: "{{ role_force }}"
   when: role_files
 
 # handlers
@@ -47,7 +47,7 @@
   template:
     src: handlers/main.yml.j2
     dest: "{{ dir }}/handlers/main.yml"
-    force: false
+    force: "{{ role_force }}"
   when: role_handlers
 
 # meta
@@ -63,7 +63,7 @@
   template:
     src: meta/main.yml.j2
     dest: "{{ dir }}/meta/main.yml"
-    force: false
+    force: "{{ role_force }}"
   when: role_meta
 
 # tasks
@@ -79,7 +79,7 @@
   template:
     src: tasks/main.yml.j2
     dest: "{{ dir }}/tasks/main.yml"
-    force: false
+    force: "{{ role_force }}"
   when: role_tasks
 
 # templates
@@ -97,7 +97,7 @@
   copy:
     content: ""
     dest: "{{ dir }}/templates/.gitkeep"
-    force: false
+    force: "{{ role_force }}"
   when: role_templates
 
 # vars
@@ -113,5 +113,5 @@
   template:
     src: vars/main.yml.j2
     dest: "{{ dir }}/vars/main.yml"
-    force: false
+    force: "{{ role_force }}"
   when: role_vars
