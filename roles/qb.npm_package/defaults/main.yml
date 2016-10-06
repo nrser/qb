@@ -1,5 +1,5 @@
 ---
-# defaults file for qb.npm
+# defaults file for qb.npm_package
 npm_force: false
 
 # package.json stuff

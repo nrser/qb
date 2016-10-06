@@ -1,5 +1,5 @@
 ---
-# meta/qb.yml file for qb.npm
+# meta/qb.yml file for qb.npm_package
 # 
 # qb settings for this role. see README.md for more info.
 #
@@ -10,7 +10,7 @@ var_prefix: null
 # how to get a default for `dir` if it's not provided as the 
 default_dir: null
 
-# set to false to not save options in /Users/nrser/dev/gh/nrser/qb/roles/qb.npm/.qb-options.yml
+# set to false to not save options in .qb-options.yml files
 save_options: true
 
 vars:

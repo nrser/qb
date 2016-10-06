@@ -1,5 +1,5 @@
 ---
-# tasks file for qb.npm_module
+# tasks file for qb.npm_package_module
 
 - name: create package.json
   template:
