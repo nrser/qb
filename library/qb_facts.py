@@ -15,6 +15,7 @@ def main():
     d = {
         'git_user_name': ['git', 'config', 'user.name'],
         'git_user_email': ['git', 'config', 'user.email'],
+        'git_repo_root': ['git', 'rev-parse', '--show-toplevel'],
     }
     
     for key, cmd in d.iteritems():        
