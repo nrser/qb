@@ -180,6 +180,9 @@ module QB
     # passing them to the role. defaults to `#namespaceless` unless specified
     # in meta.
     def var_prefix
+      # ugh, i was generating meta/qb.yml files that set 'var_prefix' to
+      # `null`, but it would be nice to 
+      # 
       meta_or 'var_prefix', namespaceless
     end
     
@@ -235,10 +238,14 @@ module QB
     private
     
     # get the value at the first found of the keys or the default.
+    # 
+    # `nil` (`null` in yaml files) are treated like they're not there at
+    # all. you need to use `false` if you want to tell QB not to do something.
+    # 
     def meta_or keys, default
       keys = [keys] if keys.is_a? String
       keys.each do |key|
-        if meta.key? key
+        if meta.key?(key) && !meta[key].nil?
           return meta[key]
         end
       end

@@ -102,11 +102,15 @@ module QB
       private
       
       # get the value at the first found of the keys or the default.
+      # 
+      # `nil` (`null` in yaml files) are treated like they're not there at
+      # all. you need to use `false` if you want to tell QB not to do something.
+      # 
       def meta_or keys, default
         keys = [keys] if keys.is_a? String
         keys.each do |key|
-          if @meta.key? key
-            return @meta[key]
+          if meta.key?(key) && !meta[key].nil?
+            return meta[key]
           end
         end
         default

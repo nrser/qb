@@ -8,6 +8,11 @@ if this file exists in a role `qb` sees it will make that role available.
 
 the contents of this file allow you to configure how `qb` uses the role.
 
+### null values ###
+
+values set to `null` are treated like they're not there at all. to tell QB
+*not* to do something assign `false`.
+
 ### var_prefix ###
 
 declare prefix to be added to variable names from the command line for
@@ -30,7 +35,7 @@ to the `qb.project` role.
 
 however, this setting allows you to specify an alternative prefix. 
 
-if this is set to `null` or any varient of `false` the default will be used.
+if this is set to `null` the default will be used.
 
 ### default_dir ###
 
