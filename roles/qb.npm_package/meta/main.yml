@@ -6,9 +6,9 @@ allow_duplicates: yes
 dependencies:
 - role: qb.gitignore
   gitignore_name: Node
-  gitignore_force: "{{ npm_force }}"
+  gitignore_force: "{{ npm_package_force }}"
   
 - role: qb.project
-  project_private: "{{ npm_private }}"
-  project_force: "{{ npm_force }}"
-  when: npm_project
+  project_private: "{{ npm_package_private }}"
+  project_force: "{{ npm_package_force }}"
+  when: npm_package_project

@@ -28,6 +28,7 @@ vars:
 - name: scope
   description: npm scope to create the module under.
   type: string
+  accept_false: true
   short: s
 
 - name: name

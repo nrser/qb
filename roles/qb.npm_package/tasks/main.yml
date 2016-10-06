@@ -5,4 +5,4 @@
   template:
     src: package.json.j2
     dest: "{{ qb_dir }}/package.json"
-    force: "{{ npm_force }}"
+    force: "{{ npm_package_force }}"
