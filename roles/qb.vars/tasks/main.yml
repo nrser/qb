@@ -1,0 +1,6 @@
+---
+# tasks file for qb.vars
+
+- name: vars
+  debug:
+    msg: "{{ vars }}"
