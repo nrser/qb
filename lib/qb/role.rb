@@ -191,7 +191,8 @@ module QB
     # old name
     alias_method :vars, :options
     
-    # loads the defaults from defaults/main.yml, caching by default
+    # loads the defaults from vars/main.yml and defaults/main.yml,
+    # caching by default. vars override defaults values.
     def load_defaults cache = true
       defaults_path = @path + 'defaults' + 'main.yml'
       defaults = if defaults_path.file?
@@ -199,6 +200,15 @@ module QB
       else
         {}
       end
+      
+      vars_path = @path + 'vars' + 'main.yml'
+      vars = if vars_path.file?
+        YAML.load(vars_path.read) || {}
+      else
+        {}
+      end
+      
+      defaults = defaults.merge! vars
       
       if cache
         @defaults = defaults
