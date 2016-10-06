@@ -16,6 +16,3 @@
 [submodule "dev/packages/hack-npm-test"]
 	path = dev/packages/hack-npm-test
 	url = git@github.com:nrser/hack-npm-test.git
-[submodule "dev/gems/state_mate"]
-	path = dev/gems/state_mate
-	url = git@github.com:nrser/state_mate.git
