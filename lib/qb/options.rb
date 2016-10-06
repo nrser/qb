@@ -64,11 +64,11 @@ module QB
         @cli_name = if @include_path.empty?
           Options.cli_ize_name @meta_name
         else
-          "#{ @include_path.join('-') }-#{ Options.cli_ize_name @meta_name }"
+          Options.cli_ize_name "#{ @include_path.join('-') }-#{ @meta_name }"
         end
         
         @var_name = if role.var_prefix
-          "#{ role.var_prefix }_#{ Options.var_ize_name @meta_name }"
+          Options.var_ize_name "#{ role.var_prefix }_#{ @meta_name }"
         else
           Options.var_ize_name @meta_name
         end
@@ -196,10 +196,10 @@ module QB
             
             # don't use short names when included (for now)
             if include_path.empty? && option.meta['short']
-              on_args << "-#{ option.meta['short'] } #{ option.cli_name.upcase }"
+              on_args << "-#{ option.meta['short'] } #{ option.meta_name.upcase }"
             end
             
-            on_args << "--#{ option.cli_name }=#{ option.cli_name.upcase }"
+            on_args << "--#{ option.cli_name }=#{ option.meta_name.upcase }"
             
             on_args << ruby_type
           end
