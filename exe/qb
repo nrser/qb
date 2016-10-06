@@ -58,10 +58,10 @@ def with_clean_env &block
 end
 
 def metadata
-  if QB.gemspec.metadata
+  if QB.gemspec.metadata && !QB.gemspec.metadata.empty?
     "metadata:\n" + QB.gemspec.metadata.map {|key, value|
       "  #{ key }: #{ value }"
-    }.join("\n")
+    }.join("\n") + "\n"
   end
 end
 
@@ -69,7 +69,6 @@ def help
   puts <<-END
 version: #{ QB::VERSION }
 #{ metadata }
-
 syntax:
 
     qb ROLE [OPTIONS] DIRECTORY
