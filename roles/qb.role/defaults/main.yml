@@ -1,4 +1,5 @@
 ---
+role_force: false
 # can't be named `role_name` 'cause ansible sets that?
 role_role_name: "{{ dir | basename }}"
 role_defaults: true
