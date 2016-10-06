@@ -10,3 +10,6 @@
 [submodule "roles/nrser.rb"]
 	path = roles/nrser.rb
 	url = git@github.com:nrser/ansible-nrser.rb.git
+[submodule "roles/nrser.state_mate"]
+	path = roles/nrser.state_mate
+	url = git@github.com:nrser/ansible-nrser.state_mate.git
