@@ -1,29 +1,67 @@
 #!/usr/bin/python
 
 import subprocess
+import os
+import glob
+import json
+
+def gemspec_path(dir):
+    paths = glob.glob(os.path.join(dir, '*.gemspec'))
+    
+    if len(paths) == 0:
+        return None
+    elif len(paths) == 1:
+        return paths[0]
+    else:
+        # this shouldn't really happen, but i don't want to stop the show...
+        return paths[0]
+
+def is_gem(dir):
+    return bool(gemspec_path(dir))
 
 def main():
     module = AnsibleModule(
         argument_spec = dict(
+            qb_dir = dict(require = True, type = 'path'),
         ),
         supports_check_mode = False,
     )
-
+    
+    qb_dir = module.params['qb_dir']
     
     facts = {}
     
-    d = {
-        'git_user_name': ['git', 'config', 'user.name'],
-        'git_user_email': ['git', 'config', 'user.email'],
-        'git_repo_root': ['git', 'rev-parse', '--show-toplevel'],
+    cmds = {
+        'qb_git_user_name': ['git', 'config', 'user.name'],
+        'qb_git_user_email': ['git', 'config', 'user.email'],
+        'qb_git_repo_root': ['git', 'rev-parse', '--show-toplevel'],
     }
     
-    for key, cmd in d.iteritems():        
+    for key, cmd in cmds.iteritems():        
         try:
-            facts[key] = subprocess.check_output(cmd).rstrip()
+            value = subprocess.check_output(cmd).rstrip()
+            facts[key] = value
         except subprocess.CalledProcessError as e:
-            pass        
+            pass
+    
+    if is_gem(qb_dir):
+        ruby = '''
+            require 'json'
+            spec = Gem::Specification::load("%s")
+            puts JSON.dump({
+                'name' => spec.name,
+                'version' => spec.version,
+            })
+        ''' % (gemspec_path(qb_dir))
         
+        spec_json = subprocess.check_output(['ruby', '-e', ruby])
+        facts['gem'] = json.loads(spec_json)
+    
+    # depreciated namespaceless names
+    facts['git_user_name'] = facts['qb_git_user_name']
+    facts['git_user_email'] = facts['qb_git_user_email']
+    facts['git_repo_root'] = facts['qb_git_repo_root']
+    
     changed = False
 
     module.exit_json(

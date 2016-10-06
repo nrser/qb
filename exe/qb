@@ -204,7 +204,11 @@ def main args
             'that' => "'ansible 2.1.2' in lookup('pipe', 'ansible --version')",
           },
         },
-        {'qb_facts' => nil},
+        {
+          'qb_facts' => {
+            'qb_dir' => dir,
+          }
+        },
       ],
       'roles' => [
         'nrser.blockinfile',
