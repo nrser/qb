@@ -37,9 +37,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec"
   
-  spec.add_dependency "cmds", ">= 0.0.9"
-  spec.add_dependency "nrser-extras", ">= 0.0.3"
-  spec.add_dependency "state_mate", ">= 0.0.6"
+  spec.add_dependency "cmds",'~> 0.0', ">= 0.0.9"
+  spec.add_dependency "nrser-extras", '~> 0.0', ">= 0.0.3"
+  spec.add_dependency "state_mate", '~> 0.0', ">= 0.0.7"
   
   
   if QB::VERSION.end_with? '.dev'
