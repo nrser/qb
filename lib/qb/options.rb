@@ -199,7 +199,12 @@ module QB
               on_args << "-#{ option.meta['short'] } #{ option.meta_name.upcase }"
             end
             
-            on_args << "--#{ option.cli_name }=#{ option.meta_name.upcase }"
+            if option.meta['accept_false']
+              on_args << "--[no-]#{ option.cli_name }=#{ option.meta_name.upcase }"
+            else
+              on_args << "--#{ option.cli_name }=#{ option.meta_name.upcase }"
+            end
+              
             
             on_args << ruby_type
           end
