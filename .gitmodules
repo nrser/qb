@@ -13,6 +13,3 @@
 [submodule "roles/nrser.state_mate"]
 	path = roles/nrser.state_mate
 	url = git@github.com:nrser/ansible-nrser.state_mate.git
-[submodule "dev/packages/hack-npm-test"]
-	path = dev/packages/hack-npm-test
-	url = git@github.com:nrser/hack-npm-test.git
