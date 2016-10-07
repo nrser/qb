@@ -6,5 +6,7 @@ allow_duplicates: yes
 dependencies:
 - role: nrser.state_mate
 
+- role: nrser.rb
+
 - role: qb.npm_package
   when: hack_npm_create

@@ -14,4 +14,8 @@
   command: git push --set-upstream origin master
   args:
     chdir: "{{ qb_dir }}"
-    
+
+- name: remove it
+  file:
+    path: "{{ qb_dir }}"
+    state: absent

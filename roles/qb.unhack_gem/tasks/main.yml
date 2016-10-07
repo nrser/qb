@@ -2,7 +2,7 @@
 # tasks file for qb.unhack_gem
 
 - set_fact:
-    unhack_gem_rel_path: "./{{ qb_dir | relpath(qb_git_repo_root) }}"
+    unhack_gem_rel_path: "./{{ qb_dir | relpath(qb_cwd) }}"
 
 - name: make sure tree is clean
   command: git diff-index --quiet HEAD --
@@ -18,10 +18,10 @@
 - name: remove submodule
   command: "git rm {{ qb_dir }}"
   args:
-    chdir: "{{ qb_git_repo_root }}"
+    chdir: "{{ qb_cwd }}"
 
 - name: remove line from Gemfile
   lineinfile:
-    dest: "{{ qb_git_repo_root }}/Gemspec"
+    dest: "{{ qb_cwd }}/Gemspec"
     state: absent
     regexp: "^gem '{{ qb_gem_info.name }}'"
