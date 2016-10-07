@@ -1,0 +1,17 @@
+---
+# create a new npm package to hack
+- name: add everything 
+  command: git add --all .
+  args:
+    chdir: "{{ qb_dir }}"
+
+- name: add commit everything 
+  command: git commit -m "init"
+  args:
+    chdir: "{{ qb_dir }}"
+  
+- name: push
+  command: git push --set-upstream origin master
+  args:
+    chdir: "{{ qb_dir }}"
+    

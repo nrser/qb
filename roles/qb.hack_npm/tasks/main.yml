@@ -1,0 +1,44 @@
+---
+# tasks file for qb.hack_npm
+
+- set_fact:
+    hack_npm_rel_dir: "{{ qb_dir | relpath(git_repo_root) }}"
+
+- include: create.yml
+  when: hack_npm_create
+
+- name: dir need to be absent (is auto-created by qb exe)
+  file:
+    path: "{{ qb_dir }}"
+    state: absent
+
+- name: "add {{ hack_npm_owner }}/{{ hack_npm_name }} submodule"
+  command: >
+    git submodule add
+      git@github.com:{{ hack_npm_owner }}/{{ hack_npm_name }}.git
+      {{ hack_npm_rel_dir }}
+  args:
+    chdir: "{{ qb_git_repo_root }}"
+    # creates: "{{ qb_dir }}"
+
+- name: add linking to dev/setup.yml
+  # - name: npm link nrser.js for jash so it can build
+  #   tags:
+  #   - npm-link
+  #   command: npm link ../nrser.js
+  #   args:
+  #     chdir: "{{ dev_setup_project_root }}/packages/{{ item }}"
+  #   with_items:
+  #   - jash
+  state:
+    debug: w
+    yaml:
+      key: "{{ git_repo_root }}/dev/setup.yml:0:tasks"
+      array_contains:
+        name: "npm link {{ hack_npm_rel_dir }}"
+        tags:
+        - npm-link
+        command: "npm link {{ hack_npm_rel_dir }}"
+        args:
+          chdir: "{{ '{{ dev_setup_project_root }}' }}"
+      

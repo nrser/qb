@@ -1,0 +1,49 @@
+---
+# meta/qb.yml file for qb.hack_npm
+# 
+# qb settings for this role. see README.md for more info.
+#
+
+# prefix for role variables
+var_prefix: null
+
+# how to get a default for `dir` if it's not provided as the 
+default_dir: null
+
+# set to false to not save options in .qb-options.yml files
+save_options: false
+
+options:
+# - name: example
+#   description: an example of a variable.
+#   required: false
+#   type: boolean # boolean (default) | string
+#   short: e
+- name: name
+  type: string
+  description: the repo name
+  short: n
+
+- name: owner
+  type: string
+  description: the repo owner
+  short: o
+
+- name: dest_dir
+  type: string
+  description: qb_dir relative dir to put the submodule in under it's name.
+  short: d
+
+- name: dest_path
+  type: string
+  description: >
+    qb_dir relative path to put the submodule at. supercedes dest_dir.
+  short: p
+
+- name: create
+  type: boolean
+  description: create a new npm package to hack
+  short: c
+
+- include: qb.npm_package
+  as: package

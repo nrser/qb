@@ -1,0 +1,10 @@
+---
+# meta file for qb.hack_npm
+
+allow_duplicates: yes
+
+dependencies:
+- role: nrser.state_mate
+
+- role: qb.npm_package
+  when: hack_npm_create
