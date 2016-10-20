@@ -21,10 +21,14 @@ Gem::Specification.new do |spec|
   `git submodule --quiet foreach pwd`.split($\).each do |submodule_path|
     Dir.chdir(submodule_path) do
       submodule_relative_path = submodule_path.sub gem_dir, ""
-      # issue git ls-files in submodule's directory and
-      # prepend the submodule path to create absolute file paths
-      `git ls-files`.split($\).each do |filename|
-        spec.files << "#{submodule_relative_path}/#{filename}"
+      
+      # don't bundle dev submods
+      unless submodule_relative_path.start_with? 'dev/'
+        # issue git ls-files in submodule's directory and
+        # prepend the submodule path to create absolute file paths
+        `git ls-files`.split($\).each do |filename|
+          spec.files << "#{submodule_relative_path}/#{filename}"
+        end
       end
     end
   end
@@ -39,7 +43,7 @@ Gem::Specification.new do |spec|
   
   spec.add_dependency "cmds",'~> 0.0', ">= 0.0.9"
   spec.add_dependency "nrser-extras", '~> 0.0', ">= 0.0.3"
-  spec.add_dependency "state_mate", '~> 0.0', ">= 0.0.7"
+  spec.add_dependency "state_mate", '~> 0.0', ">= 0.0.8"
   
   
   if QB::VERSION.end_with? '.dev'
