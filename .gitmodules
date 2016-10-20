@@ -13,3 +13,6 @@
 [submodule "roles/nrser.state_mate"]
 	path = roles/nrser.state_mate
 	url = git@github.com:nrser/ansible-nrser.state_mate.git
+[submodule "dev/gems/state_mate"]
+	path = dev/gems/state_mate
+	url = git@github.com:nrser/state_mate
