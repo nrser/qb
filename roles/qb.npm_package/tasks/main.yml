@@ -1,8 +1,27 @@
 ---
 # tasks file for qb.npm_package_module
 
+- name: set npm_package_json_path
+  set_fact:
+    npm_package_json_path: "{{ qb_dir }}/package.json"
+
 - name: create package.json
-  template:
-    src: package.json.j2
-    dest: "{{ qb_dir }}/package.json"
-    force: "{{ npm_package_force }}"
+  command: npm init -y
+  args:
+    chdir: "{{ qb_dir }}"
+    creates: "{{ npm_package_json_path }}"
+
+- name: set package.json scalar values
+  state:
+    json:
+      key: "{{ npm_package_json_path }}:{{ item.key }}"
+      set: "{{ item.value }}"
+  with_dict:
+    name: "{{ npm_package_scoped_name }}"
+    private: "{{ npm_package_private }}"
+    version: "{{ npm_package_version }}"
+    description: "{{ npm_package_description }}"
+    main: "{{ npm_package_main }}"
+    keywords: "{{ npm_package_keywords | to_json }}"
+    license: "{{ npm_package_license }}"
+    author: "{{ npm_package_author }}"

@@ -4,6 +4,8 @@
 allow_duplicates: yes
 
 dependencies:
+- role: nrser.state_mate
+
 - role: qb.gitignore
   gitignore_name: Node
   gitignore_force: "{{ npm_package_force }}"
