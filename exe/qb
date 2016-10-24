@@ -264,11 +264,14 @@ def main args
     #       roles_path: tmp_roles_path.to_s
     #   end
     # end
-    # with_clean_env do
+    
+    # the `gem` ansible module doesn't work right when the bunlder env vars 
+    # are set... so we need to clear them.
+    with_clean_env do
       Cmds.stream! "ANSIBLE_ROLES_PATH=<%= roles_path %> ansible-playbook <%= playbook_path %>", 
         roles_path: ansible_roles_path,
         playbook_path: playbook_path.to_s
-    # end
+    end
   end
 end
 
