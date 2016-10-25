@@ -28,7 +28,7 @@ TMP_DIR = ROOT + 'tmp'
 # format a debug message with optional key / values to print
 #
 # @param msg [String] message to print.
-# @param dump [Hash] optional hash of keys and vaues to dump.
+# @param dump [Hash] optional hash of keys and values to dump.
 def format msg, dump = {}
   unless dump.empty?
     msg += "\n" + dump.map {|k, v| "  #{ k }: #{ v.inspect }" }.join("\n")
