@@ -235,6 +235,26 @@ module QB
       !!meta_or('mkdir', true)
     end
     
+    # get the CLI banner for the role
+    def banner
+      lines = []
+      
+      name_line = "#{ name } role"
+      lines << name_line
+      lines << "=" * name_line.length
+      lines << ''
+      if meta['description']
+        lines << meta['description']
+        lines << ''
+      end
+      lines << 'usage:'
+      lines << "  qb #{ name } [OPTIONS] DIRECTORY"
+      lines << ''
+      lines << 'options:'
+      
+      lines.join("\n")
+    end
+    
     private
     
     # get the value at the first found of the keys or the default.

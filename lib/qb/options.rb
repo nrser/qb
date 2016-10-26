@@ -243,15 +243,26 @@ module QB
     end # add 
     
     def self.parse! role, args      
-      options = {}
+      role_options = {}
+      
+      qb_options = {
+        'host' => 'localhost',
+      }
       
       opt_parser = OptionParser.new do |opts|
-        opts.banner = "qb #{ role.name } [OPTIONS] DIRECTORY"
+        opts.banner = role.banner
         
-        add opts, options, role
+        opts.on(
+          '-H',
+          '---host=HOST',
+          "set playbook host",
+          "default: localhost"
+        ) do |value|
+          qb_options['host'] = value
+        end
         
-        # No argument, shows at tail.  This will print an options summary.
-        # Try it and see!
+        add opts, role_options, role
+        
         opts.on_tail("-h", "--help", "Show this message") do
           puts opts
           exit
@@ -260,7 +271,7 @@ module QB
       
       opt_parser.parse! args
       
-      options
+      [role_options, qb_options]
     end # parse!
   end # Options
 end # QB

@@ -103,9 +103,10 @@ def main args
     exit 1
   end
   
-  options = QB::Options.parse! role, args
+  options, qb_options = QB::Options.parse! role, args
   
   debug "options set on cli", options.select {|k, o| !o.value.nil?}
+  debug "qb options", qb_options
   
   cwd = Dir.getwd
   
@@ -195,7 +196,7 @@ def main args
   
   playbook = [
     {
-      'hosts' => 'localhost',
+      'hosts' => qb_options['host'],
       'vars' => playbook_vars,
       'pre_tasks' => [
         # need ansible 2.1.2.0 at least to run

@@ -2,11 +2,12 @@
 # stub instead of `bundle exec qb ...`
 
 # so you know you're using the local repo version (vs an installed gem)...
-puts "*** LOADING REPO VERSION ***\n\n"
+puts "*** LOADING REPO VERSION ***"
 
 root = File.dirname(File.realpath(File.join(__FILE__, '..')))
 
 puts "source: #{ root }"
+puts 
 
 Dir.chdir root do
   require 'bundler/setup'
