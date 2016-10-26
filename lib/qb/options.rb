@@ -175,10 +175,12 @@ module QB
             when nil
               raise MetadataError,
                 "must provide type in qb metadata for option #{ option.meta_name }"
-            when 'string'
+            when 'string', 'str'
               String
-            when 'array'
+            when 'array', 'list'
               Array
+            when 'integer', 'int'
+              Integer
             when Hash
               if option.meta['type'].key? 'one_of'
                 klass = Class.new
@@ -217,15 +219,19 @@ module QB
           
           on_args << option.description
           
+          if option.required?
+            on_args << "REQUIRED."
+          end
+          
           if role.defaults.key? option.var_name
             on_args << if option.meta['type'] == 'boolean'
               if role.defaults[option.var_name]
-                "default --#{ option.cli_name }"
+                "DEFAULT: --#{ option.cli_name }"
               else
-                "default --no-#{ option.cli_name }"
+                "DEFAULT: --no-#{ option.cli_name }"
               end
             else
-              "default = #{ role.defaults[option.var_name] }"
+              "DEFAULT: #{ role.defaults[option.var_name] }"
             end
           end
           
@@ -263,7 +269,7 @@ module QB
           '---hosts=HOSTS',
           Array,
           "set playbook host",
-          "default: localhost"
+          "DEFAULT: localhost"
         ) do |value|
           qb_options['hosts'] = value
         end

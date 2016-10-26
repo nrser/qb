@@ -177,6 +177,16 @@ def main args
     end
   end
   
+  # check that required options are present
+  missing = options.values.select {|option|
+    option.required? && option.value.nil?
+  }
+  
+  unless missing.empty?
+    puts "ERROR: options #{ missing.map {|o| o.cli_name } } are required."
+    exit 1
+  end
+  
   set_options = options.select {|k, o| !o.value.nil?}
   
   debug "set options", set_options
@@ -282,10 +292,16 @@ def main args
       end
       template << "<%= playbook_path %>"
       
-      Cmds.stream! template.join(" "), 
+      status = Cmds.stream template.join(" "), 
         roles_path: ansible_roles_path,
         playbook_path: playbook_path.to_s,
         hosts: "#{ play['hosts'].join(',') },"
+      
+      if status != 0
+        puts "ERROR ansible-playbook failed."
+      end
+      
+      exit status
     end
   end
 end
