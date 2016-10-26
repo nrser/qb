@@ -246,19 +246,33 @@ module QB
       role_options = {}
       
       qb_options = {
-        'host' => 'localhost',
+        'hosts' => ['localhost'],
       }
+      
+      if role.meta['default_user']
+        qb_options['user'] = role.meta['default_user']
+      end
       
       opt_parser = OptionParser.new do |opts|
         opts.banner = role.banner
         
         opts.on(
           '-H',
-          '---host=HOST',
+          '---hosts=HOSTS',
+          Array,
           "set playbook host",
           "default: localhost"
         ) do |value|
-          qb_options['host'] = value
+          qb_options['hosts'] = value
+        end
+        
+        opts.on(
+          '-U',
+          '---user=USER',
+          String,
+          "ansible become user for the playbook"
+        ) do |value|
+          qb_options['user'] = value
         end
         
         add opts, role_options, role

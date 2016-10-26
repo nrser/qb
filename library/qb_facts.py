@@ -40,6 +40,8 @@ def main():
         try:
             value = subprocess.check_output(cmd).rstrip()
             facts[key] = value
+            # depreciated old name
+            facts[key[3:]] = value
         except subprocess.CalledProcessError as e:
             pass
     
@@ -58,10 +60,6 @@ def main():
         gem_info['gemspec_path'] = gemspec_path(qb_dir)
         
         facts['qb_gem_info'] = gem_info
-    
-    # depreciated namespaceless names
-    facts['git_user_name'] = facts['qb_git_user_name']
-    facts['git_user_email'] = facts['qb_git_user_email']
     
     changed = False
 
