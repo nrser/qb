@@ -275,7 +275,14 @@ def main args
     # the `gem` ansible module doesn't work right when the bunlder env vars 
     # are set... so we need to clear them.
     with_clean_env do
-      Cmds.stream! "ANSIBLE_ROLES_PATH=<%= roles_path %> ansible-playbook -i <%= hosts %> <%= playbook_path %>", 
+      template = []
+      template << "ANSIBLE_ROLES_PATH=<%= roles_path %> ansible-playbook"
+      if play['hosts'] != ['localhost']
+        template << "-i <%= hosts %>"
+      end
+      template << "<%= playbook_path %>"
+      
+      Cmds.stream! template.join(" "), 
         roles_path: ansible_roles_path,
         playbook_path: playbook_path.to_s,
         hosts: "#{ play['hosts'].join(',') },"
