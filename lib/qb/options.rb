@@ -177,6 +177,8 @@ module QB
                 "must provide type in qb metadata for option #{ option.meta_name }"
             when 'string'
               String
+            when 'array'
+              Array
             when Hash
               if option.meta['type'].key? 'one_of'
                 klass = Class.new
