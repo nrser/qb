@@ -1,0 +1,69 @@
+{
+  "passPerPreset": true,
+  
+  "presets": [
+    "stage-2",
+    "react",
+    "es2015"
+  ],
+  
+  "env": {
+    "development": {
+      "plugins": [
+        ["metalog", {
+          "strip": {
+            "labels": {
+              "trace": false
+            }
+          },
+          "extraLabels": [
+            "errorRefs",
+            "warnRefs",
+            "infoRefs",
+            "debugRefs",
+            "traceRefs",
+            "notif",
+            "errorNotif",
+            "warnNotif",
+            "infoNotif",
+            "debugNotif",
+            "traceNotif"
+          ]
+        }],
+        "syntax-flow",
+        "transform-export-extensions",
+        ["tcomb", {
+          "skipAsserts": true
+        }],
+        "transform-flow-strip-types"
+      ]
+    },
+  
+    "production": {
+      "plugins": [
+        ["metalog", {
+          "strip": true,
+          "extraLabels": [
+            "errorRefs",
+            "warnRefs",
+            "infoRefs",
+            "debugRefs",
+            "traceRefs",
+            "notif",
+            "errorNotif",
+            "warnNotif",
+            "infoNotif",
+            "debugNotif",
+            "traceNotif"
+          ]
+        }],
+        "syntax-flow",
+        "transform-export-extensions",
+        ["tcomb", {
+          "skipAsserts": true
+        }],
+        "transform-flow-strip-types"
+      ]
+    }
+  }
+}

@@ -1,0 +1,63 @@
+---
+# tasks file for nrser.js
+
+- name: add deps to package.json
+  state:
+    json:
+      key: "{{ npm_package_json_path }}:dependencies:{{ item.key }}"
+      set: "{{ item.value }}"
+      create: true
+  with_dict: "{{ nrser_js_deps }}"
+
+- name: add dev deps to package.json
+  state:
+    json:
+      key: "{{ npm_package_json_path }}:devDependencies:{{ item.key }}"
+      set: "{{ item.value }}"
+      create: true
+  with_dict: "{{ nrser_js_dev_deps }}"
+
+- name: "create {{ item }} dir"
+  file:
+    dest: "{{ qb_dir }}/{{ item }}"
+    state: directory
+  with_items:
+  - src
+  - test/src
+
+- name: "create {{ item }} file"
+  copy:
+    dest: "{{ qb_dir }}/{{ item }}"
+    content: ''
+  with_items:
+  - src/index.js
+  - test/src/index.tests.js
+
+- name: add .babelrc
+  copy:
+    src: .babelrc
+    dest: "{{ qb_dir }}/.babelrc"
+
+- name: add ughfile.js
+  copy:
+    src: ughfile.js
+    dest: "{{ qb_dir }}/ughfile.js"
+
+- name: add gulpfile.js
+  copy:
+    src: gulpfile.js
+    dest: "{{ qb_dir }}/gulpfile.js"
+
+- name: flow init
+  command: node_modules/.bin/flow init
+  args:
+    chdir: "{{ qb_dir }}"
+    creates: "{{ qb_dir }}/.flowconfig"
+
+- name: "ignore {{ item }}"
+  lineinfile:
+    line: "{{ item }}"
+    dest: "{{ qb_dir }}/.gitignore"
+  with_items:
+  - /lib
+  - /test/lib

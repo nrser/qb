@@ -1,0 +1,6 @@
+---
+qb.qb_role:
+  defaults: false
+  files: true
+  templates: false
+  vars: true

@@ -1,0 +1,17 @@
+---
+# meta file for nrser.js
+
+allow_duplicates: yes
+
+dependencies:
+- role: nrser.state_mate
+
+- role: qb.npm_package
+  
+- role: qb.npm_package
+  npm_package_main: lib/index.js
+  npm_package_scripts:
+    clean: gulp clean
+    build: "npm run clean && gulp babel"
+    test: "npm run build && gulp mocha"
+    watch: "npm run clean && gulp babel && gulp watch"
