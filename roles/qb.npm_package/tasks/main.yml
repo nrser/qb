@@ -25,3 +25,11 @@
     keywords: "{{ npm_package_keywords | to_json }}"
     license: "{{ npm_package_license }}"
     author: "{{ npm_package_author }}"
+
+- name: set package.json scripts
+  state:
+    json:
+      key: "{{ npm_package_json_path }}:scripts:{{ item.key }}"
+      set: "{{ item.value }}"
+      create: true
+  with_dict: "{{ npm_package_scripts }}"
