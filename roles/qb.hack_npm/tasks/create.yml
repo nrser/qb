@@ -5,7 +5,7 @@
   args:
     chdir: "{{ qb_dir }}"
 
-- name: add commit everything 
+- name: commit everything 
   command: git commit -m "init"
   args:
     chdir: "{{ qb_dir }}"

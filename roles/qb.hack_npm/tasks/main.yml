@@ -16,7 +16,7 @@
     
       vars = {}
       
-      # get the root of the git repot that we're operating from
+      # get the root of the git repo that we're operating from
       Dir.chdir qb_cwd do
         begin
           vars['repo_root'] = Cmds.out!('git rev-parse --show-toplevel').strip
@@ -38,6 +38,14 @@
       
       vars
 
+# - debug:
+#     msg:
+#       repo_root: "{{ hack_npm_repo_root }}"
+#       rel_dir: "{{ hack_npm_rel_dir }}"
+# 
+# - fail:
+#     msg: HERE
+
 - include: create.yml
   when: hack_npm_create
 
@@ -47,7 +55,7 @@
       git@github.com:{{ hack_npm_owner }}/{{ hack_npm_name }}.git
       {{ hack_npm_rel_dir }}
   args:
-    chdir: "{{ qb_cwd }}"
+    chdir: "{{ hack_npm_repo_root }}"
     creates: "{{ qb_dir }}"
 
 - name: add linking to dev/setup.yml

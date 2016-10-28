@@ -2,8 +2,6 @@
 # vars file for qb.hack_npm
 hack_npm_name: "{{ qb_dir | basename }}"
 hack_npm_owner: "{{ git_user_name }}"
-# hack_npm_dest_dir: "{{ qb_dir }}/dev/packages"
-# hack_npm_dest_path: "{{ hack_npm_dest_dir }}/{{ hack_npm_name }}"
 hack_npm_create: false
 
 # overrides
