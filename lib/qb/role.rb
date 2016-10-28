@@ -113,6 +113,38 @@ module QB
       role
     end
     
+    # get the include path for an included role based on the 
+    # option metadata that defines the include and the current
+    # include path.
+    # 
+    # @param role [Role]
+    #   the role to include.
+    # 
+    # @param option_meta [Hash]
+    #   the entry for the option in qb.yml
+    # 
+    # @param current_include_path [Array<string>]
+    # 
+    # @return [Array<string>]
+    #   include path for the included role.
+    # 
+    def self.get_include_path role, option_meta, current_include_path      
+      new_include_path = if option_meta.key? 'as'
+        case option_meta['as']
+        when nil, false
+          # include it in with the parent role's options
+          current_include_path
+        when String
+          current_include_path + [option_meta['as']]
+        else
+          raise MetadataError.new,
+            "bad 'as' value: #{ option_meta.inspect }"
+        end
+      else
+        current_include_path + [role.namespaceless]
+      end      
+    end
+    
     # instance methods
     # ================
     
@@ -187,12 +219,22 @@ module QB
     end
     
     # get the options from the metadata, defaulting to [] if none defined
-    def options
+    def option_metas
       meta_or ['options', 'opts', 'vars'], []
     end
     
-    # old name
-    alias_method :vars, :options
+    # get an array of Option for the role, including any included roles
+    def options include_path = []
+      option_metas.map {|option_meta|
+        if option_meta.key? 'include'
+          role_name = option_meta['include']
+          role = QB::Role.require role_name
+          role.options Role.get_include_path(role, option_meta, include_path)
+        else
+          QB::Options::Option.new self, option_meta, include_path
+        end
+      }.flatten
+    end
     
     # loads the defaults from vars/main.yml and defaults/main.yml,
     # caching by default. vars override defaults values.
@@ -235,6 +277,17 @@ module QB
       !!meta_or('mkdir', true)
     end
     
+    def usage
+      parts = ['qb', name]
+      options.each {|option|
+        if option.required?
+          parts << option.usage
+        end
+      }
+      parts << '[OPTIONS] DIRECTORY'
+      parts.join(' ')
+    end
+    
     # get the CLI banner for the role
     def banner
       lines = []
@@ -248,7 +301,8 @@ module QB
         lines << ''
       end
       lines << 'usage:'
-      lines << "  qb #{ name } [OPTIONS] DIRECTORY"
+      # lines << "  qb #{ name } [OPTIONS] DIRECTORY"
+      lines << "  #{ usage }"
       lines << ''
       lines << 'options:'
       
@@ -270,6 +324,6 @@ module QB
         end
       end
       default
-    end
-  end
-end
+    end # meta_or
+  end # Role
+end # QB
