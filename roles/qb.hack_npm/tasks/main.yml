@@ -58,25 +58,25 @@
     chdir: "{{ hack_npm_repo_root }}"
     creates: "{{ qb_dir }}"
 
-- name: add linking to dev/setup.yml
-  # - name: npm link nrser.js for jash so it can build
-  #   tags:
-  #   - npm-link
-  #   command: npm link ../nrser.js
-  #   args:
-  #     chdir: "{{ dev_setup_project_root }}/packages/{{ item }}"
-  #   with_items:
-  #   - jash
-  state:
-    debug: w
-    yaml:
-      key: "{{ qb_cwd }}/dev/setup.yml:0:tasks"
-      array_contains:
-        name: "npm link {{ hack_npm_rel_dir }}"
-        tags:
-        - npm-link
-        command: "npm link {{ hack_npm_rel_dir }}"
-        args:
-          chdir: "{{ '{{ dev_setup_project_root }}' }}"
-      create: true
+# - name: add linking to dev/setup.yml
+#   # - name: npm link nrser.js for jash so it can build
+#   #   tags:
+#   #   - npm-link
+#   #   command: npm link ../nrser.js
+#   #   args:
+#   #     chdir: "{{ dev_setup_project_root }}/packages/{{ item }}"
+#   #   with_items:
+#   #   - jash
+#   state:
+#     debug: w
+#     yaml:
+#       key: "{{ qb_cwd }}/dev/setup.yml:0:tasks"
+#       array_contains:
+#         name: "npm link {{ hack_npm_rel_dir }}"
+#         tags:
+#         - npm-link
+#         command: "npm link {{ hack_npm_rel_dir }}"
+#         args:
+#           chdir: "{{ '{{ dev_setup_project_root }}' }}"
+#       create: true
       
