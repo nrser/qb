@@ -1,4 +1,8 @@
 const gulp = require('gulp');
-const ugh = require('./ughfile');
+const Ugh = require('nrser/lib/ugh').Ugh;
 
-ugh.createGulpTasks(gulp);
+const ugh = new Ugh({gulp, packageDir: __dirname});
+
+ugh.autoTasks();
+
+module.exports = ugh;

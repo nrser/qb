@@ -43,5 +43,11 @@ options:
 #   type: boolean # boolean (default) | string
 #   short: e
 
+- name: yarn
+  description: use yarn node package manager instead of npm
+  required: false
+  type: boolean
+  short: y
+
 - include: qb.npm_package
   as: package
