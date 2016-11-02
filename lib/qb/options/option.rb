@@ -71,7 +71,10 @@ module QB
       end
       
       def boolean?
-        ['boolean', 'bool'].include? meta['type'].downcase
+        (
+          meta['type'].is_a?(String) &&
+          ['boolean', 'bool'].include?(meta['type'].downcase)
+        )
       end
       
       def usage
