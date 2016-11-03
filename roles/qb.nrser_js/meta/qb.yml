@@ -43,9 +43,13 @@ options:
 #   type: boolean # boolean (default) | string
 #   short: e
 
+- name: install
+  description: run npm or yarn install
+  type: boolean
+  short: i
+
 - name: yarn
   description: use yarn node package manager instead of npm
-  required: false
   type: boolean
   short: y
 

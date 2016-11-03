@@ -51,22 +51,22 @@
   - /lib
   - /test/lib
 
+- name: add .flowconfig
+  copy:
+    src: .flowconfig
+    dest: "{{ qb_dir }}/.flowconfig"
+
 - name: npm install
-  when: "{{ nrser_js_yarn == false }}"
+  when: "{{ nrser_js_install == true and nrser_js_yarn == false }}"
   command: npm install
   args:
     chdir: "{{ qb_dir }}"
     creates: "{{ qb_dir }}/node_modules"
 
 - name: yarn install
-  when: "{{ nrser_js_yarn == true}}"
+  when: "{{ nrser_js_install == true and nrser_js_yarn == true}}"
   command: yarn
   args:
     chdir: "{{ qb_dir }}"
     creates: "{{ qb_dir }}/node_modules"
-
-- name: flow init
-  command: ./node_modules/.bin/flow init
-  args:
-    chdir: "{{ qb_dir }}"
-    creates: "{{ qb_dir }}/.flowconfig"
+    

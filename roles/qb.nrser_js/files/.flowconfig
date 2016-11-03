@@ -1,0 +1,18 @@
+[ignore]
+
+[include]
+
+[libs]
+
+[options]
+# support babel-plugin-transform-class-properties (in stage 2 preset)
+esproposal.class_static_fields=enable
+
+# support babel-plugin-transform-export-extensions
+esproposal.export_star_as=enable
+
+# it sucks not to able to use getters and setters... safety be damned.
+unsafe.enable_getters_and_setters=true
+
+# uncomment if you need dynamic requires
+# module.ignore_non_literal_requires=true
