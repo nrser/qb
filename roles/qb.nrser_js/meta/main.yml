@@ -12,6 +12,6 @@ dependencies:
   npm_package_main: lib/index.js
   npm_package_scripts:
     clean: gulp clean
-    build: "npm run clean && gulp babel"
-    test: "npm run build && gulp mocha"
-    watch: "npm run clean && gulp babel && gulp watch"
+    build: "gulp build"
+    test: "gulp mocha"
+    watch: "gulp watch"
