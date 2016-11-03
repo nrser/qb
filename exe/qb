@@ -16,7 +16,7 @@ require 'qb'
 ROOT = QB::ROOT
 ROLES_DIR = QB::ROLES_DIR
 ROLES = Pathname.glob(ROLES_DIR + 'qb.*').map {|path| path.basename.to_s}
-DEBUG_ARGS = ['-D', '--debug']
+DEBUG_ARGS = ['-D', '--DEBUG']
 TMP_DIR = ROOT + 'tmp'
 
 # globals
@@ -236,7 +236,7 @@ def main args
   
   debug "playbook", playbook
   
-  playbook_path = ROOT + '.qb-playbook.yml'
+  playbook_path = Pathname.new(Dir.getwd) + '.qb-playbook.yml'
   debug playbook_path: playbook_path.to_s
   
   playbook_path.open('w') do |f|
@@ -268,34 +268,50 @@ def main args
   tmp_roles_path = QB::ROOT + 'tmp' + 'roles'
   
   ansible_roles_path = (
-    [tmp_roles_path] +
-    QB::Role.search_path
+    [
+      role.path.expand_path.dirname,
+      tmp_roles_path
+    ] + QB::Role.search_path
   ).join(':')
   
-  Dir.chdir ROOT do
-    # install requirements
-    # unless (TMP_DIR + 'roles').directory?
-    #   with_clean_env do
-    #     Cmds.stream! "ANSIBLE_ROLES_PATH=<%= roles_path %> ansible-galaxy install --ignore-errors -r <%= req_path%>",
-    #       req_path: (ROOT + 'requirements.yml'),
-    #       roles_path: tmp_roles_path.to_s
-    #   end
-    # end
-    
-    # the `gem` ansible module doesn't work right when the bunlder env vars 
+  ansible_library_path = [
+    ROOT + 'library',
+  ].join(':')
+  
+  Dir.chdir QB::ROOT do
+    # the `gem` ansible module doesn't work right when the bundler env vars 
     # are set... so we need to clear them.
     with_clean_env do
       template = []
-      template << "ANSIBLE_ROLES_PATH=<%= roles_path %> ansible-playbook"
+      template << "ANSIBLE_ROLES_PATH=<%= roles_path %>"
+      template << "ANSIBLE_LIBRARY=<%= library_path %>"
+      template << "ansible-playbook"
+      
       if play['hosts'] != ['localhost']
         template << "-i <%= hosts %>"
       end
+      
+      if qb_options['tags']
+        template << "--tags=<%= tags %>"
+      end
+      
+      if qb_options['verbose']
+        template << "-#{ 'v' * qb_options['verbose'] }"
+      end
+      
       template << "<%= playbook_path %>"
       
-      status = Cmds.stream template.join(" "), 
+      cmd = Cmds.sub template.join(" "), [], {
         roles_path: ansible_roles_path,
+        library_path: ansible_library_path,
         playbook_path: playbook_path.to_s,
-        hosts: "#{ play['hosts'].join(',') },"
+        hosts: "#{ play['hosts'].join(',') },",
+        tags: (qb_options['tags'] ? qb_options['tags'].join(',') : nil),
+      }
+      
+      puts "COMMAND: #{ cmd }"
+      
+      status = Cmds.stream cmd
       
       if status != 0
         puts "ERROR ansible-playbook failed."

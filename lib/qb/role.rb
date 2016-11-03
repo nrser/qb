@@ -97,6 +97,14 @@ module QB
     
     # find exactly one matching role for the input string or raise.
     def self.require input
+      
+      as_pathname = Pathname.new(input)
+        
+      # allow a path to a role dir
+      if role_dir? as_pathname
+        return Role.new as_pathname
+      end
+      
       matches = self.matches input
       
       role = case matches.length

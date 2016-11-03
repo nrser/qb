@@ -196,11 +196,25 @@ module QB
           qb_options['user'] = value
         end
         
-        add opts, role_options, role
+        opts.on(
+          '-T',
+          '--TAGS=TAGS',
+          Array,
+          "playbook tags",
+        ) do |value|
+          qb_options['tags'] = value
+        end
         
-        opts.on_tail("-h", "--help", "Show this message") do
-          puts opts
-          exit
+        opts.on(
+          '-V',
+          '--VERBOSE[=LEVEL]',
+          "run playbook in verbose mode"
+        ) do |value|
+          qb_options['verbose'] = if value.nil?
+            1
+          else
+            value.to_i
+          end
         end
       end
       
