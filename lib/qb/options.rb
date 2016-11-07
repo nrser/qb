@@ -216,6 +216,13 @@ module QB
             value.to_i
           end
         end
+        
+        add opts, role_options, role
+        
+        opts.on_tail("-h", "--help", "Show this message") do
+          puts opts
+          exit
+        end
       end
       
       opt_parser.parse! args
