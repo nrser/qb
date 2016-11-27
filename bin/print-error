@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+# parses and prints a fatal error out of ansible-playbook output
+# 
+# usage:
+# 
+#     qb some_role . | print-error
+# 
+
+require 'json'
+require 'pp'
+
+out = STDIN.read
+
+json = out[/FAILED\!\ \=\>\ (\{.*\})\n/, 1]
+
+data = JSON.load json
+stderr = data['module_stderr']
+
+# pp data
+
+puts "STDERR:\n\n"
+
+puts stderr
