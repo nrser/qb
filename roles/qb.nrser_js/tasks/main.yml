@@ -5,7 +5,7 @@
   state:
     json:
       key: "{{ npm_package_json_path }}:dependencies:{{ item.key }}"
-      set: "{{ item.value }}"
+      init: "{{ item.value }}"
       create: true
   with_dict: "{{ nrser_js_deps }}"
 
@@ -13,7 +13,7 @@
   state:
     json:
       key: "{{ npm_package_json_path }}:devDependencies:{{ item.key }}"
-      set: "{{ item.value }}"
+      init: "{{ item.value }}"
       create: true
   with_dict: "{{ nrser_js_dev_deps }}"
 

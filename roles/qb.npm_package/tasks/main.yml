@@ -30,6 +30,5 @@
   state:
     json:
       key: "{{ npm_package_json_path }}:scripts:{{ item.key }}"
-      set: "{{ item.value }}"
-      create: true
+      init: "{{ item.value }}"
   with_dict: "{{ npm_package_scripts }}"

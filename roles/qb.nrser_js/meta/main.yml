@@ -5,13 +5,8 @@ allow_duplicates: yes
 
 dependencies:
 - role: nrser.state_mate
-
-- role: qb.npm_package
   
 - role: qb.npm_package
   npm_package_main: lib/index.js
-  npm_package_scripts:
-    clean: gulp clean
-    build: "gulp build"
-    test: "gulp mocha"
-    watch: "gulp watch"
+  npm_package_scripts: "{{ nrser_js_package_scripts }}"
+  
