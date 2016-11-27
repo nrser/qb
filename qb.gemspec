@@ -43,7 +43,7 @@ Gem::Specification.new do |spec|
   
   spec.add_dependency "cmds",'~> 0.0', ">= 0.0.9"
   spec.add_dependency "nrser-extras", '~> 0.0', ">= 0.0.3"
-  spec.add_dependency "state_mate", '~> 0.0', ">= 0.0.8"
+  spec.add_dependency "state_mate", '~> 0.0', ">= 0.0.9"
   
   
   if QB::VERSION.end_with? '.dev'
