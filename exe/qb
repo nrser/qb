@@ -125,6 +125,8 @@ def main args
   set_debug! args
   debug args: args
   
+  QB.check_ansible_version
+  
   role_arg = args.shift
   debug "role arg" => role_arg
   
@@ -248,11 +250,12 @@ def main args
     'vars' => playbook_vars,
     'pre_tasks' => [
       # need ansible 2.1.2.0 at least to run
-      {
-        'assert' => {
-          'that' => "'ansible 2.1.2' in lookup('pipe', 'ansible --version')",
-        },
-      },
+      # but this is obviously not flexible enough
+      # {
+      #   'assert' => {
+      #     'that' => "'ansible 2.1.2' in lookup('pipe', 'ansible --version')",
+      #   },
+      # },
       {
         'qb_facts' => {
           'qb_dir' => dir,

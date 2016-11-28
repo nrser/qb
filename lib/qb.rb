@@ -5,6 +5,7 @@ require "qb/version"
 module QB
   ROOT = (Pathname.new(__FILE__).dirname + '..').expand_path
   ROLES_DIR = ROOT + 'roles'
+  MIN_ANSIBLE_VERSION = Gem::Version.new '2.1.2'
   
   class Error < StandardError
   end
@@ -84,6 +85,28 @@ module QB
       else
         raise "not sure to process '#{ key }' in metea/qb.yml"
       end
+    end
+  end # get_default_dir
+  
+  def self.check_ansible_version
+    out = Cmds.out! 'ansible --version'
+    version_str = out[/ansible\ ([\d\.]+)/, 1]
+    
+    if version_str.nil?
+      raise NRSER.dedent <<-END
+        could not parse ansible version from `ansible --version` output:
+        
+        #{ out }
+      END
+    end
+    
+    version = Gem::Version.new version_str
+    
+    if version < QB::MIN_ANSIBLE_VERSION
+      raise NRSER.squish <<-END
+        qb #{ QB::VERSION } requires ansible #{ QB::MIN_ANSIBLE_VERSION },
+        found version #{ version_str } at #{ `which ansible` }
+      END
     end
   end
 end
