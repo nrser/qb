@@ -9,7 +9,7 @@
 
 - name: modify .gitignore
   blockinfile:
-    content: "{{ lookup('file', './files/gitignore/' + gitignore_name + '.gitignore') }}"
+    content: "{{ lookup('file', 'gitignore/' + gitignore_name + '.gitignore') }}"
     dest: "{{ qb_dir }}/.gitignore"
     beginmarker: |
       {{ '#' * 78 }}
