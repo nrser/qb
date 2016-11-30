@@ -248,6 +248,8 @@ def main args
   {
     'hosts' => qb_options['hosts'],
     'vars' => playbook_vars,
+    # 'gather_subset' => ['!all'],
+    'gather_facts' => qb_options['facts'],
     'pre_tasks' => [
       # need ansible 2.1.2.0 at least to run
       # but this is obviously not flexible enough

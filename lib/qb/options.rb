@@ -168,6 +168,7 @@ module QB
       
       qb_options = {
         'hosts' => ['localhost'],
+        'facts' => false,
       }
       
       if role.meta['default_user']
@@ -215,6 +216,14 @@ module QB
           else
             value.to_i
           end
+        end
+        
+        opts.on(
+          '-F',
+          '--FACTS',
+          "gather facts (often un-needed)",
+        ) do |value|
+          qb_options['facts'] = value
         end
         
         add opts, role_options, role
