@@ -137,14 +137,14 @@ module QB
           end
           
           if role.defaults.key? option.var_name
-            on_args << if option.meta['type'] == 'boolean'
-              if role.defaults[option.var_name]
+            if option.meta['type'] == 'boolean'
+              on_args << if role.defaults[option.var_name]
                 "DEFAULT: --#{ option.cli_name }"
               else
                 "DEFAULT: --no-#{ option.cli_name }"
               end
-            else
-              "DEFAULT: #{ role.defaults[option.var_name] }"
+            elsif !role.defaults[option.var_name].nil?
+              on_args << "DEFAULT: #{ role.defaults[option.var_name] }"
             end
           end
           
