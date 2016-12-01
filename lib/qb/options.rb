@@ -66,10 +66,7 @@ module QB
           # create an option
           option = Option.new role, option_meta, include_path
           
-          # this dictates whether or not the option's *argument* is required.
-          # we always require the argument, except in the case of boolean
-          # options or options that accept false.
-          on_args = [:REQUIRED]
+          on_args = []
           
           if option.meta['type'] == 'boolean'
             # don't use short names when included (for now)
