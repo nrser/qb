@@ -1,10 +1,10 @@
 module QB
-  module Options
+  class Options
     class Option
       
       
       # the role that this option is for
-      # attr_reader :role
+      attr_reader :role
       
       # the entry from the qb metadata for this option
       attr_reader :meta
@@ -26,7 +26,7 @@ module QB
       attr_accessor :value
       
       def initialize role, meta, include_path
-        # @role = WeakRef.new role
+        @role = role
         @meta = meta
         @include_path = include_path
         
@@ -83,6 +83,10 @@ module QB
         else
           "--#{ cli_name }=#{ meta_name.upcase }"
         end
+      end
+      
+      def cli_short_name
+        meta['short']
       end
       
       private

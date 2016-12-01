@@ -3,7 +3,7 @@ require 'optparse'
 require_relative "options/option"
 
 module QB
-  module Options
+  class Options
     # errors
     # ======
     
@@ -238,5 +238,61 @@ module QB
       
       [role_options, qb_options]
     end # parse!
+    
+    def initialize role, args
+      @role = role
+      @input_args = args
+      @options = []
+      @cli_names = Hash.new {|h, k| h[k] = []}
+    end
+    
+    private
+    
+    def include_role include_meta, include_path
+      role_name = include_meta['include']
+      role = QB::Role.require role_name
+      new_include_path = if include_meta.key? 'as'
+        case include_meta['as']
+        when nil, false
+          # include it in with the parent role's options
+          include_path
+        when String
+          include_path + [include_meta['as']]
+        else
+          raise MetadataError.new,
+            "bad 'as' value: #{ include_meta.inspect }"
+        end
+      else
+        include_path + [role.namespaceless]
+      end
+      
+      QB.debug "including #{ role.name } as #{ new_include_path.join('-') }"
+      
+      add role, new_include_path
+    end
+    
+    def add role, include_path = []
+      QB.debug "adding options for #{ role.name }..."
+      
+      role.option_metas.each do |option_meta|
+        if option_meta.key? 'include'
+          include_role option_meta, include_path
+          
+        else
+          # create an option
+          option = Option.new role, option_meta, include_path
+          
+          # add it to @options
+          @options << option
+          
+          # add a reference to it by it's cli names
+          @cli_names[option.cli_name] << option
+          unless option.cli_short_name.nil?
+            @cli_name[option.cli_short_name] << option
+          end
+          
+        end
+      end
+    end
   end # Options
 end # QB
