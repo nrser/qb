@@ -51,6 +51,7 @@ module QB
       [
         QB::ROLES_DIR,
         Pathname.new(Dir.getwd).join('roles'),
+        Pathname.new(Dir.getwd).join('ansible', 'roles'),
         Pathname.new(Dir.getwd).join('dev', 'roles'),
         Pathname.new(Dir.getwd).join('dev', 'roles', 'tmp'),
       ]
