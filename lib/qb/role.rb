@@ -61,7 +61,7 @@ module QB
     def self.available
       search_path.
         select {|search_dir|
-          # make sure it's there (and a direcotry)
+          # make sure it's there (and a directory)
           search_dir.directory?
         }.
         map {|search_dir|
