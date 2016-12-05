@@ -28,4 +28,18 @@ describe QB::Util do
       expect(f.("./ansible/roles/nrser.substring", 'n.subs')).to be true
     end
   end # .words_start_with?
+  
+  describe '.resolve' do
+    f = QB::Util.method :resolve
+    
+    it "resolves against pwd by default" do
+      expect(f.()).to eq Pathname.pwd
+      expect(f.('x')).to eq Pathname.pwd.join('x') 
+    end
+    
+    it "resolves abs path to itself" do
+      expect(f.('/usr/bin')).to eq Pathname.new('/usr/bin')
+      expect(f.('/etc', '/usr/bin')).to eq Pathname.new('/usr/bin')
+    end
+  end # .resolve
 end # QB::Util
