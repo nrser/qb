@@ -81,6 +81,8 @@ module QB
     
     # get an array of QB::Role that match an input string
     def self.matches input
+      available = self.available
+      
       available.each {|role|
         # exact match to relative path
         return [role] if role.rel_path.to_s == input
@@ -90,12 +92,27 @@ module QB
       }.each {|role|
         # exact match without the namespace prefix ('qb.' or similar)
         return [role] if role.namespaceless == input
-      }.select {|role|
-        # select any that word match
-        QB::Util.words_start_with? role.rel_path.to_s, input
-      }.tap {|matches|
-        QB.debug "role matches" => matches
       }
+      
+      # see if we prefix match any full names
+      name_prefix_matches = available.select {|role|
+        role.name.start_with? input
+      }
+      return name_prefix_matches unless name_prefix_matches.empty?
+      
+      # see if we prefix match any name
+      namespaceless_prefix_matches = available.select {|role|
+        role.namespaceless.start_with? input
+      }
+      unless namespaceless_prefix_matches.empty?
+        return namespaceless_prefix_matches 
+      end
+      
+      # see if we word match any names
+      name_word_matches = available.select {|role|
+        QB::Util.words_start_with? role.name, input
+      }
+      return name_word_matches unless name_word_matches.empty?
     end
     
     # find exactly one matching role for the input string or raise.
