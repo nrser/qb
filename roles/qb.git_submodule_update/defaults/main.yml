@@ -1,0 +1,3 @@
+---
+# defaults file for qb.git_submodule_update
+git_submodule_update_dir: "{{ qb_dir }}"

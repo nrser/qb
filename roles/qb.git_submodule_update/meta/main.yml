@@ -1,0 +1,8 @@
+---
+# meta file for qb.git_submodule_update
+
+allow_duplicates: yes
+
+dependencies: []
+# - role: role-name
+

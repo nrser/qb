@@ -1,0 +1,11 @@
+---
+# tasks file for qb.git_submodule_update
+
+- name: update submodules
+  command: git submodule update --init
+  args:
+    chdir: "{{ git_submodule_update_dir }}"
+
+- name: checkout branch for any commits that are exactly one head
+  git_submodule_update:
+    dir: "{{ git_submodule_update_dir }}"

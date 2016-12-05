@@ -1,0 +1,167 @@
+#!/usr/bin/env ruby
+
+#!/usr/bin/env ruby
+# WANT_JSON
+
+# init bundler in dev env
+if ENV['QB_DEV_ENV']
+  ENV.each {|k, v|
+    if k.start_with? 'QB_DEV_ENV_'
+      ENV[k.sub('QB_DEV_ENV_', '')] = v
+    end
+  }
+  require 'bundler/setup'
+end
+
+require 'qb'
+require 'cmds'
+require 'nrser'
+
+class GitSubmoduleUpdate < QB::AnsibleModule
+  def main_dir
+    File.realpath @args['dir']
+  end
+  
+  def resolve *path
+    QB::Util.resolve main_dir, *path
+  end
+  
+  def submodules
+    out = Dir.chdir main_dir do
+      Cmds.out! "git submodule"
+    end
+    
+    out.lines.map {|line|
+      match = line.match /([0-9a-f]{40})\s(\S+)\s/
+      commit = match[1]
+      rel_dir = match[2]
+      dir = resolve rel_dir
+      
+      {
+        commit: commit,
+        dir: dir,
+        rel_dir: rel_dir,
+        detached: detached?(dir),
+        dirty: dirty?(dir),
+      }
+    }
+  end
+  
+  def dirty? repo_dir
+    Dir.chdir repo_dir do
+      !Cmds.out!("git status --porcelain").empty?
+    end
+  end
+  
+  def detached? repo_dir
+    Dir.chdir repo_dir do
+      out = Cmds.out! "git branch"
+      
+      !!(out.lines[0].match /\*\ \(HEAD\ detached\ at [0-9a-f]{7}\)/)
+    end
+  end
+  
+  def branch_heads repo_dir
+    Dir.chdir repo_dir do
+      Cmds.out!("git show-ref").lines.map {|line|
+        m = line.match(/([0-9a-f]{40})\s+(\S+)\s/)
+        commit = m[1]
+        ref = m[2]
+        
+        {
+          commit: commit,
+          ref: ref,
+        }
+      }
+    end
+  end
+  
+  def branch_heads_for_commit submodule
+    branch_heads(submodule[:dir]).select {|branch_head|
+      branch_head[:commit] == submodule[:commit]
+    }.reject {|branch_head| branch_head[:ref].end_with? 'HEAD'}
+  end
+  
+  def attach! submodule
+    branch_heads = branch_heads_for_commit submodule
+    branch_head = nil
+    
+    case branch_heads.length
+    when 0
+      # commit does not point to any branch heads - which means it's
+      # probably a commit in a branch that's behind the head
+      # 
+      # we could figure out which branch it's in but we don't want to
+      # automatically update it because that might break shit.
+      # 
+      # do nothing
+      return false
+    when 1
+      # commit is head of only one branch
+      branch_head = branch_heads[0]
+    else
+      # commit is head of multiple branches
+      local = branch_heads.select {|bh| bh[:ref].start_with? 'refs/heads'}
+      
+      case local.length
+      when 0
+        # commit is head of multiple remote branches
+        # see if one is master
+        branch_head = branch_heads.find {|bh| bh[:ref].end_with? 'master'}
+        
+        # if none do we're hosed - not sure which one it should be on
+        if branch_head.nil?
+          raise NRSER.squish <<-END
+            submodule #{ submodule[:rel_dir] } points to commit
+            #{ submodule[:commit] } that heads multiple non-master remote
+            branches: #{ branch_heads.map {|bh| bh[:ref]} }
+          END
+        end
+        
+      when 1
+        # the commit is head of one local branch, use it
+        branch_head = local[0]
+      
+      else
+        # the commit heads multiple local branches
+        # again, see if one is master
+        branch_head = local.find {|b| b[:ref].end_with? 'master'}
+        
+        # if none do we're hosed - not sure which one it should be on
+        if branch_head.nil?
+          raise NRSER.squish <<-END
+            submodule #{ submodule[:rel_dir] } points to commit
+            #{ submodule[:commit] } that heads multiple non-master local
+            branches: #{ local.map {|bh| bh[:ref]} }
+          END
+        end
+      end # case
+    end
+    
+    branch = branch_head[:ref].split('/')[-1]
+    
+    Dir.chdir submodule[:dir] do
+      # checkout the branch
+      Cmds! "git checkout <%= branch %>", branch: branch
+      
+      # do a pull if the head was on the remote
+      if branch_head[:ref].start_with? 'refs/remotes'
+        Cmds! "git pull origin <%= branch %>", branch: branch
+      end
+    end
+    
+    @changed = true
+  end
+  
+  def main
+    submodules.select {|sub|
+      sub[:detached]
+    }.each {|sub|
+      attach! sub
+    }
+    
+    nil
+  end
+end
+
+GitSubmoduleUpdate.new.run
