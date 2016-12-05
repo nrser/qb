@@ -37,5 +37,18 @@ module QB
       # no match
       false
     end # .match_words?
+    
+    # @return [Pathname] absolute resolved path.
+    def self.resolve *segments
+      joined = Pathname.new ''
+      
+      ([Dir.pwd] + segments).reverse.each_with_index {|segment, index|
+        joined = Pathname.new(segment).join joined
+        return joined if joined.absolute?
+      }
+      
+      # shouldn't ever happen
+      raise "resolution failed: #{ segments.inspect }"
+    end
   end # Util
 end # QB

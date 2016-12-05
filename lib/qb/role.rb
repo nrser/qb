@@ -1,5 +1,6 @@
 require 'yaml'
 require 'cmds'
+require 'parseconfig'
 
 module QB
   class Role
@@ -46,15 +47,43 @@ module QB
       ['qb.yml', 'qb'].any? {|filename| pathname.join('meta', filename).file?}
     end
     
-    # array of Pathname places to look for role dirs.
+    # get role paths from ansible.cfg if it exists in a directory.
+    # 
+    # @param dir [Pathname] directory to look for ansible.cfg in.
+    # 
+    # @return [Array<String>] role paths
+    # 
+    def self.cfg_roles_path dir
+      path = dir.join 'ansible.cfg'
+      
+      if path.file?
+        config = ParseConfig.new path.to_s
+        config['defaults']['roles_path'].split(':').map {|path|
+          QB::Util.resolve dir, path
+        }
+      else
+        []
+      end
+    end
+    
+    # @param dir [Pathname] dir to include.
+    def self.roles_paths dir
+      cfg_roles_path(dir) + [
+        dir.join('roles'),
+        dir.join('roles', 'tmp')
+      ]
+    end
+    
+    # @return [Array<Pathname>] places to look for role dirs.
     def self.search_path
       [
-        QB::ROLES_DIR,
-        Pathname.new(Dir.getwd).join('roles'),
-        Pathname.new(Dir.getwd).join('ansible', 'roles'),
-        Pathname.new(Dir.getwd).join('dev', 'roles'),
-        Pathname.new(Dir.getwd).join('dev', 'roles', 'tmp'),
-      ]
+        QB::ROOT,
+        QB::Util.resolve,
+        QB::Util.resolve('ansible'),
+        QB::Util.resolve('dev'),
+      ].map {|dir|
+        roles_paths dir
+      }.flatten
     end
     
     # array of QB::Role found in search path.

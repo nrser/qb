@@ -2,6 +2,7 @@ require 'nrser/extras'
 
 require "qb/version"
 require "qb/util"
+require "qb/ansible_module"
 
 module QB
   ROOT = (Pathname.new(__FILE__).dirname + '..').expand_path
