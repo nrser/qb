@@ -1,6 +1,7 @@
 require 'nrser/extras'
 
 require "qb/version"
+require "qb/util"
 
 module QB
   ROOT = (Pathname.new(__FILE__).dirname + '..').expand_path
