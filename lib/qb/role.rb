@@ -113,6 +113,8 @@ module QB
         QB::Util.words_start_with? role.name, input
       }
       return name_word_matches unless name_word_matches.empty?
+      
+      []
     end
     
     # find exactly one matching role for the input string or raise.
