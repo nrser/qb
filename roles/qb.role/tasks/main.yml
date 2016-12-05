@@ -115,3 +115,14 @@
     dest: "{{ dir }}/vars/main.yml"
     force: "{{ role_force }}"
   when: role_vars
+
+# readme
+# ======
+
+- name: create README.md
+  template:
+    src: README.md.j2
+    dest: "{{ dir }}/README.md"
+    force: "{{ role_force }}"
+  when: role_readme
+  

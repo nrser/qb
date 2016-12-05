@@ -9,6 +9,7 @@ role_meta: true
 role_tasks: true
 role_templates: false
 role_vars: false
+role_readme: false
 
 # galaxy
 role_galaxy: false

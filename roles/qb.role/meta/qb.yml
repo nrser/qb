@@ -62,6 +62,11 @@ vars:
   description: include galaxy info in meta/main.yml
   short: g
 
+- name: readme
+  type: boolean
+  description: include README.md
+  short: r
+
 - name: project
   type: boolean
   description: create a project repo for this role
