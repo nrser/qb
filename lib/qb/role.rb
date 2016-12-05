@@ -69,6 +69,8 @@ module QB
           search_dir.children.select {|child| role_dir? child }
         }.
         flatten.
+        # should allow uniq to remove dups
+        map {|role_dir| role_dir.realpath }.
         # needed when qb is run from the qb repo since QB::ROLES_DIR and
         # ./roles are the same dir
         uniq.
