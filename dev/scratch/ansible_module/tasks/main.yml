@@ -1,0 +1,9 @@
+---
+# tasks file for ansible_module
+
+- name: test QB::AnsibleModule
+  test:
+    x: ex
+
+- debug:
+    msg: "{{ blah }}"
