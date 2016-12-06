@@ -5,14 +5,14 @@
 
 - name: create defaults directory
   file:
-    path: "{{ dir }}/defaults"
+    path: "{{ role_dest }}/defaults"
     state: directory
   when: role_defaults
 
 - name: create defaults/main.yml
   template:
     src: defaults/main.yml.j2
-    dest: "{{ dir }}/defaults/main.yml"
+    dest: "{{ role_dest }}/defaults/main.yml"
     force: "{{ role_force }}"
   when: role_defaults
 
@@ -21,7 +21,7 @@
 
 - name: create files directory
   file:
-    path: "{{ dir }}/files"
+    path: "{{ role_dest }}/files"
     state: directory
   when: role_files
 
@@ -30,7 +30,7 @@
 - name: create a .gitkeep in the files directory
   copy:
     content: ""
-    dest: "{{ dir }}/files/.gitkeep"
+    dest: "{{ role_dest }}/files/.gitkeep"
     force: "{{ role_force }}"
   when: role_files
 
@@ -39,14 +39,14 @@
 
 - name: create handlers directory
   file:
-    path: "{{ dir }}/handlers"
+    path: "{{ role_dest }}/handlers"
     state: directory
   when: role_handlers
 
 - name: create handlers/main.yml
   template:
     src: handlers/main.yml.j2
-    dest: "{{ dir }}/handlers/main.yml"
+    dest: "{{ role_dest }}/handlers/main.yml"
     force: "{{ role_force }}"
   when: role_handlers
 
@@ -55,14 +55,14 @@
 
 - name: create meta directory
   file:
-    path: "{{ dir }}/meta"
+    path: "{{ role_dest }}/meta"
     state: directory
   when: role_meta
 
 - name: create meta/main.yml
   template:
     src: meta/main.yml.j2
-    dest: "{{ dir }}/meta/main.yml"
+    dest: "{{ role_dest }}/meta/main.yml"
     force: "{{ role_force }}"
   when: role_meta
 
@@ -71,14 +71,14 @@
 
 - name: create tasks directory
   file:
-    path: "{{ dir }}/tasks"
+    path: "{{ role_dest }}/tasks"
     state: directory
   when: role_tasks
 
 - name: create tasks/main.yml
   template:
     src: tasks/main.yml.j2
-    dest: "{{ dir }}/tasks/main.yml"
+    dest: "{{ role_dest }}/tasks/main.yml"
     force: "{{ role_force }}"
   when: role_tasks
 
@@ -87,7 +87,7 @@
 
 - name: create templates directory
   file:
-    path: "{{ dir }}/templates"
+    path: "{{ role_dest }}/templates"
     state: directory
   when: role_templates
 
@@ -96,7 +96,7 @@
 - name: create a .gitkeep in the templates directory
   copy:
     content: ""
-    dest: "{{ dir }}/templates/.gitkeep"
+    dest: "{{ role_dest }}/templates/.gitkeep"
     force: "{{ role_force }}"
   when: role_templates
 
@@ -105,14 +105,14 @@
 
 - name: create vars directory
   file:
-    path: "{{ dir }}/vars"
+    path: "{{ role_dest }}/vars"
     state: directory
   when: role_vars
 
 - name: create vars/main.yml
   template:
     src: vars/main.yml.j2
-    dest: "{{ dir }}/vars/main.yml"
+    dest: "{{ role_dest }}/vars/main.yml"
     force: "{{ role_force }}"
   when: role_vars
 
@@ -122,7 +122,23 @@
 - name: create README.md
   template:
     src: README.md.j2
-    dest: "{{ dir }}/README.md"
+    dest: "{{ role_dest }}/README.md"
     force: "{{ role_force }}"
   when: role_readme
+
+# library
+# =======
+
+- name: create library directory
+  file:
+    path: "{{ role_dest }}/library"
+    state: directory
+  when: role_library
+
+- name: create a .gitkeep in the library directory
+  copy:
+    content: ""
+    dest: "{{ role_dest }}/library/.gitkeep"
+    force: "{{ role_force }}"
+  when: role_library
   

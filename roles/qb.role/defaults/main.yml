@@ -1,7 +1,8 @@
 ---
+role_dest: "{{ qb_dir }}"
 role_force: false
 # can't be named `role_name` 'cause ansible sets that?
-role_role_name: "{{ dir | basename }}"
+role_role_name: "{{ role_dest | basename }}"
 role_defaults: true
 role_files: false
 role_handlers: false
@@ -10,6 +11,7 @@ role_tasks: true
 role_templates: false
 role_vars: false
 role_readme: false
+role_library: false
 
 # galaxy
 role_galaxy: false

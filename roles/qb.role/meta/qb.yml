@@ -67,6 +67,11 @@ vars:
   description: include README.md
   short: r
 
+- name: library
+  type: boolean
+  description: create library directory.
+  short: l
+
 - name: project
   type: boolean
   description: create a project repo for this role
