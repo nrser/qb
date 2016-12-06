@@ -42,7 +42,7 @@ end
 
 def set_debug! args
   if DEBUG_ARGS.any? {|arg| args.include? arg}
-    QB.debug = true
+    ENV['QB_DEBUG'] = 'true'
     debug "ON"
     DEBUG_ARGS.each {|arg| args.delete arg}
   end
@@ -78,10 +78,14 @@ def with_clean_env &block
       ].include?(k)
     }
     
+    qb_env = ENV.select {|k, v| k.start_with? 'QB_'}
+    
     Bundler.with_clean_env do
       # now that we're in a clean env, copy the Bundler env vars into 
       # 'QB_DEV_ENV_<NAME>' vars.
       dev_env.each {|k, v| ENV["QB_DEV_ENV_#{ k }"] = v}
+      
+      qb_env.each {|k, v| ENV[k] = v}
       
       # and set QB_DEV_ENV=true
       ENV['QB_DEV_ENV'] = 'true'
@@ -352,7 +356,16 @@ def main args
       
       puts "COMMAND: #{ cmd }"
       
+      # boot up stdio services so that ansible modules can stream to our
+      # stdout and stderr to print stuff (including debug lines) in real-time
+      stdio_services = {'out' => $stdout, 'err' => $stderr}.map do |name, dest|
+        QB::Util::STDIO::Service.new(name, dest).tap {|s| s.open! }
+      end
+      
       status = Cmds.stream cmd
+      
+      # close the stdio services
+      stdio_services.each {|s| s.close! }
       
       if status != 0
         puts "ERROR ansible-playbook failed."

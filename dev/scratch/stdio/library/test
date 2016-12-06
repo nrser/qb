@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+# WANT_JSON
+
+# init bundler in dev env
+if ENV['QB_DEV_ENV']
+  ENV.each {|k, v|
+    if k.start_with? 'QB_DEV_ENV_'
+      ENV[k.sub('QB_DEV_ENV_', '')] = v
+    end
+  }
+  require 'bundler/setup'
+end
+
+require 'qb'
+require 'pp'
+
+class Test < QB::AnsibleModule
+  def main
+    QB.debug args: @args
+    
+    if @args['count']
+      (1..10).each {|i|
+        puts i
+        sleep 1
+      }
+    end
+    
+    raise "HERE" if @args['raise']
+    
+    nil
+  end
+end
+
+Test.new.run

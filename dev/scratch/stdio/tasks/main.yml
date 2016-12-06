@@ -1,0 +1,5 @@
+---
+# tasks file for stdio
+- test:
+    count: "{{ stdio_count }}"
+    raise: "{{ stdio_raise }}"

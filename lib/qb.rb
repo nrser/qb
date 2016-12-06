@@ -2,6 +2,7 @@ require 'nrser/extras'
 
 require "qb/version"
 require "qb/util"
+require 'qb/util/stdio'
 require "qb/ansible_module"
 
 module QB
@@ -12,16 +13,8 @@ module QB
   class Error < StandardError
   end
   
-  # TODO this should be in an instance that is run instead of module global
-  # hack for now
-  @@debug = false
-  
-  def self.debug= bool
-    @@debug = !!bool
-  end
-  
   def self.debug *args
-    return unless @@debug && args.length > 0
+    return unless ENV['QB_DEBUG'] && args.length > 0
     
     header = 'DEBUG'
     

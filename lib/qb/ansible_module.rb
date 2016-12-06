@@ -12,6 +12,17 @@ module QB
       @input = File.read @input_file
       @args = JSON.load @input
       @facts = {}
+      
+      # if QB_STDIO_ env vars are set send stdout and stderr
+      # to those sockets to print in the parent process
+      
+      if ENV['QB_STDIO_OUT']
+        $stdout = UNIXSocket.new ENV['QB_STDIO_OUT']
+      end
+      
+      if ENV['QB_STDIO_ERR']
+        $stderr = UNIXSocket.new ENV['QB_STDIO_ERR']
+      end
     end
     
     def run
@@ -41,7 +52,9 @@ module QB
     end
     
     def exit_json hash
-      print JSON.dump(self.class.stringify_keys(hash))
+      # print JSON response to process' actual STDOUT (instead of $stdout,
+      # which may be pointing to the qb parent process)
+      STDOUT.print JSON.dump(self.class.stringify_keys(hash))
       exit 0
     end
     
