@@ -286,6 +286,73 @@ def main args
   playbook_path = Pathname.new(Dir.getwd) + '.qb-playbook.yml'
   debug playbook_path: playbook_path.to_s
   
+  tmp_roles_path = QB::ROOT + 'tmp' + 'roles'
+  
+  ansible_roles_path = (
+    [
+      role.path.expand_path.dirname,
+      tmp_roles_path
+    ] + QB::Role.search_path
+  ).join(':')
+  
+  ansible_library_path = [
+    ROOT + 'library',
+  ].join(':')
+  
+  template = []
+  template << "ANSIBLE_ROLES_PATH=<%= roles_path %>"
+  template << "ANSIBLE_LIBRARY=<%= library_path %>"
+  template << "ansible-playbook"
+  
+  if play['hosts'] != ['localhost']
+    template << "-i <%= hosts %>"
+  end
+  
+  if qb_options['tags']
+    template << "--tags=<%= tags %>"
+  end
+  
+  if qb_options['verbose']
+    template << "-#{ 'v' * qb_options['verbose'] }"
+  end
+  
+  template << "<%= playbook_path %>"
+  
+  cmd = Cmds.sub template.join(" "), [], {
+    roles_path: ansible_roles_path,
+    library_path: ansible_library_path,
+    playbook_path: playbook_path.to_s,
+    hosts: "#{ play['hosts'].join(',') },",
+    tags: (qb_options['tags'] ? qb_options['tags'].join(',') : nil),
+  }
+  
+  # print
+  # =====
+  # 
+  # print useful stuff for debugging / running outside of qb
+  # 
+  
+  if qb_options['print'].include? 'options'
+    puts "SET OPTIONS:\n\n#{ YAML.dump set_options }\n\n"
+  end
+  
+  if qb_options['print'].include? 'cmd'
+    puts "COMMAND:\n\n#{ cmd }\n\n"
+  end
+  
+  if qb_options['print'].include? 'playbook'
+    puts "PLAYBOOK:\n\n#{ YAML.dump playbook }\n\n"
+  end
+  
+  # stop here if we're not supposed to run
+  exit 0 if !qb_options['run']
+  
+  # run
+  # ===
+  # 
+  # stuff below here does stuff
+  # 
+  
   playbook_path.open('w') do |f|
     f.write YAML.dump(playbook)
   end
@@ -312,50 +379,8 @@ def main args
     end
   end
   
-  tmp_roles_path = QB::ROOT + 'tmp' + 'roles'
-  
-  ansible_roles_path = (
-    [
-      role.path.expand_path.dirname,
-      tmp_roles_path
-    ] + QB::Role.search_path
-  ).join(':')
-  
-  ansible_library_path = [
-    ROOT + 'library',
-  ].join(':')
-  
   Dir.chdir QB::ROOT do    
-    with_clean_env do      
-      template = []
-      template << "ANSIBLE_ROLES_PATH=<%= roles_path %>"
-      template << "ANSIBLE_LIBRARY=<%= library_path %>"
-      template << "ansible-playbook"
-      
-      if play['hosts'] != ['localhost']
-        template << "-i <%= hosts %>"
-      end
-      
-      if qb_options['tags']
-        template << "--tags=<%= tags %>"
-      end
-      
-      if qb_options['verbose']
-        template << "-#{ 'v' * qb_options['verbose'] }"
-      end
-      
-      template << "<%= playbook_path %>"
-      
-      cmd = Cmds.sub template.join(" "), [], {
-        roles_path: ansible_roles_path,
-        library_path: ansible_library_path,
-        playbook_path: playbook_path.to_s,
-        hosts: "#{ play['hosts'].join(',') },",
-        tags: (qb_options['tags'] ? qb_options['tags'].join(',') : nil),
-      }
-      
-      puts "COMMAND: #{ cmd }"
-      
+    with_clean_env do
       # boot up stdio services so that ansible modules can stream to our
       # stdout and stderr to print stuff (including debug lines) in real-time
       stdio_services = {'out' => $stdout, 'err' => $stderr}.map do |name, dest|

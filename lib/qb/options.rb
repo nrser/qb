@@ -162,6 +162,8 @@ module QB
       qb_options = {
         'hosts' => ['localhost'],
         'facts' => true,
+        'print' => ['cmd'],
+        'verbose' => false,
       }
       
       if role.meta['default_user']
@@ -200,14 +202,24 @@ module QB
         end
         
         opts.on(
-          '-V',
-          '--VERBOSE[=LEVEL]',
-          "run playbook in verbose mode"
+          '-V[LEVEL]',
+          "run playbook in verbose mode. use like -VVV or -V3."
         ) do |value|
+          # QB.debug "verbose", value: value
+          
           qb_options['verbose'] = if value.nil?
             1
           else
-            value.to_i
+            case value
+            when '0'
+              false
+            when /^[1-4]$/
+              value.to_i
+            when /^[V]{1,3}$/i
+              value.length + 1
+            else
+              raise "bad verbose value: #{ value.inspect }"
+            end
           end
         end
         
@@ -216,6 +228,21 @@ module QB
           "don't gather facts",
         ) do |value|
           qb_options['facts'] = false
+        end
+        
+        opts.on(
+          '--PRINT=FLAGS',
+          Array,
+          "set what to print before running."
+        ) do |value|
+          qb_options['print'] = value
+        end
+        
+        opts.on(
+          '--NO-RUN',
+          "don't run the playbook (useful to just print stuff)",
+        ) do |value|
+          qb_options['run'] = false
         end
         
         add opts, role_options, role
