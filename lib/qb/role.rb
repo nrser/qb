@@ -76,8 +76,7 @@ module QB
     
     # @return [Array<Pathname>] places to look for role dirs.
     def self.search_path
-      [
-        QB::ROOT,
+      [QB::ROLES_DIR] + [
         QB::Util.resolve,
         QB::Util.resolve('ansible'),
         QB::Util.resolve('dev'),
