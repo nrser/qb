@@ -73,12 +73,12 @@ module QB::Util::STDIO
       # 
       debug "closing..."
       
-      @thread.kill
-      @socket.close
+      @thread.kill unless @thread.nil?
+      @socket.close unless @socket.nil?
       @socket = nil
-      @server.close
+      @server.close unless @server.nil?
       @server = nil
-      FileUtils.rm @path
+      FileUtils.rm(@path) if @path.exist?
       
       debug "closed."
     end

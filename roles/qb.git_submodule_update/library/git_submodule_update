@@ -44,7 +44,7 @@ class GitSubmoduleUpdate < QB::AnsibleModule
         detached: detached?(dir),
         dirty: dirty?(dir),
       }
-    }
+    }.tap {|subs| QB.debug submodules: submodules}
   end
   
   def dirty? repo_dir
