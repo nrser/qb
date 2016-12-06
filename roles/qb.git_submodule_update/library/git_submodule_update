@@ -17,6 +17,8 @@ require 'qb'
 require 'cmds'
 require 'nrser'
 
+using NRSER
+
 class GitSubmoduleUpdate < QB::AnsibleModule
   def main_dir
     File.realpath @args['dir']
@@ -44,7 +46,7 @@ class GitSubmoduleUpdate < QB::AnsibleModule
         detached: detached?(dir),
         dirty: dirty?(dir),
       }
-    }.tap {|subs| QB.debug submodules: submodules}
+    }.tap {|subs| QB.debug submodules: subs}
   end
   
   def dirty? repo_dir
@@ -83,6 +85,8 @@ class GitSubmoduleUpdate < QB::AnsibleModule
   end
   
   def attach! submodule
+    QB.debug "attaching submodule #{ submodule[:rel_dir] }..."
+    
     branch_heads = branch_heads_for_commit submodule
     branch_head = nil
     
@@ -95,62 +99,88 @@ class GitSubmoduleUpdate < QB::AnsibleModule
       # automatically update it because that might break shit.
       # 
       # do nothing
+      puts <<-END.squish
+        submodule #{ submodule[:rel_dir] } points to commit
+        #{ submodule[:commit] } that is not the head of any branch.
+      END
+      
       return false
+      
     when 1
-      # commit is head of only one branch
+      QB.debug "commit is head of only one branch: #{ branch_heads[0][:ref] }"
       branch_head = branch_heads[0]
+      
     else
-      # commit is head of multiple branches
+      QB.debug "commit is head of multiple branches..."
+      
       local = branch_heads.select {|bh| bh[:ref].start_with? 'refs/heads'}
       
       case local.length
       when 0
-        # commit is head of multiple remote branches
+        QB.debug "commit is head of multiple remote branches..."
+        
         # see if one is master
         branch_head = branch_heads.find {|bh| bh[:ref].end_with? 'master'}
         
         # if none do we're hosed - not sure which one it should be on
         if branch_head.nil?
-          raise NRSER.squish <<-END
+          puts <<-END.squish
             submodule #{ submodule[:rel_dir] } points to commit
             #{ submodule[:commit] } that heads multiple non-master remote
             branches: #{ branch_heads.map {|bh| bh[:ref]} }
           END
+          
+          return false
         end
         
+        QB.debug "commit is head of local master, using that."
+        
       when 1
-        # the commit is head of one local branch, use it
+        QB.debug "the commit is head of one local branch, using it."
+        
         branch_head = local[0]
       
       else
-        # the commit heads multiple local branches
+        QB.debug "the commit heads multiple local branches..."
+        
         # again, see if one is master
         branch_head = local.find {|b| b[:ref].end_with? 'master'}
         
         # if none do we're hosed - not sure which one it should be on
         if branch_head.nil?
-          raise NRSER.squish <<-END
+          puts <<-END.squish
             submodule #{ submodule[:rel_dir] } points to commit
             #{ submodule[:commit] } that heads multiple non-master local
             branches: #{ local.map {|bh| bh[:ref]} }
           END
+          
+          return false
         end
-      end # case
-    end
+        
+        QB.debug "commit is head of remote master, using that."
+      end # case local.length
+    end # case branch_heads.length
+    
+    QB.debug "attaching #{ submodule[:rel_dir] } to #{ branch_head[:ref] }..."
     
     branch = branch_head[:ref].split('/')[-1]
     
     Dir.chdir submodule[:dir] do
-      # checkout the branch
+      QB.debug "checking out branch #{ branch } for #{ submodule[:rel_dir] }..."
+      
       Cmds! "git checkout <%= branch %>", branch: branch
       
       # do a pull if the head was on the remote
       if branch_head[:ref].start_with? 'refs/remotes'
+        QB.debug "commit is head of remote branch, pulling..."
+        
         Cmds! "git pull origin <%= branch %>", branch: branch
       end
     end
     
+    QB.debug "attached."
     @changed = true
+    true
   end
   
   def main
