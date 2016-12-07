@@ -136,9 +136,9 @@ module QB
         return namespaceless_prefix_matches 
       end
       
-      # see if we word match any names
+      # see if we word match any relative paths
       name_word_matches = available.select {|role|
-        QB::Util.words_start_with? role.name, input
+        QB::Util.words_start_with? role.rel_path.to_s, input
       }
       return name_word_matches unless name_word_matches.empty?
       
