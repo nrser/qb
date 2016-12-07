@@ -3,5 +3,5 @@
 
 allow_duplicates: yes
 
-dependencies:
-- role: qb.stream
+dependencies: []
+# - role: qb.stream
