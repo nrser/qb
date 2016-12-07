@@ -1,0 +1,7 @@
+---
+qb.qb_role:
+  modules:
+  - stream
+  defaults: false
+  tasks: false
+  library: true

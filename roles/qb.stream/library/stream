@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+# WANT_JSON
+
+# init bundler in dev env
+if ENV['QB_DEV_ENV']
+  ENV.each {|k, v|
+    if k.start_with? 'QB_DEV_ENV_'
+      ENV[k.sub('QB_DEV_ENV_', '')] = v
+    end
+  }
+  require 'bundler/setup'
+end
+
+require 'qb'
+require 'cmds'
+
+class Stream < QB::AnsibleModule
+  def main
+    status = Cmds.stream @args['cmd']
+    
+    changed!
+  end
+end
+
+Stream.new.run

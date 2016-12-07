@@ -1,0 +1,7 @@
+---
+# meta file for stream
+
+allow_duplicates: yes
+
+dependencies:
+- role: qb.stream
