@@ -6,10 +6,14 @@
 
   pre_tasks:
   - name: load dev_setup facts
+    tags:
+    - always
     dev_setup_facts:
 
   roles:
   - role: nrser.dev_setup
+    tags:
+    - dev-setup
     # repos that are co-developed
     dev_setup_repos:
     - owner: nrser
