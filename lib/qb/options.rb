@@ -164,6 +164,7 @@ module QB
         'facts' => true,
         'print' => ['cmd'],
         'verbose' => false,
+        'run' => true,
       }
       
       if role.meta['default_user']
