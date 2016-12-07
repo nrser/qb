@@ -299,9 +299,12 @@ def main args
     ROOT + 'library',
   ].join(':')
   
+  ansible_filter_plugins_path = ROOT.join 'plugins', 'filter_plugins'
+  
   template = []
   template << "ANSIBLE_ROLES_PATH=<%= roles_path %>"
   template << "ANSIBLE_LIBRARY=<%= library_path %>"
+  template << "ANSIBLE_FILTER_PLUGINS=<%= filter_plugins_path %>"
   template << "ansible-playbook"
   
   if play['hosts'] != ['localhost']
@@ -324,6 +327,7 @@ def main args
     playbook_path: playbook_path.to_s,
     hosts: "#{ play['hosts'].join(',') },",
     tags: (qb_options['tags'] ? qb_options['tags'].join(',') : nil),
+    filter_plugins_path: ansible_filter_plugins_path.to_s,
   }
   
   # print
