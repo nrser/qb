@@ -32,7 +32,7 @@ module QB
     end
     
     # $stderr.puts("DEBUG " + format(msg, values))
-    $stderr.puts YAML.dump(dumpObj)
+    $stderr.puts dumpObj.pretty_inspect
   end
   
   def self.get_default_dir role, cwd, options
