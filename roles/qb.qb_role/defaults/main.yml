@@ -1,0 +1,4 @@
+---
+# defaults file for qb.qb_role
+qb_role_dest: "{{ qb_dir }}"
+qb_role_modules: []

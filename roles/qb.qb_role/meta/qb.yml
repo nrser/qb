@@ -11,5 +11,12 @@ var_prefix: null
 default_dir: null
 
 options:
+- name: modules
+  description: >-
+    create ruby module boilerplate(s) in library using QB::AnsibleModule.
+  type: array
+  required: false
+  implies: library
+  
 - include: qb.role
   as: false

@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+# WANT_JSON
+
+# init bundler in dev env
+if ENV['QB_DEV_ENV']
+  ENV.each {|k, v|
+    if k.start_with? 'QB_DEV_ENV_'
+      ENV[k.sub('QB_DEV_ENV_', '')] = v
+    end
+  }
+  require 'bundler/setup'
+end
+
+require 'qb'
+
+class {{ qb_role_module_class }} < QB::AnsibleModule
+  def main
+    nil
+  end
+end
+
+{{ qb_role_module_class }}.new.run
