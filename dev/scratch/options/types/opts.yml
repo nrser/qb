@@ -1,0 +1,13 @@
+---
+- name: array_of_int
+  description: an array of integers
+  type:
+    array_of: integer
+
+- name: scope
+  description: can be string or false
+  type:
+    one_of:
+    - type: string
+    - false
+  
