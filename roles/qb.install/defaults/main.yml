@@ -1,0 +1,9 @@
+---
+# defaults file for qb.install
+
+install_path: "{{ qb_user_roles_dir }}"
+install_src: "{{ install_name.split('.')[0] }}/ansible-{{ install_name }}"
+install_version: master
+install_force: false
+install_update: false
+install_link: false

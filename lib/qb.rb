@@ -7,7 +7,8 @@ require "qb/ansible_module"
 
 module QB
   ROOT = (Pathname.new(__FILE__).dirname + '..').expand_path
-  ROLES_DIR = ROOT + 'roles'
+  GEM_ROLES_DIR = ROOT + 'roles'
+  USER_ROLES_DIR = Pathname.new(ENV['HOME']).join '.ansible', 'roles'
   MIN_ANSIBLE_VERSION = Gem::Version.new '2.1.2'
   
   class Error < StandardError
@@ -106,6 +107,6 @@ module QB
   end
 end
 
-# needs QB::ROLES_DIR
+# needs QB::*_ROLES_DIR
 require 'qb/role'
 require 'qb/options'

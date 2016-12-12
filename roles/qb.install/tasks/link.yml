@@ -1,0 +1,27 @@
+---
+# symlink to src directory
+
+- name: |
+    remove destination
+    
+      {{ install_path }}/{{ install_name }}
+    
+    prior to linking.
+  file:
+    path: "{{ install_path }}/{{ install_name }}"
+    state: absent
+  when: "{{ install_force }}"
+
+- name: |
+    symlink
+      
+      {{ install_path }}/{{ install_name }}
+    
+    to
+    
+      {{ install_src | realpath }}
+  file:
+    src: "{{ install_src | realpath }}"
+    dest: "{{ install_path }}/{{ install_name }}"
+    state: link
+    

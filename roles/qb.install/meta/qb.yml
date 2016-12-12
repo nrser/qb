@@ -1,5 +1,5 @@
 ---
-# meta/qb.yml file for {{ role_role_name }}
+# meta/qb.yml file for qb.install
 # 
 # qb settings for this role. see README.md for more info.
 #
@@ -16,10 +16,10 @@ var_prefix: null
 # 
 # options:
 # 
-# -   null
+# -   null (default)
 #     -   require the value on the command line.
 # -   false
-#     -   don't provide qb_dir (means doesn't load or save options either).
+#     -   don't provide qb_dir (means doesn't load or save options either)
 # -   git_root
 #     -   use the git root fof the directory that the `qb` command is invoked
 #         from. useful for 'project-centric' commands so they can be invoked
@@ -30,17 +30,59 @@ var_prefix: null
 #     -   invoke an execuable, passing a JSON serialization of the options 
 #         mapping their CLI names to values. path can be relative to role
 #         directory.
-default_dir: null
+default_dir: false
 
 # default user to become for play
 default_user: null
 
 # set to false to not save options in .qb-options.yml files
-save_options: true
+save_options: false
 
-options: []
+options:
 # - name: example
 #   description: an example of a variable.
 #   required: false
 #   type: boolean # boolean (default) | string
 #   short: e
+
+- name: name
+  description: name of role to install.
+  required: true
+  type: string
+  short: n
+
+- name: src
+  description: where to get the role.
+  required: false
+  type: string
+  short: s
+
+- name: version
+  description: version of the role to install.
+  required: false
+  type: boolean
+  short: v
+
+- name: path
+  description: path to isntall roles at.
+  required: false
+  type: string
+  short: p
+
+- name: force
+  description: force the install.
+  required: false
+  type: boolean
+  short: f
+
+- name: update
+  description: update the role.
+  required: false
+  type: boolean
+  short: u
+
+- name: link
+  description: symlink to src (which must be a file path)
+  required: false
+  type: boolean
+  short: l

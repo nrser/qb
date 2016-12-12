@@ -17,12 +17,12 @@ def gemspec_path(dir):
         return paths[0]
 
 def is_gem(dir):
-    return bool(gemspec_path(dir))
+    return dir and bool(gemspec_path(dir))
 
 def main():
     module = AnsibleModule(
         argument_spec = dict(
-            qb_dir = dict(require = True, type = 'path'),
+            qb_dir = dict(require = False, type = 'path'),
         ),
         supports_check_mode = False,
     )

@@ -74,9 +74,38 @@ module QB
       ]
     end
     
+    # places to look for qb role directories. these paths are also included
+    # when qb runs a playbook.
+    # 
+    # TODO resolution order:
+    # 
+    # 1.  paths specific to this run:
+    #     a.  TODO paths provided on the cli.
+    # 2.  paths specific to the current directory:
+    #     a.  paths specified in ./ansible.cfg (if it exists)
+    #     b.  ./roles
+    #     c.  ./roles/tmp
+    #         -   used for roles that are downloaded but shouldn't be included
+    #             in source control.
+    #     d.  paths specified in ./ansible/ansible.cfg (if it exists)
+    #     e.  ./ansible/roles
+    #     f.  ./ansible/roles/tmp
+    #         -   used for roles that are downloaded but shouldn't be included
+    #             in source control.
+    #     g.  paths specified in ./dev/ansible.cfg (if it exists)
+    #     h.  ./dev/roles
+    #     i.  ./dev/roles/tmp
+    #         -   used for roles that are downloaded but shouldn't be included
+    #             in source control.
+    # 3.  
+    # 
     # @return [Array<Pathname>] places to look for role dirs.
+    # 
     def self.search_path
-      [QB::ROLES_DIR] + [
+      [
+        QB::USER_ROLES_DIR,
+        QB::GEM_ROLES_DIR
+      ] + [
         QB::Util.resolve,
         QB::Util.resolve('ansible'),
         QB::Util.resolve('dev'),
@@ -99,7 +128,7 @@ module QB
         flatten.
         # should allow uniq to remove dups
         map {|role_dir| role_dir.realpath }.
-        # needed when qb is run from the qb repo since QB::ROLES_DIR and
+        # needed when qb is run from the qb repo since QB::GEM_ROLES_DIR and
         # ./roles are the same dir
         uniq.
         map {|role_dir|
@@ -209,8 +238,8 @@ module QB
     def initialize path
       @path = path
       
-      @rel_path = if path.to_s.start_with? QB::ROLES_DIR.to_s
-        path.sub(QB::ROLES_DIR.to_s + '/', '')
+      @rel_path = if path.to_s.start_with? QB::GEM_ROLES_DIR.to_s
+        path.sub(QB::GEM_ROLES_DIR.to_s + '/', '')
       elsif path.to_s.start_with? Dir.getwd
         path.sub(Dir.getwd + '/', './')
       else

@@ -1,0 +1,15 @@
+---
+- name: |
+    clone
+      
+      git@github.com:{{ install_src }}.git@{{ install_version }}
+    
+    to
+    
+      {{ install_path }}/{{ install_name }}
+  git:
+    repo: "git@github.com:{{ install_src }}.git"
+    dest: "{{ install_path }}/{{ install_name }}"
+    version: "{{ install_version }}"
+    force: "{{ install_force }}"
+    update: "{{ install_update }}"
