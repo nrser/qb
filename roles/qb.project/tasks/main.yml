@@ -29,7 +29,6 @@
   lineinfile:
     line: /tmp
     dest: "{{ qb_dir }}/.gitignore"
-  register: ignore_tmp
   when: project_tmp
 
 # readme
@@ -50,3 +49,12 @@
   args:
     chdir: "{{ qb_dir }}"
   when: project_hub
+
+# qb artifacts
+# ============
+
+- name: ignore .qb-playbook.yml
+  lineinfile:
+    line: .qb-playbook.yml
+    dest: "{{ qb_dir }}/.gitignore"
+  when: project_tmp
