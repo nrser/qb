@@ -45,6 +45,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "nrser-extras", '~> 0.0', ">= 0.0.3"
   spec.add_dependency "state_mate", '~> 0.0', ">= 0.0.9"
   spec.add_dependency 'parseconfig', '~> 1.0', '>= 1.0.8'
+  spec.add_dependency 'highline', '~> 1.7', '>= 1.7.8'
+  # spec.add_dependency 'json-schema', '~> 2.7'
   
   
   if QB::VERSION.end_with? '.dev'

@@ -4,6 +4,7 @@ require "qb/version"
 require "qb/util"
 require 'qb/util/stdio'
 require "qb/ansible_module"
+require "qb/types"
 
 module QB
   ROOT = (Pathname.new(__FILE__).dirname + '..').expand_path

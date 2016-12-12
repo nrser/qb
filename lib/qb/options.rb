@@ -129,15 +129,15 @@ module QB
             on_args << "REQUIRED."
           end
           
-          if role.defaults.key? option.var_name
+          unless option.default.nil?
             if option.meta['type'] == 'boolean'
-              on_args << if role.defaults[option.var_name]
+              on_args << if option.default
                 "DEFAULT: --#{ option.cli_name }"
               else
                 "DEFAULT: --no-#{ option.cli_name }"
               end
-            elsif !role.defaults[option.var_name].nil?
-              on_args << "DEFAULT: #{ role.defaults[option.var_name] }"
+            else
+              on_args << "DEFAULT: #{ option.default }"
             end
           end
           
@@ -165,6 +165,7 @@ module QB
         'print' => ['cmd'],
         'verbose' => false,
         'run' => true,
+        'interactive' => false,
       }
       
       if role.meta['default_user']
@@ -244,6 +245,14 @@ module QB
           "don't run the playbook (useful to just print stuff)",
         ) do |value|
           qb_options['run'] = false
+        end
+        
+        opts.on(
+          '-I',
+          '--INTERACTIVE',
+          "ask for options interracially."
+        ) do |value|
+          qb_options['interactive'] = true
         end
         
         add opts, role_options, role

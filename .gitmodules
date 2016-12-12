@@ -16,3 +16,6 @@
 [submodule "dev/gems/state_mate"]
 	path = dev/gems/state_mate
 	url = git@github.com:nrser/state_mate
+[submodule "dev/gems/nrser-ruby"]
+	path = dev/gems/nrser-ruby
+	url = git@github.com:nrser/nrser-ruby.git

@@ -1,8 +1,6 @@
 module QB
   module Options
     class Option
-      
-      
       # the role that this option is for
       # attr_reader :role
       
@@ -25,6 +23,9 @@ module QB
       # the value of the option, or `nil` if we never assign one
       attr_accessor :value
       
+      # default value from the role
+      attr_reader :default
+      
       def initialize role, meta, include_path
         # @role = WeakRef.new role
         @meta = meta
@@ -45,6 +46,10 @@ module QB
         end
         
         @value = nil
+        
+        @default = role.defaults[@var_name]
+        
+        @type = 
       end
       
       # if the option is required in the cli
@@ -84,6 +89,30 @@ module QB
           "--#{ cli_name }=#{ meta_name.upcase }"
         end
       end
+      
+      def type
+        
+      end
+      
+      # def value= string
+      #   @value = case meta['type'].downcase
+      #   when 'string', 'str'
+      #     string
+      #     
+      #   when 'array', 'list'
+      #     string.split ','
+      #     
+      #   when 'integer', 'int'
+      #     string.to_i
+      #     
+      #   when Hash
+      #     if meta['type'].key? 'one_of'
+      #       if meta['type']['one_of'].include? value
+      #         value
+      #       else
+      #         raise 
+      #         
+      # end
       
       private
       

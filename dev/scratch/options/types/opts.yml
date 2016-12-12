@@ -10,4 +10,11 @@
     one_of:
     - type: string
     - false
+  type:
+  - type: string
+  - false
+  type:
+    all_of:
+    - type: string
+    - length: 
   

@@ -5,6 +5,7 @@ require 'pp'
 require 'yaml'
 require 'json'
 require 'fileutils'
+require 'highline'
 
 require 'cmds'
 
@@ -180,12 +181,6 @@ def main args
   
   debug "normalized_dir", dir
   
-  # create the dir if it doesn't exist (so don't have to cover this in
-  # every role)
-  if role.mkdir
-    FileUtils.mkdir_p dir unless File.exists? dir
-  end
-  
   saved_options_path = Pathname.new(dir) + '.qb-options.yml'
   
   saved_options = if saved_options_path.exist?
@@ -203,6 +198,22 @@ def main args
   else
     debug "no saved options"
     {}
+  end
+  
+  # interactive
+  # ===========
+  # 
+  
+  if qb_options['interactive']
+    cli = HighLine.new
+    
+    options.values.each {|option|
+      question = "#{ option.cli_name } (default: #{ option.default })"
+      answer = cli.ask question
+      puts
+    }
+    
+    exit 0
   end
   
   if saved_options.key? role.options_key
@@ -356,6 +367,12 @@ def main args
   # 
   # stuff below here does stuff
   # 
+  
+  # create the dir if it doesn't exist (so don't have to cover this in
+  # every role)
+  if role.mkdir
+    FileUtils.mkdir_p dir unless File.exists? dir
+  end
   
   playbook_path.open('w') do |f|
     f.write YAML.dump(playbook)
