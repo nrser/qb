@@ -18,7 +18,7 @@ class Stream < QB::AnsibleModule
   def main
     Dir.chdir @args['chdir'] if @args['chdir']
     
-    status = Cmds.stream @args['cmd']
+    Cmds.stream! @args['cmd']
     
     changed!
   end
