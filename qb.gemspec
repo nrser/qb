@@ -49,7 +49,7 @@ Gem::Specification.new do |spec|
   checked_in_files = `git ls-files -z`.split("\x0")
   
   node_modules_files = Dir.glob(
-    File.join(GEM_ROOT, 'node_modules/**/**'), File::FNM_DOTMATCH
+    File.join(GEM_ROOT, 'node_modules/**/*'), File::FNM_DOTMATCH
   ).map {|abs_path|
     Pathname.new(abs_path).relative_path_from(Pathname.new(GEM_ROOT)).to_s
   }
