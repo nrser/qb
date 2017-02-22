@@ -1,7 +1,39 @@
 # coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
+require 'pathname'
+
+GEM_ROOT = File.expand_path(File.dirname(__FILE__))
+lib = File.join(GEM_ROOT, 'lib')
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'qb/version'
+
+# things not to package (String | Regexp)
+OMIT_FILES = [
+  # standard gem ignores (test files)
+  %r{^(test|spec|feature)/},
+  # all the development files
+  %r{^dev/},
+  # all the temp files
+  %r{^tmp/},
+  # dotfiles / dev config
+  '.gitignore',
+  '.gitmodules',
+  '.qb-options.yml',
+  '.rspec',
+  '.travis.yml',
+  # don't think we need this *in* the gem - it's for bundler in dev
+  'Gemfile',
+  # dev executables are in /bin (gem executables are in /exe)
+  %r{^bin/},
+  # yarn artifacts
+  'yarn.lock',
+  'node_modules/.yarn-integrity',
+  # nrser.blockinfile tests carried over from fork
+  %r{^roles/nrser.blockinfile/tests/},
+  # temp playbook used in development
+  'temp.yml',
+  # don't think we need the Rakefile
+  'Rakefile',
+]
 
 Gem::Specification.new do |spec|
   spec.name          = QB::GEM_NAME
@@ -14,7 +46,26 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/nrser/qb"
   spec.license       = "MIT"
   
-  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
+  checked_in_files = `git ls-files -z`.split("\x0")
+  
+  node_modules_files = Dir.glob(
+    File.join(GEM_ROOT, 'node_modules/**/**'), File::FNM_DOTMATCH
+  ).map {|abs_path|
+    Pathname.new(abs_path).relative_path_from(Pathname.new(GEM_ROOT)).to_s
+  }
+  
+  spec.files         = (checked_in_files + node_modules_files).reject {|fp|
+    OMIT_FILES.any? {|pattern|
+      case pattern
+      when String
+        fp == pattern
+      when Regexp
+        pattern.match fp
+      else
+        raise "bad pattern: #{ pattern.inspect }"
+      end
+    }
+  }
   
   # get an array of submodule dirs by executing 'pwd' inside each submodule
   gem_dir = File.expand_path(File.dirname(__FILE__)) + "/"

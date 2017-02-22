@@ -16,8 +16,18 @@ def gemspec_path(dir):
         # this shouldn't really happen, but i don't want to stop the show...
         return paths[0]
 
+
 def is_gem(dir):
     return dir and bool(gemspec_path(dir))
+
+
+def package_json_path(dir):
+    return os.path.join(dir, 'package.json')
+
+
+def has_package_json(dir):
+    return os.path.isfile(package_json_path(dir))
+
 
 def main():
     module = AnsibleModule(
@@ -60,6 +70,12 @@ def main():
         gem_info['gemspec_path'] = gemspec_path(qb_dir)
         
         facts['qb_gem_info'] = gem_info
+    
+    if has_package_json(qb_dir):
+        f = open(package_json_path(qb_dir))
+        package_json = json.loads(f.read())
+        f.close()
+        facts['qb_package_json'] = package_json
     
     changed = False
 
