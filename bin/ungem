@@ -1,5 +1,12 @@
 #!/usr/bin/ruby
 
+# coming back to this now i'm not even sure what it does..?
+# 
+# commit says "little script to remove gem stuff while testing"
+# 
+# @see https://github.com/nrser/qb/commit/bad147cc5a0e3850b4db2af34572567f79d7adf5
+# 
+
 require 'fileutils'
 
 [
