@@ -1,7 +1,7 @@
 module QB
   GEM_NAME = 'qb'
   
-  VERSION = "0.1.45.dev"
+  VERSION = "0.1.45"
   
   def self.gemspec
     Gem.loaded_specs[GEM_NAME]
