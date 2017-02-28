@@ -71,4 +71,4 @@
 
 - debug:
     msg: >
-      v{{ release_yarn_package_dir }} released.
+      v{{ release_yarn_release_version }} released.
