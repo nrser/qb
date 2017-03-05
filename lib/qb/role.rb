@@ -138,17 +138,43 @@ module QB
     
     # get an array of QB::Role that match an input string
     def self.matches input
+      # keep this here to we don't re-gen every loop
       available = self.available
       
+      # first off, see if input matches any relative paths exactly
       available.each {|role|
-        # exact match to relative path
         return [role] if role.rel_path.to_s == input
-      }.each {|role|
-        # exact match to full name
-        return [role] if role.name == input
-      }.each {|role|
-        # exact match without the namespace prefix ('qb.' or similar)
-        return [role] if role.namespaceless == input
+      }
+      
+      # create an array of "separator" variations to try *exact* matching 
+      # against. in order of preference:
+      # 
+      # 1.  exact input
+      #     -   this means if you ended up with roles that actually *are*
+      #         differnetiated by '_/-' differences (which, IMHO, is a 
+      #         horrible fucking idea), you can get exactly what you ask for
+      #         as a first priority
+      # 2.  input with '-' changed to '_'
+      #     -   prioritized because convetion is to underscore-separate
+      #         role names.
+      # 3.  input with '_' changed to '-'
+      #     -   really just for convience's sake so you don't really have to 
+      #         remember what separator is used.
+      #     
+      separator_variations = [
+        input,
+        input.gsub('-', '_'),
+        input.gsub('_', '_'),
+      ]
+      
+      separator_variations.each {|variation|
+        available.each {|role|
+          # exact match to full name
+          return [role] if role.name == variation
+        }.each {|role|
+          # exact match without the namespace prefix ('qb.' or similar)
+          return [role] if role.namespaceless == variation
+        }  
       }
       
       # see if we prefix match any full names
