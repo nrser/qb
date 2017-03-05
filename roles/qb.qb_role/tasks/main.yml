@@ -3,13 +3,13 @@
 
 - name: create meta directory
   file:
-    path: "{{ dir }}/meta"
+    path: "{{ role_dest }}/meta"
     state: directory
 
 - name: create meta/qb.yml
   template:
     src: qb.yml.j2
-    dest: "{{ dir }}/meta/qb.yml"
+    dest: "{{ role_dest }}/meta/qb.yml"
     force: false
 
 - include: module.yml

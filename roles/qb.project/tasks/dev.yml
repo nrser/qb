@@ -1,7 +1,7 @@
 ---
 
 - set_fact:
-    project_dev_dir: "{{ qb_dir }}/dev"
+    project_dev_dir: "{{ project_dest }}/dev"
 
 - set_fact:
     project_dev_gitignore: "{{ project_dev_dir }}/.gitignore"

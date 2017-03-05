@@ -1,4 +1,5 @@
 ---
 # defaults file for qb.gitignore
 
+gitignore_dest: "{{ qb_dir }}"
 gitignore_force: false

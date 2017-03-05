@@ -1,16 +1,21 @@
 ---
 # tasks file for qb.gitignore
 
+- name: create directory
+  file:
+    path: "{{ gitignore_dest }}"
+    state: directory
+
 - name: create .gitignore
   copy:
     content: ''
-    dest: "{{ qb_dir }}/.gitignore"
+    dest: "{{ gitignore_dest }}/.gitignore"
     force: "{{ gitignore_force }}"
 
 - name: modify .gitignore
   blockinfile:
     content: "{{ lookup('file', 'gitignore/' + gitignore_name + '.gitignore') }}"
-    dest: "{{ qb_dir }}/.gitignore"
+    dest: "{{ gitignore_dest }}/.gitignore"
     beginmarker: |
       {{ '#' * 78 }}
       # BEGIN {{ gitignore_name }}.gitignore

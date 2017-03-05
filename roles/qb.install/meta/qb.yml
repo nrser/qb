@@ -86,3 +86,9 @@ options:
   required: false
   type: boolean
   short: l
+
+- name: create
+  description: create a repo for a new role to install in $GITHUB_HOME.
+  required: false
+  type: boolean
+  short: c

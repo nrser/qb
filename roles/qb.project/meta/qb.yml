@@ -3,6 +3,10 @@ default_dir:
   exe: qb/get_dir
   
 vars:
+- name: dest
+  description: destination directory.
+  type: string
+  
 - name: owner
   desciption: github owner of directory
   type: string

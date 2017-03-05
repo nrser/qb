@@ -3,6 +3,12 @@
 
 allow_duplicates: yes
 
-dependencies: []
+dependencies: # []
 # - role: role-name
-
+- role: qb.qb_role
+  when: "{{ install_create }}"
+  role_dest: "{{ install_src }}"
+  role_role_name: "{{ install_name }}"
+  role_project: true
+  project_hub: true
+  project_dest: "{{ install_src }}"

@@ -4,6 +4,6 @@
 - name: initialize git
   command: git init
   args:
-    chdir: "{{ dir }}"
-    creates: "{{ dir }}/.git"
+    chdir: "{{ git_repo_dest }}"
+    creates: "{{ git_repo_dest }}/.git"
   

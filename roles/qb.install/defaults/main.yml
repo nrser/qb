@@ -2,8 +2,23 @@
 # defaults file for qb.install
 
 install_path: "{{ qb_user_roles_dir }}"
-install_src: "{{ install_name.split('.')[0] }}/ansible-{{ install_name }}"
+
+install_src: "{% if install_create -%}
+  {{ ansible_env.GITHUB_HOME }}/{{ install_name.split('.')[0] }}/ansible-{{ install_name }}
+{%- else -%}
+  {{ install_name.split('.')[0] }}/ansible-{{ install_name }}
+{%- endif %}"
+
 install_version: master
+
 install_force: false
+
 install_update: false
-install_link: false
+
+install_link: "{% if install_create -%}
+  true
+{%- else -%}
+  false
+{%- endif %}"
+
+install_create: false

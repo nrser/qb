@@ -1,0 +1,4 @@
+---
+- name: open new qb role repo in atom
+  shell: "atom {{ install_src }}"
+  

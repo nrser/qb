@@ -6,7 +6,7 @@
 
 - name: create /bin directory
   git_mkdir:
-    path: "{{ qb_dir }}/bin"
+    path: "{{ project_dest }}/bin"
   when: project_bin
 
 # dev
@@ -20,7 +20,7 @@
 
 - name: create tmp directory
   git_mkdir:
-    path: "{{ qb_dir }}/tmp"
+    path: "{{ project_dest }}/tmp"
     # have to explicitly commit it since it's ignored 
     commit: true
   when: project_tmp
@@ -28,7 +28,7 @@
 - name: ignore tmp dir in git
   lineinfile:
     line: /tmp
-    dest: "{{ qb_dir }}/.gitignore"
+    dest: "{{ project_dest }}/.gitignore"
   when: project_tmp
 
 # readme
@@ -37,7 +37,7 @@
 - name: create readme
   template:
     src: README.md.j2
-    dest: "{{ qb_dir }}/README.md"
+    dest: "{{ project_dest }}/README.md"
     force: "{{ project_force }}"
   when: project_readme
 
@@ -47,7 +47,7 @@
 - name: run `hub create`
   command: "hub create{% if project_private %} -p{% endif %} {{ project_owner }}/{{ project_name }}"
   args:
-    chdir: "{{ qb_dir }}"
+    chdir: "{{ project_dest }}"
   when: project_hub
 
 # qb artifacts
@@ -56,5 +56,5 @@
 - name: ignore .qb-playbook.yml
   lineinfile:
     line: .qb-playbook.yml
-    dest: "{{ qb_dir }}/.gitignore"
+    dest: "{{ project_dest }}/.gitignore"
   when: project_tmp

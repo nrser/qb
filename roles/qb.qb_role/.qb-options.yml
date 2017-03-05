@@ -2,3 +2,4 @@
 qb.qb_role:
   defaults: true
   templates: true
+  vars: true
