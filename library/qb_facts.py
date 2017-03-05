@@ -18,6 +18,9 @@ def gemspec_path(dir):
 
 
 def is_gem(dir):
+    if dir is None:
+        return False
+        
     return dir and bool(gemspec_path(dir))
 
 
@@ -26,6 +29,9 @@ def package_json_path(dir):
 
 
 def has_package_json(dir):
+    if dir is None:
+        return False
+    
     return os.path.isfile(package_json_path(dir))
 
 
