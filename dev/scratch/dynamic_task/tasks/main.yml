@@ -1,0 +1,9 @@
+---
+# tasks file for dynamic-task
+
+- set_fact:
+    mod: debug
+
+- name: dynamic task
+  "{{ dynamic_task_module }}":
+    msg: HERE
