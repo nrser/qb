@@ -2,4 +2,6 @@
 # defaults file for qb.gitignore
 
 gitignore_dest: "{{ qb_dir }}"
+gitignore_content: "{{ lookup('file', 'gitignore/' + gitignore_name + '.gitignore') }}"
+gitignore_tag: "{{ gitignore_name }}.gitingore"
 gitignore_force: false

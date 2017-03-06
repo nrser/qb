@@ -14,13 +14,13 @@
 
 - name: modify .gitignore
   blockinfile:
-    content: "{{ lookup('file', 'gitignore/' + gitignore_name + '.gitignore') }}"
+    content: "{{ gitignore_content }}"
     dest: "{{ gitignore_dest }}/.gitignore"
     beginmarker: |
       {{ '#' * 78 }}
-      # BEGIN {{ gitignore_name }}.gitignore
+      # BEGIN {{ gitignore_tag }}
       #
     endmarker: |
       #
-      # END {{ gitignore_name }}.gitignore
+      # END {{ gitignore_tag }}
       {{ '#' * 78 }}
