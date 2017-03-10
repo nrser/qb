@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+require 'yaml'
+require 'shellwords'
+
+PROJECT_ROOT = File.expand_path File.join(File.dirname(__FILE__), '..')
+CHROME_PATH = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+YAML.load(
+  File.read(
+    File.join(PROJECT_ROOT, 'dev', 'bookmarks.yml')
+  )
+).each {|url|
+  `#{ CHROME_PATH.shellescape } #{ url.shellescape }`
+}
