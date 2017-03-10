@@ -64,7 +64,7 @@ options:
   short: v
 
 - name: path
-  description: path to isntall roles at.
+  description: path to install roles at.
   required: false
   type: string
   short: p
