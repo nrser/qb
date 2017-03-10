@@ -38,6 +38,13 @@ default_user: null
 # set to false to not save options in .qb-options.yml files
 save_options: false
 
+examples:
+  create a new role backed by a GitHub repo: >
+    
+    qb install --create --name=nrser.blah
+    
+    (`name` needs to have the namespace attached if one is desired)
+
 options:
 # - name: example
 #   description: an example of a variable.
@@ -46,7 +53,9 @@ options:
 #   short: e
 
 - name: name
-  description: name of role to install.
+  description: >
+    name of role to install.
+    include namespace if desired (nrser.blah vs blah).
   required: true
   type: string
   short: n

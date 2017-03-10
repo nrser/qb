@@ -422,6 +422,46 @@ module QB
       lines.join("\n")
     end
     
+    def examples
+      @meta['examples']
+    end
+    
+    # format the `meta.examples` hash into a string suitable for cli
+    # output.
+    # 
+    # @return [String]
+    #   the CLI-formatted examples.
+    # 
+    def format_examples
+      examples.
+        map {|title, body|
+          [
+            "#{ title }:",
+            body.lines.map {|l|
+              # only indent non-empty lines
+              # makes compacting newline sequences easier (see below)
+              if l.match(/^\s*$/)
+                l
+              else
+                '  ' + l
+              end
+            },
+            ''
+          ]
+        }.
+        flatten.
+        join("\n").
+        # compact newline sequences
+        gsub(/\n\n+/, "\n\n")
+    end
+    
+    # examples text
+    def puts_examples
+      return unless examples
+      
+      puts "\n" + format_examples + "\n"
+    end
+    
     private
     
     # get the value at the first found of the keys or the default.

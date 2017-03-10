@@ -250,6 +250,9 @@ module QB
         
         opts.on_tail("-h", "--help", "Show this message") do
           puts opts
+          
+          role.puts_examples
+          
           exit
         end
       end
