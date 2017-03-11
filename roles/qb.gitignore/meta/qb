@@ -14,6 +14,10 @@ end
 puts JSON.pretty_generate({
   save_options: false,
   
+  default_dir: {
+    find_up: '.gitignore',
+  },
+  
   vars: [
     {
       name: "name",

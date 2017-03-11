@@ -43,24 +43,40 @@ module QB
                               options: options
     
     key = 'default_dir'
-    case role.meta[key]
-    when nil, false
+    value = role.meta[key]
+    case value
+    when nil
       # there is no get_dir info in meta/qb.yml, can't get the dir
       raise "unable to infer default directory: no '#{ key }' key in meta/qb.yml"
-      
+    
+    when false
+      # this method should not get called when the value is false (an entire
+      # section is skipped in exe/qb when `default_dir = false`)
+      raise "role does not use default directory (meta/qb.yml:default_dir = false)"
+    
     when 'git_root'
       debug "returning the git root relative to cwd"
       NRSER.git_root cwd
     
     when 'cwd'
-      debug "returing current working directory"
+      debug "returning current working directory"
       cwd
       
     when Hash
       debug "qb meta option is a Hash"
       
-      if role.meta[key].key? 'exe'
-        exe_path = role.meta[key]['exe']
+      unless value.length == 1
+        raise "#{ role.meta_path.to_s }:default_dir invalid: #{ value.inspect }"
+      end
+      
+      hash_key, hash_value = value.first
+      
+      case hash_key
+      when 'exe'
+        exe_path = hash_value
+        
+        # supply the options to the exe so it can make work off those values
+        # if it wants.
         exe_input_data = Hash[
           options.map {|option|
             [option.cli_option_name, option.value]
@@ -78,8 +94,21 @@ module QB
         Cmds.chomp! exe_path do
           JSON.dump exe_input_data
         end
+        
+      when 'find_up'
+        filename = hash_value
+        
+        unless filename.is_a? String
+          raise "find_up filename must be string, found #{ filename.inspect }"
+        end
+        
+        debug "found 'find_up', looking for file named #{ filename }"
+        
+        Util.find_up filename
+        
       else
-        raise "not sure to process '#{ key }' in metea/qb.yml"
+        raise "bad key: #{ hash_key } in #{ role.meta_path.to_s }:default_dir"
+        
       end
     end
   end # get_default_dir

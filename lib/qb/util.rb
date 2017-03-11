@@ -50,5 +50,33 @@ module QB
       # shouldn't ever happen
       raise "resolution failed: #{ segments.inspect }"
     end
+    
+    # find `filename` in `from` or closest parent directory.
+    # 
+    # @param [String] filename
+    #   name of file to search for.
+    # 
+    # @param [Pathname] from (Pathname.pwd)
+    #   directory to start from.
+    # 
+    # @return [Pathname]
+    #   Pathname of found file.
+    # 
+    # @raise
+    #   if file is not found in `from` or any of it's parent directories.
+    # 
+    def self.find_up filename, from = Pathname.pwd
+      path = from + filename
+      
+      return from if path.exist?
+      
+      parent = from.parent
+      
+      if from == parent
+        raise "not found in current or any parent directories: #{ filename }"
+      end
+      
+      return find_up filename, parent
+    end # .find_up
   end # Util
 end # QB

@@ -3,8 +3,19 @@ require 'cmds'
 require 'parseconfig'
 
 module QB
+  # contains info on a QB role.
+  # 
+  # 
   class Role
+    # attrs
+    # =====
+    
     attr_accessor :path, :name, :rel_path
+    
+    # @!attribute [r] meta_path
+    #   @return [String, nil] the path qb metadata was load from. `nil` if it's
+    #     never been loaded or doesn't exist.
+    attr_accessor :meta_path
     
     # errors
     # ======
@@ -273,6 +284,9 @@ module QB
       end
       
       @name = path.to_s.split(File::SEPARATOR).last
+      
+      # gets filled in when {#meta_load}
+      @meta_path = nil
     end
     
     def to_s
@@ -300,13 +314,18 @@ module QB
     #
     # if `cache` is true caches it as `@meta`
     # 
-    def load_meta cache = true
+    def load_meta cache = true      
       meta = if (@path + 'meta' + 'qb').exist?
-        YAML.load(Cmds.out!((@path + 'meta' + 'qb').realpath.to_s)) || {}
+        @meta_path = @path + 'meta' + 'qb'
+        YAML.load(Cmds.out!(@meta_path.realpath.to_s)) || {}
+        
       elsif (@path + 'meta' + 'qb.yml').exist?
-        YAML.load((@path + 'meta' + 'qb.yml').read) || {}
+        @meta_path = @path + 'meta' + 'qb.yml'
+        YAML.load(@meta_path.read) || {}
+        
       else
         {}
+        
       end
       
       if cache
