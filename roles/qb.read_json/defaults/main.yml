@@ -1,0 +1,5 @@
+---
+# defaults file for qb.read_json
+read_json_src: "{{ qb_dir }}"
+read_json_var: null
+read_json_dump: "{{ ansible_env.QB_DEBUG is defined }}" 

@@ -3,6 +3,7 @@ __metaclass__ = type
 
 import subprocess
 import os
+import json
 
 from ansible.errors import AnsibleError
 
@@ -47,12 +48,29 @@ def semver_inc(version, level = None, preid = None):
     return out.rstrip()
 
 
+def semver_parse(version):
+    '''parse semver.
+    '''
+    
+    stmt = (
+        '''console.log(JSON.stringify(require('semver')(%s), null, 2))''' %
+        json.dumps(version)
+    )
+    
+    cmd = ['node', '--eval', stmt]
+    
+    out = subprocess.check_output(cmd)
+    
+    return out.rstrip()
+
+
 class FilterModule(object):
     ''' version manipulation filters '''
 
     def filters(self):
         return {
             'semver_inc': semver_inc,
+            'semver_parse': semver_parse,
         }
 
 

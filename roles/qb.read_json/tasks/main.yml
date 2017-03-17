@@ -1,0 +1,23 @@
+---
+# tasks file for qb.read_json
+- name: read file
+  slurp:
+    src: "{{ read_json_src }}"
+  register: read_json_slurp
+
+- name: parse json
+  set_fact:
+    read_json_value: "{{ read_json_slurp.content | b64decode }}"
+
+- name: set var
+  when: read_json_var != None
+  set_fact:
+    "{{ read_json_var }}": "{{ read_json_value }}"
+
+- name: print debug output
+  when: read_json_dump
+  debug:
+    msg:
+      name: "{{ read_json_var }}"
+      value: "{{ read_json_value }}"
+  
