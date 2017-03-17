@@ -4,7 +4,7 @@
 - name: parse version value
   set_fact:
     package_json_info_value:
-      value: "{{ read_json_value }}"
+      object: "{{ read_json_value }}"
       version: "{{ read_json_value.version | semver_parse }}"
 
 - name: set var

@@ -2,4 +2,4 @@
 # defaults file for qb.package_json_info
 package_json_info_dir: "{{ qb_dir }}"
 package_json_info_var: null
-package_json_info_debug: "{{ ansible_env.QB_DEBUG is defined }}" 
+package_json_info_dump: "{{ ansible_env.QB_DEBUG is defined }}" 
