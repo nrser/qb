@@ -160,7 +160,7 @@ def main args
       # 
       # in some cases (like projects) the dir can be figured out in other ways:
       # 
-      QB.get_default_dir role, cwd, options
+      role.default_dir cwd, options
       
     when 1
       # there is a single positional arg, which is used as dir
@@ -318,6 +318,10 @@ def main args
   
   if qb_options['verbose']
     template << "-#{ 'v' * qb_options['verbose'] }"
+  end
+  
+  if qb_options['ask_vault_pass'] || role.ask_vault_pass?
+    template << "--ask-vault-pass"
   end
   
   template << "<%= playbook_path %>"

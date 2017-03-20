@@ -23,10 +23,34 @@ module QB
     class MetadataError < Error
     end
     
+    # turn a name into a "command line" version by replacing underscores with
+    # dashes.
+    # 
+    # @param [String] option_name
+    #   the input option name.
+    # 
+    # @return [String]
+    #   the CLI-ized name.
+    # 
+    # @example
+    #   QB::Options.cli_ize_name "my_var" # => "my-var"
+    # 
     def self.cli_ize_name option_name
       option_name.gsub '_', '-'
     end
     
+    # turn a name into a "ruby / ansible variable" version by replacing
+    # dashes with underscores.
+    # 
+    # @param [String] option_name
+    #   the input option name.
+    # 
+    # @return [String]
+    #   the ruby / ansible var-ized name.
+    # 
+    # @example
+    #   QB::Options.cli_ize_name "my-var" # => "my_var"
+    # 
     def self.var_ize_name option_name
       option_name.gsub '-', '_'
     end
@@ -156,6 +180,25 @@ module QB
       end # each var
     end # add 
     
+    # destructively removes options from `args` and populates hashes of
+    # role-specific options and general qb ones.
+    # 
+    # @param [QB::Role] role
+    #   the role to parse the options for.
+    # 
+    # @param [Array<String>] args
+    #   CLI args -- `ARGV` with the role arg shifted off.
+    # 
+    # @return [Array<Hash<String, Option|Object>>]
+    #   a two-element array:
+    #   
+    #   1.  the options for the role, hash of Option#cli_name to Option
+    #       instances.
+    #       
+    #   2.  the general qb options, hash of String key to option values.
+    #   
+    # @raise if bad options are found.
+    # 
     def self.parse! role, args      
       role_options = {}
       
@@ -244,6 +287,13 @@ module QB
           "don't run the playbook (useful to just print stuff)",
         ) do |value|
           qb_options['run'] = false
+        end
+        
+        opts.on(
+          '--ASK-VAULT-PASS',
+          "ask for the vault password.",
+        ) do |value|
+          qb_options['ask_vault_pass'] = true
         end
         
         add opts, role_options, role
