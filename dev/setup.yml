@@ -15,32 +15,15 @@
     tags:
     - dev-setup
     # repos that are co-developed
-    dev_setup_repos:
-    - owner: nrser
-      name: gitignore
-      
-    - owner: nrser
-      name: ansible-nrser.dev_setup
-    
-    - owner: nrser
-      name: ansible-nrser.rbenv_gem
-    
-    - owner: nrser
-      name: cmds
-    
-    - owner: nrser
-      name: ansible-nrser.nodenv
-    
-    - owner: nrser
-      name: ansible-nrser.rbenv
+    dev_setup_repos: []
 
     # sources that are used for reference only
     dev_setup_refs:
       github:
       - owner: ansible
         name: ansible
-        version: v1.9.4-1
-        dir_name: ansible-v1.9.4
+        version: v2.2.1.0
+        dir_name: ansible-v2.2.1.0
         depth: 1
       
       - owner: nrser
