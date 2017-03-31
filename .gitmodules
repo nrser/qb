@@ -16,3 +16,6 @@
 [submodule "dev/gems/state_mate"]
 	path = dev/gems/state_mate
 	url = git@github.com:nrser/state_mate
+[submodule "dev/gems/cmds"]
+	path = dev/gems/cmds
+	url = git@github.com:nrser/cmds.git
