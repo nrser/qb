@@ -1,0 +1,8 @@
+---
+# meta file for qb.yarn
+
+allow_duplicates: yes
+
+dependencies: []
+# - role: role-name
+

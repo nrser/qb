@@ -1,0 +1,8 @@
+---
+
+options:
+- name: required
+  description: a required option.
+  required: true
+  type: string
+  short: r

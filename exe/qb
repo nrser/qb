@@ -143,10 +143,13 @@ def main args
     exit 1
   end
   
-  options, qb_options = QB::Options.parse! role, args
+  options = QB::Options.new role, args
   
-  debug "options set on cli", options.select {|k, o| !o.value.nil?}
-  debug "qb options", qb_options
+  debug "role options set on cli", options.role_options.select {|k, o|
+    !o.value.nil?
+  }
+  
+  debug "qb options", options.qb_options
   
   cwd = Dir.getwd
   
@@ -160,7 +163,7 @@ def main args
       # 
       # in some cases (like projects) the dir can be figured out in other ways:
       # 
-      role.default_dir cwd, options
+      role.default_dir cwd, options.role_options
       
     when 1
       # there is a single positional arg, which is used as dir
@@ -210,7 +213,7 @@ def main args
       debug "found saved options for role", role_saved_options
       
       role_saved_options.each do |option_cli_name, value|
-        option = options[option_cli_name]
+        option = options.role_options[option_cli_name]
         
         if option.value.nil?
           debug "setting from saved options", option: option, value: value
@@ -222,7 +225,7 @@ def main args
   end # unless default_dir == false
   
   # check that required options are present
-  missing = options.values.select {|option|
+  missing = options.role_options.values.select {|option|
     option.required? && option.value.nil?
   }
   
@@ -231,7 +234,7 @@ def main args
     exit 1
   end
   
-  set_options = options.select {|k, o| !o.value.nil?}
+  set_options = options.role_options.select {|k, o| !o.value.nil?}
   
   debug "set options", set_options
   
@@ -251,18 +254,11 @@ def main args
   
   play =
   {
-    'hosts' => qb_options['hosts'],
+    'hosts' => options.qb_options['hosts'],
     'vars' => playbook_vars,
     # 'gather_subset' => ['!all'],
-    'gather_facts' => qb_options['facts'],
+    'gather_facts' => options.qb_options['facts'],
     'pre_tasks' => [
-      # need ansible 2.1.2.0 at least to run
-      # but this is obviously not flexible enough
-      # {
-      #   'assert' => {
-      #     'that' => "'ansible 2.1.2' in lookup('pipe', 'ansible --version')",
-      #   },
-      # },
       {
         'qb_facts' => {
           'qb_dir' => dir,
@@ -275,9 +271,9 @@ def main args
     ],
   }
   
-  if qb_options['user']
+  if options.qb_options['user']
     play['become'] = true
-    play['become_user'] = qb_options['user']
+    play['become_user'] = options.qb_options['user']
   end
   
   playbook = [play]
@@ -294,46 +290,84 @@ def main args
       role.path.expand_path.dirname,
       tmp_roles_path
     ] + QB::Role.search_path
-  ).join(':')
+  )
   
   ansible_library_path = [
-    QB::ROOT + 'library',
-  ].join(':')
+    QB::ROOT.join('library'),
+  ]
   
-  ansible_filter_plugins_path = QB::ROOT.join 'plugins', 'filter_plugins'
+  ansible_filter_plugins_path = [
+    QB::ROOT.join('plugins', 'filter_plugins'),
+  ]
   
-  template = []
-  template << "ANSIBLE_ROLES_PATH=<%= roles_path %>"
-  template << "ANSIBLE_LIBRARY=<%= library_path %>"
-  template << "ANSIBLE_FILTER_PLUGINS=<%= filter_plugins_path %>"
-  template << "ansible-playbook"
+  ansible_lookup_plugins_path = [
+    QB::ROOT.join('plugins', 'lookup_plugins'),
+  ]
   
-  if play['hosts'] != ['localhost']
-    template << "-i <%= hosts %>"
-  end
+  template = <<-END
+    ANSIBLE_ROLES_PATH=<%= roles_path.join(':') %>
+    ANSIBLE_LIBRARY=<%= library_path.join(':') %>
+    ANSIBLE_FILTER_PLUGINS=<%= filter_plugins_path.join(':') %>
+    ANSIBLE_LOOKUP_PLUGINS=<%= lookup_plugins_path.join(':') %>
+    
+    ansible-playbook
+    
+    <% if inventory_file %>
+      --inventory-file=<%= inventory_file %>
+    <% end %>
   
-  if qb_options['tags']
-    template << "--tags=<%= tags %>"
-  end
+    <% if tags %>
+      --tags=<%= tags.join(',') %>
+    <% end %>
   
-  if qb_options['verbose']
-    template << "-#{ 'v' * qb_options['verbose'] }"
-  end
+    <% if verbose %>
+      -<%= 'v' * verbose %>
+    <% end %>
   
-  if qb_options['ask_vault_pass'] || role.ask_vault_pass?
-    template << "--ask-vault-pass"
-  end
+    <%= ansible_options %>
+    
+    <%= playbook_path %>
+  END
   
-  template << "<%= playbook_path %>"
-  
-  cmd = Cmds.sub template.join(" "), [], {
-    roles_path: ansible_roles_path,
-    library_path: ansible_library_path,
-    playbook_path: playbook_path.to_s,
-    hosts: "#{ play['hosts'].join(',') },",
-    tags: (qb_options['tags'] ? qb_options['tags'].join(',') : nil),
-    filter_plugins_path: ansible_filter_plugins_path.to_s,
+  cmd = Cmds::Cmd.new template, {
+    kwds: {
+      roles_path: ansible_roles_path,
+      library_path: ansible_library_path,
+      filter_plugins_path: ansible_filter_plugins_path,
+      lookup_plugins_path: ansible_lookup_plugins_path,
+      
+      inventory_file: if play['hosts'] != ['localhost']
+        play['hosts'].join(',')
+      end,
+      
+      tags: options.qb_options['tags'],
+      
+      verbose: options.qb_options['verbose'],
+      
+      playbook_path: playbook_path.to_s,
+      
+      ansible_options: options.ansible_options,
+    },
+    
+    # format: :pretty,
   }
+  
+  # cmd = Cmds.new "ansible-playbook %{cmd_opts} %{playbook_path}", {
+  #   env: {
+  #     ANSIBLE_ROLES_PATH: roles_path,
+  #     ANSIBLE_LIBRARY: library_path,
+  #     ANSIBLE_FILTER_PLUGINS: filter_plugins_path,
+  #     ANSIBLE_LOOKUP_PLUGINS: lookup_plugins_path,
+  #   },
+  #   
+  #   kwds: {
+  #     cmd_opts: {
+  #       
+  #     },
+  #     
+  #     playbook_path: playbook_path,
+  #   },
+  # }
   
   # print
   # =====
@@ -341,20 +375,20 @@ def main args
   # print useful stuff for debugging / running outside of qb
   # 
   
-  if qb_options['print'].include? 'options'
+  if options.qb_options['print'].include? 'options'
     puts "SET OPTIONS:\n\n#{ YAML.dump set_options }\n\n"
   end
   
-  if qb_options['print'].include? 'cmd'
-    puts "COMMAND:\n\n#{ cmd }\n\n"
+  if options.qb_options['print'].include? 'cmd'
+    puts "COMMAND:\n\n#{ cmd.prepare }\n\n"
   end
   
-  if qb_options['print'].include? 'playbook'
+  if options.qb_options['print'].include? 'playbook'
     puts "PLAYBOOK:\n\n#{ YAML.dump playbook }\n\n"
   end
   
   # stop here if we're not supposed to run
-  exit 0 if !qb_options['run']
+  exit 0 if !options.qb_options['run']
   
   # run
   # ===
@@ -397,7 +431,7 @@ def main args
         QB::Util::STDIO::Service.new(name, dest).tap {|s| s.open! }
       end
       
-      status = Cmds.stream cmd
+      status = cmd.stream
       
       # close the stdio services
       stdio_services.each {|s| s.close! }

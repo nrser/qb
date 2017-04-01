@@ -1,6 +1,9 @@
 require 'yaml'
 require 'cmds'
 require 'parseconfig'
+require 'nrser/refinements'
+
+using NRSER
 
 module QB
   # contains info on a QB role.
@@ -8,17 +11,31 @@ module QB
   # 
   class Role
     # attrs
-    # =====
+    # =======================================================================
     
-    attr_accessor :path, :name, :rel_path
+    # @!attribute [r] path
+    #   @return [Pathname]
+    #     location of the role directory.
+    attr_reader :path
+    
+    # @!attribute [r] name
+    #   @return [String]
+    #     the role's ansible "name", which is it's directory name.
+    attr_reader :name
+    
+    # @!attribute [r] rel_path
+    #   @return [Pathname]
+    #     relative path to the role's directory.
+    attr_reader :rel_path
     
     # @!attribute [r] meta_path
-    #   @return [String, nil] the path qb metadata was load from. `nil` if it's
-    #     never been loaded or doesn't exist.
-    attr_accessor :meta_path
+    #   @return [String, nil]
+    #     the path qb metadata was load from. `nil` if it's never been loaded
+    #     or doesn't exist.
+    attr_reader :meta_path
     
     # errors
-    # ======
+    # =======================================================================
     
     # base for errors in the module, extends QB:Error
     class Error < QB::Error
@@ -35,7 +52,7 @@ module QB
       end
     end
     
-    # rasied by `.require` when multiple roles match
+    # raised by `.require` when multiple roles match
     class MultipleMatchesError < Error
       attr_accessor :input, :matches
       
@@ -48,7 +65,7 @@ module QB
     end
     
     # static role utils
-    # =================
+    # =======================================================================
     
     # true if pathname is a QB role directory.
     def self.role_dir? pathname
@@ -261,7 +278,7 @@ module QB
         when String
           current_include_path + [option_meta['as']]
         else
-          raise MetadataError.new,
+          raise QB::Options::MetadataError.new,
             "bad 'as' value: #{ option_meta.inspect }"
         end
       else
@@ -270,23 +287,41 @@ module QB
     end
     
     # instance methods
-    # ================
+    # =======================================================================
     
+    # 
+    # @param [String|Pathname] path
+    #   location of the role directory
+    # 
     def initialize path
-      @path = path
+      @path = if path.is_a?(Pathname) then path else Pathname.new(path) end
       
-      @rel_path = if path.to_s.start_with? QB::GEM_ROLES_DIR.to_s
-        path.sub(QB::GEM_ROLES_DIR.to_s + '/', '')
-      elsif path.to_s.start_with? Dir.getwd
-        path.sub(Dir.getwd + '/', './')
-      else
-        path
+      # check it...
+      unless @path.exist?
+        raise Errno::ENOENT.new @path.to_s
       end
       
-      @name = path.to_s.split(File::SEPARATOR).last
+      unless @path.directory?
+        raise Errno::ENOTDIR.new @path.to_s
+      end
       
-      # gets filled in when {#meta_load}
-      @meta_path = nil
+      @meta_path = if (@path + 'meta' + 'qb').exist?
+        @path + 'meta' + 'qb'
+      elsif (@path + 'meta' + 'qb.yml').exist?
+        @path + 'meta' + 'qb.yml'
+      else
+        raise Errno::ENOENT.new "#{ @path.join('meta').to_s }/[qb|qb.yml]"
+      end
+      
+      @rel_path = if @path.to_s.start_with? QB::GEM_ROLES_DIR.to_s
+        @path.sub(QB::GEM_ROLES_DIR.to_s + '/', '')
+      elsif @path.to_s.start_with? Dir.getwd
+        @path.sub(Dir.getwd + '/', './')
+      else
+        @path
+      end
+      
+      @name = @path.to_s.split(File::SEPARATOR).last
     end
     
     def to_s
@@ -315,17 +350,10 @@ module QB
     # if `cache` is true caches it as `@meta`
     # 
     def load_meta cache = true      
-      meta = if (@path + 'meta' + 'qb').exist?
-        @meta_path = @path + 'meta' + 'qb'
-        YAML.load(Cmds.out!(@meta_path.realpath.to_s)) || {}
-        
-      elsif (@path + 'meta' + 'qb.yml').exist?
-        @meta_path = @path + 'meta' + 'qb.yml'
+      meta = if @meta_path.extname == '.yml'
         YAML.load(@meta_path.read) || {}
-        
       else
-        {}
-        
+        YAML.load(Cmds.out!(@meta_path.realpath.to_s)) || {}
       end
       
       if cache
@@ -572,6 +600,13 @@ module QB
         end
       end
     end # default_dir
+    
+    # @return [Hash<String, *>]
+    #   default `ansible-playbook` CLI options from role qb metadata.
+    #   Hash of option name to value.
+    def default_ansible_options
+      meta_or 'ansible_options', {}
+    end
     
     private
     

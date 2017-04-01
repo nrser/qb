@@ -1,5 +1,5 @@
 module QB
-  module Options
+  class Options
     class Option
       
       
@@ -79,7 +79,7 @@ module QB
       
       def usage
         if boolean?
-          "--[no-]#{ option.cli_name }"
+          "--[no-]#{ cli_name }"
         else
           "--#{ cli_name }=#{ meta_name.upcase }"
         end
