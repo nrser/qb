@@ -1,0 +1,6 @@
+---
+# tasks file for resolve
+
+- debug:
+    msg:
+      resolved: "{{ lookup('resolve', 'vars/bad.yml') }}"
