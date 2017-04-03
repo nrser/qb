@@ -11,7 +11,7 @@ module QB
     QB_DEFAULTS = {
       'hosts' => ['localhost'],
       'facts' => true,
-      'print' => ['cmd'],
+      'print' => ['env', 'cmd'],
       'verbose' => false,
       'run' => true,
     }

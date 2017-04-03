@@ -18,28 +18,10 @@ DEBUG_ARGS = ['-D', '--DEBUG']
 # globals
 # =======
 
-# @api util
-# *pure*
-#
-# format a debug message with optional key / values to print
-#
-# @param msg [String] message to print.
-# @param dump [Hash] optional hash of keys and values to dump.
-def format msg, dump = {}
-  unless dump.empty?
-    msg += "\n" + dump.map {|k, v| "  #{ k }: #{ v.inspect }" }.join("\n")
-  end
-  msg
-end
-
-def debug *args
-  QB.debug *args
-end
-
 def set_debug! args
   if DEBUG_ARGS.any? {|arg| args.include? arg}
     ENV['QB_DEBUG'] = 'true'
-    debug "ON"
+    QB.debug "ON"
     DEBUG_ARGS.each {|arg| args.delete arg}
   end
 end
@@ -83,9 +65,6 @@ def with_clean_env &block
       
       qb_env.each {|k, v| ENV[k] = v}
       
-      # and set QB_DEV_ENV=true
-      ENV['QB_DEV_ENV'] = 'true'
-      
       # invoke the block
       block.call
     end
@@ -123,12 +102,12 @@ end
 
 def main args
   set_debug! args
-  debug args: args
+  QB.debug args: args
   
   QB.check_ansible_version
   
   role_arg = args.shift
-  debug "role arg" => role_arg
+  QB.debug "role arg" => role_arg
   
   help if role_arg.nil? || ['-h', '--help', 'help'].include?(role_arg)
   
@@ -145,11 +124,11 @@ def main args
   
   options = QB::Options.new role, args
   
-  debug "role options set on cli", options.role_options.select {|k, o|
+  QB.debug "role options set on cli", options.role_options.select {|k, o|
     !o.value.nil?
   }
   
-  debug "qb options", options.qb_options
+  QB.debug "qb options", options.qb_options
   
   cwd = Dir.getwd
   
@@ -175,12 +154,12 @@ def main args
       
     end
     
-    debug "input_dir", dir
+    QB.debug "input_dir", dir
     
     # normalize to expanded path (has no trailing slash)
     dir = File.expand_path dir
     
-    debug "normalized_dir", dir
+    QB.debug "normalized_dir", dir
     
     # create the dir if it doesn't exist (so don't have to cover this in
     # every role)
@@ -200,23 +179,23 @@ def main args
           }.to_h
         ]
       }.to_h.tap {|saved_options|
-        debug "found saved options", saved_options
+        QB.debug "found saved options", saved_options
       }
     else
-      debug "no saved options"
+      QB.debug "no saved options"
       {}
     end
     
     if saved_options.key? role.options_key
       role_saved_options = saved_options[role.options_key]
       
-      debug "found saved options for role", role_saved_options
+      QB.debug "found saved options for role", role_saved_options
       
       role_saved_options.each do |option_cli_name, value|
         option = options.role_options[option_cli_name]
         
         if option.value.nil?
-          debug "setting from saved options", option: option, value: value
+          QB.debug "setting from saved options", option: option, value: value
           
           option.value = value
         end
@@ -236,7 +215,7 @@ def main args
   
   set_options = options.role_options.select {|k, o| !o.value.nil?}
   
-  debug "set options", set_options
+  QB.debug "set options", set_options
   
   playbook_role = {'role' => role.name}
   
@@ -278,38 +257,40 @@ def main args
   
   playbook = [play]
   
-  debug "playbook", playbook
+  QB.debug "playbook", playbook
   
   playbook_path = Pathname.new(Dir.getwd) + '.qb-playbook.yml'
-  debug playbook_path: playbook_path.to_s
+  QB.debug playbook_path: playbook_path.to_s
   
-  tmp_roles_path = QB::ROOT + 'tmp' + 'roles'
-  
-  ansible_roles_path = (
-    [
+  env = {
+    ANSIBLE_ROLES_PATH: [
+      # stick the role path in front to make sure we get **that** role
       role.path.expand_path.dirname,
-      tmp_roles_path
-    ] + QB::Role.search_path
-  )
-  
-  ansible_library_path = [
-    QB::ROOT.join('library'),
-  ]
-  
-  ansible_filter_plugins_path = [
-    QB::ROOT.join('plugins', 'filter_plugins'),
-  ]
-  
-  ansible_lookup_plugins_path = [
-    QB::ROOT.join('plugins', 'lookup_plugins'),
-  ]
-  
-  template = <<-END
-    ANSIBLE_ROLES_PATH=<%= roles_path.join(':') %>
-    ANSIBLE_LIBRARY=<%= library_path.join(':') %>
-    ANSIBLE_FILTER_PLUGINS=<%= filter_plugins_path.join(':') %>
-    ANSIBLE_LOOKUP_PLUGINS=<%= lookup_plugins_path.join(':') %>
+      
+      # then include the full role search path
+      
+      # NOTE  this includes role paths pulled from a call-site local
+      #       ansible.cfg
+      QB::Role.search_path,
+    ].
+      flatten. # since QB::Role.search_path is an Array
+      map(&:to_s). # Pathname => String so uniq works 
+      uniq, # drop dups (seems to keep first instance so preserves priority)
     
+    ANSIBLE_LIBRARY: [
+      QB::ROOT.join('library'),
+    ],
+    
+    ANSIBLE_FILTER_PLUGINS: [
+      QB::ROOT.join('plugins', 'filter_plugins'),
+    ],
+    
+    ANSIBLE_LOOKUP_PLUGINS: [
+      QB::ROOT.join('plugins', 'lookup_plugins'),
+    ],
+  }
+  
+  template = <<-END    
     ansible-playbook
     
     <% if inventory_file %>
@@ -330,12 +311,9 @@ def main args
   END
   
   cmd = Cmds::Cmd.new template, {
+    env: env.map {|k, v| [k, v.is_a?(Array) ? v.join(':') : v]}.to_h,
+    
     kwds: {
-      roles_path: ansible_roles_path,
-      library_path: ansible_library_path,
-      filter_plugins_path: ansible_filter_plugins_path,
-      lookup_plugins_path: ansible_lookup_plugins_path,
-      
       inventory_file: if play['hosts'] != ['localhost']
         play['hosts'].join(',')
       end,
@@ -351,24 +329,6 @@ def main args
     
     # format: :pretty,
   }
-  
-  # cmd = Cmds.new "ansible-playbook %{cmd_opts} %{playbook_path}", {
-  #   env: {
-  #     ANSIBLE_ROLES_PATH: roles_path,
-  #     ANSIBLE_LIBRARY: library_path,
-  #     ANSIBLE_FILTER_PLUGINS: filter_plugins_path,
-  #     ANSIBLE_LOOKUP_PLUGINS: lookup_plugins_path,
-  #   },
-  #   
-  #   kwds: {
-  #     cmd_opts: {
-  #       
-  #     },
-  #     
-  #     playbook_path: playbook_path,
-  #   },
-  # }
-  
   # print
   # =====
   # 
@@ -377,6 +337,11 @@ def main args
   
   if options.qb_options['print'].include? 'options'
     puts "SET OPTIONS:\n\n#{ YAML.dump set_options }\n\n"
+  end
+  
+  if options.qb_options['print'].include? 'env'
+    dump = YAML.dump env.map {|k, v| [k.to_s, v.map {|i| i.to_s}]}.to_h
+    puts "ENV:\n\n#{ dump }\n\n"
   end
   
   if options.qb_options['print'].include? 'cmd'

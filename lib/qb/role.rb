@@ -525,7 +525,7 @@ module QB
     # 
     # 
     def default_dir cwd, options
-      debug "get_default_dir",  role: self,
+      QB.debug "get_default_dir",  role: self,
                                 meta: self.meta,
                                 cwd: cwd,
                                 options: options
@@ -543,7 +543,7 @@ module QB
         raise "role does not use default directory (meta/qb.yml:default_dir = false)"
       
       when 'git_root'
-        debug "returning the git root relative to cwd"
+        QB.debug "returning the git root relative to cwd"
         NRSER.git_root cwd
       
       when 'cwd'
