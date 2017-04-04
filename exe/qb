@@ -308,7 +308,7 @@ def main args
     ansible-playbook
     
     <%= cmd_options %>
-  
+    
     <% if verbose %>
       -<%= 'v' * verbose %>
     <% end %>
@@ -327,7 +327,7 @@ def main args
       playbook_path: playbook_path.to_s,
     },
     
-    # format: :pretty,
+    format: :pretty,
   }
   # print
   # =====
