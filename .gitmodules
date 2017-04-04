@@ -19,3 +19,6 @@
 [submodule "dev/gems/cmds"]
 	path = dev/gems/cmds
 	url = git@github.com:nrser/cmds.git
+[submodule "dev/gems/nrser"]
+	path = dev/gems/nrser
+	url = git@github.com:nrser/nrser-ruby.git
