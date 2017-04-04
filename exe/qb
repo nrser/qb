@@ -63,6 +63,10 @@ def with_clean_env &block
       # 'QB_DEV_ENV_<NAME>' vars.
       dev_env.each {|k, v| ENV["QB_DEV_ENV_#{ k }"] = v}
       
+      # set the flag that will be used by modules to know to restore the 
+      # variables
+      ENV['QB_DEV_ENV'] = 'true'
+      
       qb_env.each {|k, v| ENV[k] = v}
       
       # invoke the block
