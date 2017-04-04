@@ -128,7 +128,7 @@ def main args
     !o.value.nil?
   }
   
-  QB.debug "qb options", options.qb_options
+  QB.debug "qb options", options.qb
   
   cwd = Dir.getwd
   
@@ -233,10 +233,10 @@ def main args
   
   play =
   {
-    'hosts' => options.qb_options['hosts'],
+    'hosts' => options.qb['hosts'],
     'vars' => playbook_vars,
     # 'gather_subset' => ['!all'],
-    'gather_facts' => options.qb_options['facts'],
+    'gather_facts' => options.qb['facts'],
     'pre_tasks' => [
       {
         'qb_facts' => {
@@ -250,9 +250,9 @@ def main args
     ],
   }
   
-  if options.qb_options['user']
+  if options.qb['user']
     play['become'] = true
-    play['become_user'] = options.qb_options['user']
+    play['become_user'] = options.qb['user']
   end
   
   playbook = [play]
@@ -290,41 +290,41 @@ def main args
     ],
   }
   
-  template = <<-END    
+  cmd_options = options.ansible.clone
+  
+  if options.qb['inventory']
+    cmd_options['inventory-file'] = options.qb['inventory']
+    
+  elsif play['hosts'] != ['localhost']
+    cmd_options['inventory-file'] = play['hosts']
+    
+  end
+    
+  if options.qb['tags']
+    cmd_options['tags'] = options.qb['tags']
+  end
+  
+  cmd_template = <<-END    
     ansible-playbook
     
-    <% if inventory_file %>
-      --inventory-file=<%= inventory_file %>
-    <% end %>
-  
-    <% if tags %>
-      --tags=<%= tags.join(',') %>
-    <% end %>
+    <%= cmd_options %>
   
     <% if verbose %>
       -<%= 'v' * verbose %>
     <% end %>
-  
-    <%= ansible_options %>
     
     <%= playbook_path %>
   END
   
-  cmd = Cmds::Cmd.new template, {
+  cmd = Cmds::Cmd.new cmd_template, {
     env: env.map {|k, v| [k, v.is_a?(Array) ? v.join(':') : v]}.to_h,
     
     kwds: {
-      inventory_file: if play['hosts'] != ['localhost']
-        play['hosts'].join(',')
-      end,
+      cmd_options: cmd_options,
       
-      tags: options.qb_options['tags'],
-      
-      verbose: options.qb_options['verbose'],
+      verbose: options.qb['verbose'],
       
       playbook_path: playbook_path.to_s,
-      
-      ansible_options: options.ansible_options,
     },
     
     # format: :pretty,
@@ -335,25 +335,25 @@ def main args
   # print useful stuff for debugging / running outside of qb
   # 
   
-  if options.qb_options['print'].include? 'options'
+  if options.qb['print'].include? 'options'
     puts "SET OPTIONS:\n\n#{ YAML.dump set_options }\n\n"
   end
   
-  if options.qb_options['print'].include? 'env'
+  if options.qb['print'].include? 'env'
     dump = YAML.dump env.map {|k, v| [k.to_s, v.map {|i| i.to_s}]}.to_h
     puts "ENV:\n\n#{ dump }\n\n"
   end
   
-  if options.qb_options['print'].include? 'cmd'
+  if options.qb['print'].include? 'cmd'
     puts "COMMAND:\n\n#{ cmd.prepare }\n\n"
   end
   
-  if options.qb_options['print'].include? 'playbook'
+  if options.qb['print'].include? 'playbook'
     puts "PLAYBOOK:\n\n#{ YAML.dump playbook }\n\n"
   end
   
   # stop here if we're not supposed to run
-  exit 0 if !options.qb_options['run']
+  exit 0 if !options.qb['run']
   
   # run
   # ===

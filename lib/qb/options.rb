@@ -19,20 +19,20 @@ module QB
     # attributes
     # =======================================================================
     
-    # @!attribute [r] ansible_options
+    # @!attribute [r] ansible
     #   @return [Hash<String, String>]
     #     options to pass through to ansible-playbook.
-    attr_reader :ansible_options
+    attr_reader :ansible
     
     # @!attribute [r] role_options
     #   @return [Hash<String, QB::Options::Option>]
     #     options to pass through to ansible-playbook.
     attr_reader :role_options
     
-    # @!attribute [r] qb_options
+    # @!attribute [r] qb
     #   @return [Hash<String, *>]
     #     common qb-level options.
-    attr_reader :qb_options
+    attr_reader :qb
     
     # class methods
     # =======================================================================
@@ -215,7 +215,7 @@ module QB
     # 
     def self.parse! role, argv
       options = self.new role, argv
-      [options.role_options, options.qb_options]
+      [options.role_options, options.qb]
     end
     
     # constructor
@@ -237,14 +237,14 @@ module QB
     # destructively removes options from `@argv` and populates ansible, role,
     # and qb option hashes.
     def parse!
-      parse_ansible_options!
+      parse_ansible!
       
       @role_options = {}
       
-      @qb_options = QB_DEFAULTS.clone
+      @qb = QB_DEFAULTS.clone
       
       if @role.meta['default_user']
-        @qb_options['user'] = @role.meta['default_user']
+        @qb['user'] = @role.meta['default_user']
       end
       
       opt_parser = OptionParser.new do |opts|
@@ -257,7 +257,7 @@ module QB
           "set playbook host",
           "DEFAULT: localhost"
         ) do |value|
-          @qb_options['hosts'] = value
+          @qb['hosts'] = value
         end
         
         opts.on(
@@ -266,7 +266,7 @@ module QB
           String,
           "set inventory file",
         ) do |value|
-          @qb_options['hosts'] = value
+          @qb['inventory'] = value
         end
         
         opts.on(
@@ -275,7 +275,7 @@ module QB
           String,
           "ansible become user for the playbook"
         ) do |value|
-          @qb_options['user'] = value
+          @qb['user'] = value
         end
         
         opts.on(
@@ -284,7 +284,7 @@ module QB
           Array,
           "playbook tags",
         ) do |value|
-          @qb_options['tags'] = value
+          @qb['tags'] = value
         end
         
         opts.on(
@@ -293,7 +293,7 @@ module QB
         ) do |value|
           # QB.debug "verbose", value: value
           
-          @qb_options['verbose'] = if value.nil?
+          @qb['verbose'] = if value.nil?
             1
           else
             case value
@@ -313,7 +313,7 @@ module QB
           '--NO-FACTS',
           "don't gather facts",
         ) do |value|
-          @qb_options['facts'] = false
+          @qb['facts'] = false
         end
         
         opts.on(
@@ -321,21 +321,14 @@ module QB
           Array,
           "set what to print before running."
         ) do |value|
-          @qb_options['print'] = value
+          @qb['print'] = value
         end
         
         opts.on(
           '--NO-RUN',
           "don't run the playbook (useful to just print stuff)",
         ) do |value|
-          @qb_options['run'] = false
-        end
-        
-        opts.on(
-          '--ASK-VAULT-PASS',
-          "ask for the vault password.",
-        ) do |value|
-          @qb_options['ask_vault_pass'] = true
+          @qb['run'] = false
         end
         
         self.class.add opts, @role_options, @role
@@ -352,26 +345,37 @@ module QB
       opt_parser.parse! @argv
     end # parse!
     
-    # pull options that start with `--ANSIBLE_` out of `@argv` and stick 
-    # them in `@ansible_options`.
-    def parse_ansible_options!
-      @ansible_options = @role.default_ansible_options.clone
+    # pull options that start with
+    #
+    # 1.  `--ANSIBLE_`
+    # 1.  `--ANSIBLE-`
+    # 2.  `---`
+    # 
+    # out of `@argv` and stick them in `@ansible`.
+    def parse_ansible!
+      @ansible = @role.default_ansible_options.clone
+      
+      reg_exs = [
+        /\A\-\-ANSIBLE[\-\_]/,
+        /\A\-\-\-/,
+      ]
       
       @argv.reject! {|shellword|
-        if shellword.start_with? '--ANSIBLE_'
-          name = shellword['--ANSIBLE_'.length..-1]
-          value = nil
+        if re = reg_exs.find {|re| re =~ shellword}
+          name = shellword.sub re, ''
+          
+          value = true
           
           if name.include? '='
             name, value = name.split('=', 2)
           end
           
-          @ansible_options[name] = value
+          @ansible[name] = value
           
           true
         end
       }
-    end # #parse_ansible_options!
+    end # #parse_ansible!
     
   end # Options
 end # QB

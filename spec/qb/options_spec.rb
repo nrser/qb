@@ -43,29 +43,29 @@ describe QB::Options do
     end # required_option
   end # .parse!
   
-  describe "#parse_ansible_options!" do
+  describe "#parse_ansible!" do
     
     context "required options role" do
       role = test_role "required_option", ["required_option"]
       
-      it "parses a boolean ansible option to have nil value" do
+      it "parses a boolean ansible option to have true value" do
         options = QB::Options.new role, "--ANSIBLE_ask-vault-pass".shellsplit
         
-        expect(options.ansible_options.length).to be 1
-        expect(options.ansible_options.key? 'ask-vault-pass').to be true
-        expect(options.ansible_options['ask-vault-pass']).to be nil
+        expect(options.ansible.length).to be 1
+        expect(options.ansible.key? 'ask-vault-pass').to be true
+        expect(options.ansible['ask-vault-pass']).to be true
         expect(options.instance_variable_get(:@argv)).to eq []
       end
       
       it "parses a string ansible option to correct value" do
         options = QB::Options.new role, "--ANSIBLE_tags=blah".shellsplit
         
-        expect(options.ansible_options.length).to be 1
-        expect(options.ansible_options.key? 'tags').to be true
-        expect(options.ansible_options['tags']).to eq 'blah'
+        expect(options.ansible.length).to be 1
+        expect(options.ansible.key? 'tags').to be true
+        expect(options.ansible['tags']).to eq 'blah'
         expect(options.instance_variable_get(:@argv)).to eq []
       end
     end # required options role
     
-  end # #parse_ansible_options!
+  end # #parse_ansible!
 end # QB::Options
