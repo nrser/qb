@@ -42,16 +42,19 @@
     dest: "{{ release_gem_version_path }}"
     regexp: "VERSION\\s*=\\s*\"{{ release_gem_current_version }}\""
     replace: "VERSION = \"{{ release_gem_release_version }}\""
+  when: release_gem_current_version != release_gem_release_version
 
 - name: add release version to git
   command: "git add {{ release_gem_version_path }}"
   args:
     chdir: "{{ qb_dir }}"
+  when: release_gem_current_version != release_gem_release_version
 
 - name: commit release version
   command: git commit -m "bump to v{{ release_gem_release_version }}"
   args:
     chdir: "{{ qb_dir }}"
+  when: release_gem_current_version != release_gem_release_version
 
 - name: release with bundler
   shell: bundle exec rake release
