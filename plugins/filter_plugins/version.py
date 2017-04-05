@@ -59,7 +59,12 @@ def semver_parse(version):
     
     cmd = ['node', '--eval', stmt]
     
-    out = subprocess.check_output(cmd)
+    out = subprocess.check_output(
+        cmd,
+        cwd = os.path.realpath(
+            os.path.join(__file__, '..', '..')
+        )
+    )
     
     return out.rstrip()
 
