@@ -547,11 +547,11 @@ module QB
         NRSER.git_root cwd
       
       when 'cwd'
-        debug "returning current working directory"
+        QB.debug "returning current working directory"
         cwd
         
       when Hash
-        debug "qb meta option is a Hash"
+        QB.debug "qb meta option is a Hash"
         
         unless value.length == 1
           raise "#{ meta_path.to_s }:default_dir invalid: #{ value.inspect }"
@@ -590,7 +590,7 @@ module QB
             raise "find_up filename must be string, found #{ filename.inspect }"
           end
           
-          debug "found 'find_up', looking for file named #{ filename }"
+          QB.debug "found 'find_up', looking for file named #{ filename }"
           
           QB::Util.find_up filename
           
