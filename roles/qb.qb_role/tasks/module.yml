@@ -2,6 +2,11 @@
 - set_fact:
     qb_role_module_class: "{{ qb_role_module | class_case }}"
     qb_role_module_path: "{{ role_dest }}/library/{{ qb_role_module }}"
+
+- name: create library directory
+  file:
+    dest: "{{ qb_role_module_path | dirname }}"
+    state: directory
   
 - name: "create {{ qb_role_module }} module"
   template:

@@ -60,9 +60,10 @@ module QB
       def description
         value = meta_or 'description',
           "set the #{ @var_name } role variable"
+        
+        line_break = "\n" + "\t" * 5
           
         if @meta['type'].is_a?(Hash) && @meta['type'].key?('one_of')
-          line_break = "\n" + "\t" * 5
           value += " options:" + 
             "#{ line_break }#{ @meta['type']['one_of'].join(line_break) }"
         end
@@ -99,7 +100,9 @@ module QB
       # @return [Array<String>]
       # 
       def examples
-        meta_or EXAMPLES_KEYS, []
+        value = meta_or EXAMPLES_KEYS, []
+        
+        if value.is_a? String then [value] else value end
       end
       
       private

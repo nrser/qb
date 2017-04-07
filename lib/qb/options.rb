@@ -175,14 +175,6 @@ module QB
             on_args << "REQUIRED."
           end
           
-          if option.has_examples?
-            on_args << 'examples:'
-            
-            option.examples.each {|example|
-              on_args << ("  " + example)
-            }
-          end
-          
           if role.defaults.key? option.var_name
             if option.meta['type'] == 'boolean'
               on_args << if role.defaults[option.var_name]
@@ -195,9 +187,27 @@ module QB
             end
           end
           
+          if option.has_examples?
+            on_args << 'examples:'
+            
+            option.examples.each_with_index {|example, index|
+              lines = example.lines.to_a
+              
+              pp lines
+              
+              on_args << ((index + 1).to_s + '.').ljust(4) + lines.first.chomp
+              
+              lines[1..-1].each {|line|
+                on_args << (" ".ljust(4) + line.chomp)
+              }
+            }
+          end
+          
           on_args << SPACER
           
           QB.debug "adding option", option: option, on_args: on_args
+          
+          pp on_args
           
           opts.on(*on_args) do |value|
             QB.debug  "setting option",
