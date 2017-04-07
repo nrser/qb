@@ -1,7 +1,7 @@
 module QB
   class Options
     class Option
-      
+      EXAMPLES_KEYS = ['examples', 'example']
       
       # the role that this option is for
       # attr_reader :role
@@ -83,6 +83,23 @@ module QB
         else
           "--#{ cli_name }=#{ meta_name.upcase }"
         end
+      end
+      
+      # test if the option has any examples.
+      # 
+      # @return [Boolean]
+      # 
+      def has_examples?
+        EXAMPLES_KEYS.any? {|key| meta.key? key}
+      end
+      
+      # get an array of examples for the option. returns `[]` if no examples
+      # are defined.
+      # 
+      # @return [Array<String>]
+      # 
+      def examples
+        meta_or EXAMPLES_KEYS, []
       end
       
       private

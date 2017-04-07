@@ -16,6 +16,14 @@ module QB
       'run' => true,
     }
     
+    # appended on the end of an `opts.on` call to create a newline after
+    # the option (making the help output a bit easier to read)
+    # 
+    # you might think the empty string would be reasonable, but OptionParser
+    # blows up if you do that.
+    # 
+    SPACER = ' '
+    
     # attributes
     # =======================================================================
     
@@ -167,6 +175,14 @@ module QB
             on_args << "REQUIRED."
           end
           
+          if option.has_examples?
+            on_args << 'examples:'
+            
+            option.examples.each {|example|
+              on_args << ("  " + example)
+            }
+          end
+          
           if role.defaults.key? option.var_name
             if option.meta['type'] == 'boolean'
               on_args << if role.defaults[option.var_name]
@@ -178,6 +194,8 @@ module QB
               on_args << "DEFAULT: #{ role.defaults[option.var_name] }"
             end
           end
+          
+          on_args << SPACER
           
           QB.debug "adding option", option: option, on_args: on_args
           
@@ -255,7 +273,8 @@ module QB
           '--HOSTS=HOSTS',
           Array,
           "set playbook host",
-          "DEFAULT: localhost"
+          "DEFAULT: localhost",
+          SPACER
         ) do |value|
           @qb['hosts'] = value
         end
@@ -265,6 +284,7 @@ module QB
           '--INVENTORY=FILEPATH',
           String,
           "set inventory file",
+          SPACER
         ) do |value|
           @qb['inventory'] = value
         end
@@ -273,7 +293,8 @@ module QB
           '-U',
           '--USER=USER',
           String,
-          "ansible become user for the playbook"
+          "ansible become user for the playbook",
+          SPACER
         ) do |value|
           @qb['user'] = value
         end
@@ -283,13 +304,15 @@ module QB
           '--TAGS=TAGS',
           Array,
           "playbook tags",
+          SPACER
         ) do |value|
           @qb['tags'] = value
         end
         
         opts.on(
           '-V[LEVEL]',
-          "run playbook in verbose mode. use like -VVV or -V3."
+          "run playbook in verbose mode. use like -VVV or -V3.",
+          SPACER
         ) do |value|
           # QB.debug "verbose", value: value
           
@@ -312,6 +335,7 @@ module QB
         opts.on(
           '--NO-FACTS',
           "don't gather facts",
+          SPACER
         ) do |value|
           @qb['facts'] = false
         end
@@ -319,7 +343,8 @@ module QB
         opts.on(
           '--PRINT=FLAGS',
           Array,
-          "set what to print before running."
+          "set what to print before running.",
+          SPACER
         ) do |value|
           @qb['print'] = value
         end
@@ -327,6 +352,7 @@ module QB
         opts.on(
           '--NO-RUN',
           "don't run the playbook (useful to just print stuff)",
+          SPACER
         ) do |value|
           @qb['run'] = false
         end
