@@ -50,6 +50,7 @@ def main():
     cmds = {
         'qb_git_user_name': ['git', 'config', 'user.name'],
         'qb_git_user_email': ['git', 'config', 'user.email'],
+        'qb_git_repo_root': ['git', 'rev-parse', '--show-toplevel'],
     }
     
     for key, cmd in cmds.iteritems():        
