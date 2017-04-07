@@ -207,8 +207,6 @@ module QB
           
           QB.debug "adding option", option: option, on_args: on_args
           
-          pp on_args
-          
           opts.on(*on_args) do |value|
             QB.debug  "setting option",
                       option: option,
