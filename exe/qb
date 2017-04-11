@@ -320,7 +320,7 @@ def main args
     <%= playbook_path %>
   END
   
-  cmd = Cmds::Cmd.new cmd_template, {
+  cmd = Cmds.new cmd_template, {
     env: env.map {|k, v| [k, v.is_a?(Array) ? v.join(':') : v]}.to_h,
     
     kwds: {
