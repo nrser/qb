@@ -2,7 +2,7 @@
 # tasks file for qb.yarn
 
 - name: manage yarn installation
-  include: "distro/{{ ansible_distribution }}.yml"
+  include: "distribution/{{ ansible_distribution }}.yml"
 
 - name: add global packages
   with_items: "{{ yarn_global_packages }}"
