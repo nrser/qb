@@ -23,10 +23,14 @@ module QB
     #     the role's ansible "name", which is it's directory name.
     attr_reader :name
     
-    # @!attribute [r] rel_path
+    # @!attribute [r] display_path
+    # 
+    # the path to the role that we display. we only show the directory name
+    # for QB roles, and use {QB::Util.compact_path} to show `.` and `~` for
+    # paths relative to the current directory and home directory, respectively.
+    # 
     #   @return [Pathname]
-    #     relative path to the role's directory.
-    attr_reader :rel_path
+    attr_reader :display_path
     
     # @!attribute [r] meta_path
     #   @return [String, nil]
@@ -98,7 +102,7 @@ module QB
     def self.roles_paths dir
       cfg_roles_path(dir) + [
         dir.join('roles'),
-        dir.join('roles', 'tmp')
+        dir.join('roles', 'tmp'),
       ]
     end
     
@@ -127,7 +131,8 @@ module QB
     #             in source control.
     # 3.  
     # 
-    # @return [Array<Pathname>] places to look for role dirs.
+    # @return [Array<Pathname>]
+    #   places to look for role dirs.
     # 
     def self.search_path
       [
@@ -139,7 +144,8 @@ module QB
         QB::Util.resolve('dev'),
       ].map {|dir|
         roles_paths dir
-      }.flatten
+      }.
+      flatten
     end
     
     # array of QB::Role found in search path.
@@ -154,14 +160,10 @@ module QB
           search_dir.children.select {|child| role_dir? child }
         }.
         flatten.
-        # should allow uniq to remove dups
-        map {|role_dir| role_dir.realpath }.
-        # needed when qb is run from the qb repo since QB::GEM_ROLES_DIR and
-        # ./roles are the same dir
-        uniq.
         map {|role_dir|
           QB::Role.new role_dir
-        }
+        }.
+        uniq
     end
     
     # get an array of QB::Role that match an input string
@@ -171,7 +173,7 @@ module QB
       
       # first off, see if input matches any relative paths exactly
       available.each {|role|
-        return [role] if role.rel_path.to_s == input
+        return [role] if role.display_path.to_s == input
       }
       
       # create an array of "separator" variations to try *exact* matching 
@@ -221,7 +223,7 @@ module QB
       
       # see if we word match any relative paths
       name_word_matches = available.select {|role|
-        QB::Util.words_start_with? role.rel_path.to_s, input
+        QB::Util.words_start_with? role.display_path.to_s, input
       }
       return name_word_matches unless name_word_matches.empty?
       
@@ -283,7 +285,23 @@ module QB
         end
       else
         current_include_path + [role.namespaceless]
-      end      
+      end
+    end
+    
+    # the path we display in the CLI, see {#display_path}.
+    # 
+    # @param [Pathname | String] path
+    #   input path to transform.
+    # 
+    # @return [Pathname]
+    #   path to display.
+    # 
+    def self.to_display_path path
+      if path.realpath.start_with? QB::GEM_ROLES_DIR
+        path.realpath.sub (QB::GEM_ROLES_DIR.to_s + '/'), ''
+      else
+        QB::Util.contract_path path
+      end
     end
     
     # instance methods
@@ -305,6 +323,8 @@ module QB
         raise Errno::ENOTDIR.new @path.to_s
       end
       
+      @display_path = self.class.to_display_path @path
+      
       @meta_path = if (@path + 'meta' + 'qb').exist?
         @path + 'meta' + 'qb'
       elsif (@path + 'meta' + 'qb.yml').exist?
@@ -313,19 +333,11 @@ module QB
         raise Errno::ENOENT.new "#{ @path.join('meta').to_s }/[qb|qb.yml]"
       end
       
-      @rel_path = if @path.to_s.start_with? QB::GEM_ROLES_DIR.to_s
-        @path.sub(QB::GEM_ROLES_DIR.to_s + '/', '')
-      elsif @path.to_s.start_with? Dir.getwd
-        @path.sub(Dir.getwd + '/', './')
-      else
-        @path
-      end
-      
       @name = @path.to_s.split(File::SEPARATOR).last
     end
     
     def to_s
-      @rel_path.to_s
+      @display_path.to_s
     end
     
     def namespace
@@ -341,7 +353,7 @@ module QB
     end
     
     def options_key
-      @rel_path.to_s
+      @display_path.to_s
     end
     
     # load qb metadata from meta/qb.yml or from executing meta/qb and parsing
@@ -608,7 +620,21 @@ module QB
       meta_or 'ansible_options', {}
     end
     
+    # language inter-op
+    # -----------------------------------------------------------------------
+    
+    def hash
+      path.realpath.hash
+    end
+    
+    def == other
+      other.is_a?(Role) && other.path.realpath == path.realpath
+    end
+    
+    alias_method :eql?, :==
+    
     private
+    # -----------------------------------------------------------------------
     
     # get the value at the first found of the keys or the default.
     # 

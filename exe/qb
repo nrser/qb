@@ -278,7 +278,8 @@ def main args
       QB::Role.search_path,
     ].
       flatten. # since QB::Role.search_path is an Array
-      map(&:to_s). # Pathname => String so uniq works 
+      select(&:directory?).
+      map(&:realpath). # so uniq works
       uniq, # drop dups (seems to keep first instance so preserves priority)
     
     ANSIBLE_LIBRARY: [

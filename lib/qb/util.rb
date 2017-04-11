@@ -1,3 +1,7 @@
+require 'nrser'
+
+using NRSER
+
 module QB
   module Util
     # split a string into 'words' for word-based matching
@@ -49,6 +53,27 @@ module QB
       
       # shouldn't ever happen
       raise "resolution failed: #{ segments.inspect }"
+    end
+    
+    # do kind of the opposite of File.expand_path -- turn the home dir into ~
+    # and the current dir into .
+    # 
+    # @param [Pathname | String]
+    #   path to contract.
+    # 
+    # @return [Pathname]
+    #   contracted path.
+    # 
+    def self.contract_path path
+      contracted = if path.start_with? Dir.pwd
+        path.sub Dir.pwd, '.'
+      elsif path.start_with? ENV['HOME']
+        path.sub ENV['HOME'], '~'
+      else
+        path
+      end
+      
+      Pathname.new contracted
     end
     
     # find `filename` in `from` or closest parent directory.
