@@ -66,7 +66,28 @@ def semver_parse(version):
         )
     )
     
-    return out.rstrip()
+    version = json.loads(out)
+    
+    version['is_release'] = len(version['prerelease']) == 0
+    
+    version['is_dev'] = (
+        len(version['prerelease']) > 0 and
+        version['prerelease'][0] == 'dev'
+    )
+    
+    version['is_rc'] = (
+        len(version['prerelease']) > 0 and
+        version['prerelease'][0] == 'rc'
+    )
+    
+    if version['is_release']:
+        version['type'] = 'release'
+    else:
+        version['type'] = version['prerelease'][0]
+    
+    version['release'] = "%(major)s.%(minor)s.%(patch)s" % version
+    
+    return version
 
 
 class FilterModule(object):
