@@ -38,14 +38,6 @@ class {{ role_module_class }} < QB::AnsibleModule
   #       the module will exit successfully.
   #       
   def main
-    # if you want to set variables in the ansible runtime, return a hash
-    # of variables names to values.
-    # 
-    # example:
-    #   
-    #   return {blah: 'hi there!'}
-    # 
-    # otherwise, return `nil`. returning anything else will raise an error.
     return nil
   end # #main
 end # {{ role_module_class }}
