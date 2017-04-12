@@ -11,9 +11,4 @@
     src: qb.yml.j2
     dest: "{{ role_dest }}/meta/qb.yml"
     force: false
-
-- include: module.yml
-  with_items: "{{ qb_role_modules }}"
-  loop_control:
-    loop_var: qb_role_module
   

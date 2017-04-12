@@ -1,0 +1,20 @@
+---
+- set_fact:
+    role_module_class: "{{ role_module | class_case }}"
+    role_module_path: "{{ role_dest }}/library/{{ role_module }}"
+
+- name: create library directory
+  file:
+    dest: "{{ role_module_path | dirname }}"
+    state: directory
+  
+- name: "create {{ role_module }} module"
+  template:
+    src: library/module.rb.j2
+    dest: "{{ role_module_path }}"
+    force: "{{ role_force }}"
+
+- name: "make library/{{ role_module }} executable"
+  file:
+    path: "{{ role_module_path }}"
+    mode: a+x

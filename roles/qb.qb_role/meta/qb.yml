@@ -10,19 +10,6 @@ var_prefix: null
 # how to get a default for `dir` if it's not provided as the 
 default_dir: null
 
-options:
-- name: modules
-  description: >-
-    create ruby module boilerplate(s) in library using QB::AnsibleModule.
-  type: array
-  required: false
-  # TODO not yet implemented
-  implies: library
-  examples:
-  - |
-    produces library/some_module execuable with a module named SomeModule
-    
-    --modules=some_module
-  
+options:  
 - include: qb.role
   as: false

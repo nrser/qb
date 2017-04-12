@@ -14,7 +14,7 @@ end
 require 'qb'
 require 'nrser'
 
-class {{ qb_role_module_class }} < QB::AnsibleModule
+class {{ role_module_class }} < QB::AnsibleModule
   # define arg names to NRSER::Types::Type instances here and they
   # will be type checked and set as @<name>
   # 
@@ -48,6 +48,6 @@ class {{ qb_role_module_class }} < QB::AnsibleModule
     # otherwise, return `nil`. returning anything else will raise an error.
     return nil
   end # #main
-end # {{ qb_role_module_class }}
+end # {{ role_module_class }}
 
-{{ qb_role_module_class }}.new.run
+{{ role_module_class }}.new.run

@@ -141,4 +141,11 @@
     dest: "{{ role_dest }}/library/.gitkeep"
     force: "{{ role_force }}"
   when: role_library
+
+# modules
+# =======
   
+- include: module.yml
+  with_items: "{{ role_modules }}"
+  loop_control:
+    loop_var: role_module
