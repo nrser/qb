@@ -12,11 +12,42 @@ if ENV['QB_DEV_ENV']
 end
 
 require 'qb'
+require 'nrser'
 
 class {{ qb_role_module_class }} < QB::AnsibleModule
+  # define arg names to NRSER::Types::Type instances here and they
+  # will be type checked and set as @<name>
+  # 
+  # example:
+  # 
+  #     arg :x, NRSER::Types.array(String)
+  # 
+  # will check that the input json has a key named 'x' and that it's value
+  # is an Array of String instances, then set it's value as `@x`.
+  # 
+  
+  # entry point for the module. invoked by {\#run}.
+  # 
+  # @return [nil | {Symbol => #to_json}]
+  #   when returning:
+  #   
+  #   -   `nil`: module will sucessfuly exit with no additional changes.
+  #       
+  #   -   `{Symbol => #to_json}`: Hash will be merged over @facts that 
+  #       are returned by the module to be set in the Ansible runtime and
+  #       the module will exit successfully.
+  #       
   def main
-    nil
-  end
-end
+    # if you want to set variables in the ansible runtime, return a hash
+    # of variables names to values.
+    # 
+    # example:
+    #   
+    #   return {blah: 'hi there!'}
+    # 
+    # otherwise, return `nil`. returning anything else will raise an error.
+    return nil
+  end # #main
+end # {{ qb_role_module_class }}
 
 {{ qb_role_module_class }}.new.run

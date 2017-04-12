@@ -2,8 +2,14 @@ require 'json'
 
 module QB
   class AnsibleModule
+    @@arg_types = {}
+    
     def self.stringify_keys hash
       hash.map {|k, v| [k.to_s, v]}.to_h
+    end
+    
+    def self.arg name, type
+      @@arg_types[name.to_sym] = type
     end
     
     def initialize
@@ -23,6 +29,20 @@ module QB
       if ENV['QB_STDIO_ERR']
         $stderr = UNIXSocket.new ENV['QB_STDIO_ERR']
       end
+      
+      @@arg_types.each {|key, type|
+        var_name = "@#{ key.to_s }"
+        
+        unless instance_variable_get(var_name).nil?
+          raise ArgumentError.new NRSER.squish <<-END
+            an instance variable named #{ var_name } exists
+            with value #{ instance_variable_get(var_name).inspect }
+          END
+        end
+        
+        instance_variable_set var_name,
+                              type.check(@args.fetch(key.to_s))
+      }
     end
     
     def run
