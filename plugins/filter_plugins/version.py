@@ -81,9 +81,12 @@ def semver_parse(version):
     )
     
     if version['is_release']:
-        version['type'] = 'release'
+        version['level'] = 'release'
     else:
-        version['type'] = version['prerelease'][0]
+        version['level'] = version['prerelease'][0]
+    
+    # depreciated name for level
+    version['type'] = version['level']
     
     version['release'] = "%(major)s.%(minor)s.%(patch)s" % version
     
