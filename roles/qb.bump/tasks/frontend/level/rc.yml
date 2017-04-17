@@ -1,0 +1,120 @@
+---
+- debug:
+    msg: bumping to the next release candidate (rc) version...
+
+- name: >-
+    set rc_tag_prefix to 'frontend/v'
+  set_fact:
+    bump_rc_tag_prefix: frontend/v
+
+- name: >-
+    fail if unless the frontend service version level is 'dev' or 'rc'
+  fail:
+    msg: >
+      the frontend version must be 'dev' (form `M.m.p-dev`) or 'rc'
+      (form `M.m.p-rc.R`), found {{ bump_current_version.raw }}
+  when: bump_current_version.level not in ['dev', 'rc']
+
+- name: >-
+    check that the repo is clean of any untracked or changed files
+  include_role:
+    name: qb.git_check_clean
+  vars:
+    git_check_clean_dir: "{{ bump_repo_root }}"
+
+- name: >-
+    get the git tags
+  shell: git tag
+  args:
+    chdir: "{{ bump_repo_root }}"
+  register: bump_git_tags
+  changed_when: false
+
+- name: >-
+    find the next rc number, which is the lowest integer R such that 
+    '{{ bump_rc_tag_prefix }}{{ bump_current_version.release }}-rc.R'
+    is a tag, or 0 if there are no such tags.
+  vars.rb:
+    namespace: bump
+    bind:
+      tags: "{{ bump_git_tags.stdout_lines }}"
+      current_release: "{{ bump_current_version.release }}"
+      tag_prefix: "{{ bump_rc_tag_prefix }}"
+    src: |
+      re = /^#{ Regexp.escape(tag_prefix + current_release) }-rc\.(\d+)$/
+      
+      rc_number = 0
+      
+      tags.each {|tag|
+        if m = re.match(tag)
+          succ = m[1].to_i.succ
+          
+          rc_number = succ if succ > rc_number
+        end
+      }
+      
+      {'rc_number' => rc_number}
+
+- name: >-
+    set rc_version to the current release with '-rc.<rc_number>' appended
+  set_fact:
+    bump_rc_version: "{{ bump_current_version.release }}-rc.{{ bump_rc_number }}"
+
+- name: >-
+    set rc_tag to rc_tag_prefix contactinated with the rc_version
+  set_fact:
+    bump_rc_tag: "{{ bump_rc_tag_prefix }}{{ bump_rc_version }}"
+
+- name: >-
+    use yarn to bump the version in frontend/package.json
+    to {{ bump_rc_version }}
+  shell: |-
+    yarn version \
+      --no-git-tag-version \
+      --new-version {{ bump_rc_version }}
+  args:
+    chdir: "{{ bump_frontend_dir }}"
+
+- name: >-
+    add frontend/package.json changes in git
+  shell: |-
+    git add frontend/package.json
+  args:
+    chdir: "{{ bump_repo_root }}"
+
+- name: >-
+    commit frontend/package.json changes in git
+  shell: |-
+    git commit -m "bump frontend to {{ bump_rc_version }}"
+  args:
+    chdir: "{{ bump_repo_root }}"
+
+- name: >-
+    tag commit as {{ bump_rc_tag }}
+  shell: |-
+    git tag {{ bump_rc_tag }}
+  args:
+    chdir: "{{ bump_repo_root }}"
+
+- name: >-
+    push tag to origin
+  shell: |-
+    git push origin {{ bump_rc_tag }}
+  args:
+    chdir: "{{ bump_repo_root }}"
+
+- debug:
+    msg: "DONE: bumped frontend to {{ bump_rc_version }}"
+
+# TODO doesn't work... get's the path wrong as
+# 
+#     /Users/nrser/dev/gh/beiarea/www/frontend/main.yml
+# 
+# shitty ansible.
+# 
+# - name: kickoff frontend build...
+#   when: "{{ bump_build }}"
+#   include_role:
+#     name: build
+#   vars:
+#     build_service: "{{ bump_service }}"

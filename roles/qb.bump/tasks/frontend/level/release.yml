@@ -1,0 +1,112 @@
+---
+- debug:
+    msg: bumping to release version...
+
+# setup some variables...
+
+- name: >-
+    bump_rc_tag is the git tag for the current rc version that we're making
+    the release off. it's format is 'frontend/v<bump_current_release>'
+  set_fact:
+    bump_rc_tag: "frontend/v{{ bump_current_version.raw }}"
+
+- name: >-
+    bump_next_version is the version we're going to bump to, which is
+    just the release part of the current one (`M.m.p-rc.R` => `M.m.p`)
+  set_fact:
+    bump_next_version: "{{ bump_current_version.release }}"
+
+- name: >-
+    bump_tag is the tag that will be used for the commit with the release
+    version in frontend/package.json. it's format is
+    'frontend/v<bump_next_version>'
+  set_fact:
+    bump_tag: "frontend/v{{ bump_next_version }}"
+
+- name: >-
+    bump_commit_message is the message that will be used for the commit that
+    changes the version in frontend/package.json
+  set_fact:
+    bump_commit_message: >-
+      bump frontend to release version {{ bump_next_version }}
+
+# check some prerequisities...
+
+- when: bump_current_version.level not in ['rc']
+  fail:
+    msg: >-
+      the frontend service version must have level 'rc' (form `M.m.p-rc.R`),
+      found {{ bump_current_version.raw }}
+
+- name: >-
+    check that the repo is clean of any untracked or changed files
+  include_role:
+    name: qb.git_check_clean
+  vars:
+    git_check_clean_dir: "{{ bump_repo_root }}"
+
+- name: >-
+    get the tags for HEAD
+  shell: |-
+    git describe --exact-match --tags HEAD
+  args:
+    chdir: "{{ bump_repo_root }}"
+  register: bump_git_tags_at_head
+  changed_when: false
+
+- when: bump_rc_tag not in bump_git_tags_at_head.stdout_lines
+  fail: >-
+    repo HEAD needs to be at {{ bump_rc_tag }} tag.
+
+# do the work...
+
+- name: >-
+    use yarn to bump the version in //frontend/package.json
+    to bump_next_version
+  shell: |-
+    yarn version \
+      --no-git-tag-version \
+      --new-version {{ bump_next_version | quote }}
+  args:
+    chdir: "{{ bump_frontend_dir }}"
+    
+- name: >-
+    add //frontend/package.json changes in git
+  shell: |-
+    git add frontend/package.json
+  args:
+    chdir: "{{ bump_repo_root }}"
+
+- name: >-
+    commit //frontend/package.json changes in git
+  shell: |-
+    git commit -m {{ bump_commit_message | quote }}
+  args:
+    chdir: "{{ bump_repo_root }}"
+
+- name: >-
+    tag commit as bump_tag
+  shell: |-
+    git tag {{ bump_tag | quote }}
+  args:
+    chdir: "{{ bump_repo_root }}"
+
+- name: >-
+    push bump_tag to origin
+  shell: |-
+    git push origin {{ bump_tag }}
+  args:
+    chdir: "{{ bump_repo_root }}"
+
+- name: >-
+    push repo
+  shell: |-
+    git push
+  args:
+    chdir: "{{ bump_repo_root }}"
+
+# done!
+
+- debug:
+    msg: >-
+      sucessfully bumped {{ bump_service }} to {{ bump_next_version }}

@@ -1,0 +1,80 @@
+---
+- debug:
+    msg: bumping to the next development (dev) version...
+
+- when: bump_current_version.level not in ['rc', 'release']
+  fail:
+    msg: >-
+      the frontend service version must have level 'rc' (form `M.m.p-rc.R`) or 
+      'release' (form `M.m.p`), found {{ bump_current_version.raw }}
+
+- block:  # the next version and commit message depend on the level of the 
+          # current version
+  
+  - when: bump_current_version.level == 'rc'
+    name: >-
+      the next_version is the current release with a 'dev' prerelease
+    set_fact:
+      bump_next_version: "{{ bump_current_version.release }}-dev"
+      bump_commit_message: drop version level back down to dev
+
+  - when: bump_current_version.level == 'release'
+    name: >-
+      the next version is the current release with the patch incremented and
+      a 'dev' prerelease. example: 0.1.2 => 0.1.3-dev
+    set_fact:
+      bump_next_version: >-
+        {{
+          [
+            bump_current_version.major,
+            bump_current_version.minor,
+            bump_current_version.patch + 1
+          ] | join('.') + '-dev'
+        }}
+      bump_commit_message: >-
+        start development on version {{
+          [
+            bump_current_version.major,
+            bump_current_version.minor,
+            bump_current_version.patch + 1
+          ] | join('.') 
+        }}
+
+# /block
+
+- name: >-
+    use yarn to set version in frontend/package.json
+    to {{ bump_next_version }}
+  shell: |-
+    yarn version \
+      --no-git-tag-version \
+      --new-version {{ bump_next_version | quote }}
+  args:
+    chdir: "{{ bump_frontend_dir }}"
+
+- name: >-
+    add frontend/package.json changes in git
+  shell: >-
+    git add frontend/package.json
+  args:
+    chdir: "{{ bump_repo_root }}"
+
+- name: >-
+    commit frontend/package.json changes in git
+  shell: >-
+    git commit -m {{ bump_commit_message | quote }}
+  args:
+    chdir: "{{ bump_repo_root }}"
+
+- name: >-
+    push changes in git
+  shell: >-
+    git push
+  args:
+    chdir: "{{ bump_repo_root }}"
+
+# done!
+
+- debug:
+    msg: >-
+      bumped version to dev.

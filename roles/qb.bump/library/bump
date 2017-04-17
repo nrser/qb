@@ -1,0 +1,272 @@
+#!/usr/bin/env ruby
+# WANT_JSON
+
+# init bundler in dev env
+if ENV['QB_DEV_ENV']
+  ENV.each {|k, v|
+    if k.start_with? 'QB_DEV_ENV_'
+      ENV[k.sub('QB_DEV_ENV_', '')] = v
+    end
+  }
+  require 'bundler/setup'
+end
+
+require 'json'
+require 'pathname'
+
+require 'qb'
+require 'cmds'
+require 'nrser'
+require 'nrser/refinements'
+
+using NRSER
+
+class Version
+  # raw version string if available (version was read from file or whatever),
+  # defaults to `nil`.
+  # 
+  # @return [nil | String]
+  attr_reader :raw
+  
+  # major (first element) of version (the `1` in `1.2.3-rc.4`).
+  # 
+  # @return [Fixnum]
+  attr_reader :major
+  
+  # minor (second element) of version (the `2` in `1.2.3-rc.4`).
+  # 
+  # @return [Fixnum]
+  attr_reader :minor
+  
+  # patch (third element) of version (the `3` in `1.2.3-rc.4`).
+  # 
+  # @return [Fixnum]
+  attr_reader :patch
+  
+  # array of everything after the patch element.
+  # 
+  # (`['rc', 4]` in `1.2.3-rc.4` or `1.2.3.rc.4`).
+  # 
+  # @return [Array<String | Fixnum>]
+  attr_reader :prerelease
+  
+  
+  def initialize raw: nil, major:, minor:, patch:, prerelease:
+    @raw = raw
+    @major = major
+    @minor = minor
+    @patch = patch
+    @prerelease = prerelease
+  end # #initialize
+  
+  
+  # version without prerelease
+  def release
+    [@major, @minor, @patch].join '.'
+  end # #release
+  
+  
+  def to_hash
+    {
+      raw: @raw,
+      major: @major,
+      minor: @minor,
+      patch: @patch,
+      prerelease: @prerelease,
+      release: release,
+    }
+  end # #to_hash
+  
+  
+  def merge **changes
+    self.class.new **to_hash.omit(:raw, :release).merge(**changes)
+  end # #merge
+  
+  # ruby inter-op
+  # ------------------------------------------------------------------------
+  
+  def to_json options
+    QB::AnsibleModule.stringify_keys(to_hash).to_json options
+  end # #to_json
+end # Version
+
+
+# abstract base class for bumpers - classes that implement reading and 
+# writing Version objects to a package directory.
+class Bumper
+  # absolute path to the root directory of the package.
+  # 
+  # @return [String]
+  attr_reader :package_dir
+  
+  # absolute file paths that are relevant to a version bump.
+  # used when doing a `git add` to commit changes to the version.
+  # 
+  # @return [Array<String>]
+  attr_reader :files
+  
+  # current Version the package is at (before bump).
+  # 
+  # **DOES NOT** get updated when {#bump} is called.
+  # 
+  # @return [Version]
+  attr_reader :current
+  
+  
+  def initialize package_dir:, files:
+    @package_dir = package_dir
+    @files = files
+  end # #initialize
+end # Bumper
+
+
+class NodeBumper < Bumper
+  
+  def self.parse version_string
+    js = <<-END
+      var semver = require('semver');
+      var parsed = semver(#{ JSON.dump version_string});
+      var json = JSON.stringify(parsed, null, 2);
+      
+      console.log(json);
+    END
+    
+    obj = JSON.load(
+      Cmds.new("node --eval %s", chdir: QB::ROOT.to_s).chomp!(js)
+    )
+    
+    Version.new raw: obj['raw'],
+                major: obj['major'],
+                minor: obj['minor'],
+                patch: obj['patch'],
+                prerelease: obj['prerelease']
+  end # .parse
+  
+  
+  def self.format version
+    "#{ version.release }-#{ version.prerelease.join '.' }"
+  end
+  
+  
+  def initialize package_dir:
+    @package_json_path = File.join(package_dir, 'package.json')
+    
+    super package_dir: package_dir, files: [@package_json_path]
+    
+    @package_json = JSON.load File.read(@package_json_path)
+    @current = self.class.parse @package_json.fetch('version')
+  end # #initialize
+  
+  
+  def bump! **merge
+    next_version = @current.merge **merge
+    
+    # bump the version in package.json using yarn
+    Cmds.new(
+      "yarn version <%= opts %>",
+      chdir: @package_dir,
+      kwds: {
+        opts: {
+          'new-version': self.class.format(next_version),
+          'no-git-tag-version': true,
+        }
+      }
+    ).stream!
+    
+    next_version
+  end # #bump!
+  
+end # NodeBumper
+
+
+class Bump < QB::AnsibleModule
+  
+  def check_repo_clean!
+    unless Cmds.chomp!('git status --porcelain 2>/dev/null') == ''
+      raise "can not bump a dirty repo"
+    end
+  end # #check_repo_clean!
+  
+  
+  def next_rc
+    re = /^#{ Regexp.escape(@tag_prefix + @bumper.current.release) }-rc\.(\d+)$/
+    
+    result = 0
+    
+    Cmds.new("git tag", chdir: @repo_root).chomp!.lines.each {|tag|
+      if m = re.match(tag.chomp)
+        succ = m[1].to_i.succ
+        
+        result = succ if succ > result
+      end
+    }
+    
+    result
+  end # #next_rc
+  
+  
+  def bump_rc    
+    @next_version = @bumper.bump! prerelease: ['rc', next_rc]
+    @next_version_formatted = @bumper.class.format @next_version
+    
+    # add the files
+    Cmds.new(
+      "git add <%= *args %>", chdir: @repo_root
+    ).stream! *@bumper.files
+    
+    # commit the changes
+    Cmds.new(
+      "git commit %{opts}",
+      chdir: @repo_root,
+    ).stream! opts: {
+      m: "bump #{ @rel_path.to_s } to #{ @next_version_formatted }"
+    }
+    
+    # create tag
+    @tag = @tag_prefix + @next_version_formatted
+    Cmds.new("git tag %s", chdir: @repo_root).stream! @tag
+    
+    # push tag
+    Cmds.new("git push origin %s", chdir: @repo_root).stream! @tag
+  end # #bump_rc
+  
+  
+  def main
+    # check_repo_clean!
+    
+    @package_dir = File.realpath @args.fetch('package_dir')
+    @level = @args.fetch 'level'
+    
+    @repo_root = Cmds.new(
+      "git rev-parse --show-toplevel", chdir: @package_dir
+    ).chomp!
+    
+    @rel_path = Pathname.new(@package_dir).realpath.relative_path_from(
+      Pathname.new(@repo_root).realpath
+    ).to_s
+    
+    @tag_prefix = if @rel_path == '.'
+      'v'
+    else
+      "#{ @rel_path }/v"
+    end
+    
+    @bumper = NodeBumper.new package_dir: @package_dir
+    
+    case @level
+    when 'rc'
+      bump_rc
+    else
+      raise "bad level: #{ @level.inspect }"
+    end
+    
+    {
+      current: @bumper.current,
+      next_version: @next_version,
+      tag: @tag,
+    }
+  end
+  
+end # Bump
+
+Bump.new.run

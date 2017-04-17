@@ -1,0 +1,7 @@
+---
+# defaults file for bump
+
+# get the repo root from qb if it wasn't provided
+bump_repo_root: "{{ qb_git_repo_root }}"
+
+bump_package_dir: "{{ qb_dir }}"

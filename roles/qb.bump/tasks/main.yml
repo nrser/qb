@@ -1,0 +1,82 @@
+---
+# tasks file for bump
+
+# set up variables...
+
+- name: >-
+    get the repo root by cd'ing into bump_package_dir and asking git
+  shell: |-
+    git rev-parse --show-toplevel
+  args:
+    chdir: "{{ bump_package_dir }}"
+  register: bump_git_revparse_showtoplevel
+
+- name: >-
+    bump_repo_root is the stdout line from bump_git_revparse_showtoplevel
+  set_fact:
+    bump_repo_root: "{{ bump_git_revparse_showtoplevel.stdout_lines[0] }}"
+
+- name: >-
+    bump_tag_prefix is simply 'v' if the the package dir is the repo root,
+    otherwise it's the relative path to the package dir from the repo root
+    with '/v' appended.
+  set_fact_with_ruby:
+    var_name: bump_tag_prefix
+    bind:
+      repo_root: "{{ bump_repo_root }}"
+      package_dir: "{{ bump_package_dir }}"
+    src: |
+      require 'pathname'
+      
+      repo_root_pathname = Pathname.new(repo_root).realpath
+      package_dir_pathname = Pathname.new(package_dir).realpath
+        
+      if repo_root_pathname == package_dir_pathname
+        'v'
+      else
+        package_dir_pathname.
+          relative_path_from(repo_root_pathname).
+          join('v')
+          .to_s
+      end
+
+- name: >-
+    bump_package_type is determined by looking at the contents of package_dir
+    for known package files.
+  set_fact_with_ruby:
+    var_name: bump_package_type
+    bind:
+      package_dir: "{{ bump_package_dir }}"
+    src: |
+      require 'pathname'
+      
+      dir = Pathname.new package_dir
+      
+      found_types = []
+      
+      # node packages (npm / yarn)
+      if dir.join('package.json').file?
+        found_types << :node
+      end
+      
+      gemspec_pathnames = Pathname.glob(dir + '*.gemspec')
+      unless gemspec_pathnames.empty?
+        if gemspec_pathnames.length > 1
+          warn "multiple gemspecs found, skipping gem type",
+            files: gemspec_pathnames
+        end
+        
+        found_types << :gem
+      end
+      
+      if dir.join('VERSION').file?
+        found_types << :file
+      end
+      
+      case found_types.length
+
+- debug: var=bump_package_type
+
+# include a tasks file based on the type of package
+
+

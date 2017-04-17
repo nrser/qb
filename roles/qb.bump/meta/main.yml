@@ -1,0 +1,9 @@
+---
+# meta file for bump
+
+allow_duplicates: yes
+
+dependencies: # []
+# - role: role-name
+- role: nrser.rb
+
