@@ -16,13 +16,15 @@ QB_ROOT = os.path.realpath(
     )
 )
 
+
 def get_semver_path():
-    bin_path = os.path.join(QB_ROOT, 'node_modules', '.bin', 'semver')
+    bin_path = os.path.join(QB_ROOT, 'node_modules', 'semver', 'bin', 'semver')
     
     if not os.path.isfile(bin_path):
         raise Exception("can't find semver at %s" % bin_path)
     
     return bin_path 
+# get_semver_path()
 
 
 def semver_inc(version, level = None, preid = None):
@@ -54,6 +56,7 @@ def semver_inc(version, level = None, preid = None):
     out = subprocess.check_output(cmd)
     
     return out.rstrip()
+# semver_inc()
 
 
 def semver_parse(version):
@@ -69,9 +72,7 @@ def semver_parse(version):
     
     out = subprocess.check_output(
         cmd,
-        cwd = os.path.realpath(
-            os.path.join(__file__, '..', '..')
-        )
+        cwd = QB_ROOT
     )
     
     version = json.loads(out)
@@ -99,6 +100,7 @@ def semver_parse(version):
     version['release'] = "%(major)s.%(minor)s.%(patch)s" % version
     
     return version
+# semver_parse()
 
 
 class FilterModule(object):
@@ -109,6 +111,8 @@ class FilterModule(object):
             'semver_inc': semver_inc,
             'semver_parse': semver_parse,
         }
+    # filters()
+# FilterModule
 
 
 # testing - call camel_case on first cli arg and print result
