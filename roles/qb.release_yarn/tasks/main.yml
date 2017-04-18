@@ -12,9 +12,8 @@
 
 - name: create release version
   set_fact:
-    release_yarn_release_version: "{{
-      release_yarn_current_version | semver_inc(release_yarn_level)
-    }}"
+    release_yarn_release_version: >-
+      {{ release_yarn_current_version | semver_inc(release_yarn_level) }}
 
 - name: >
     increment to version {{ release_yarn_release_version }}

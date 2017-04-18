@@ -16,6 +16,14 @@ QB_ROOT = os.path.realpath(
     )
 )
 
+def get_semver_path():
+    bin_path = os.path.join(QB_ROOT, 'node_modules', '.bin', 'semver')
+    
+    if not os.path.isfile(bin_path):
+        raise Exception("can't find semver at %s" % bin_path)
+    
+    return bin_path 
+
 
 def semver_inc(version, level = None, preid = None):
     '''increment the version at level, with optional preid for pre- levels.
@@ -28,9 +36,9 @@ def semver_inc(version, level = None, preid = None):
     '1.0.1-dev.0'
     
     '''
-    
+
     cmd = [
-        os.path.join(QB_ROOT, 'node_modules', '.bin', 'semver'),
+        get_semver_path(),
         '--increment',
     ]
     
