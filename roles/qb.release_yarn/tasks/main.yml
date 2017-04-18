@@ -4,11 +4,11 @@
 - name: load package.json
   include_vars:
     file: "{{ release_yarn_package_dir }}/package.json"
-    name: release_gem_package_json
+    name: release_yarn_package_json
 
 - name: get current version
   set_fact:
-    release_yarn_current_version: "{{ release_gem_package_json.version }}"
+    release_yarn_current_version: "{{ release_yarn_package_json.version }}"
 
 - name: create release version
   set_fact:
