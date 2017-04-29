@@ -3,7 +3,7 @@
 
 dependencies:
 - role: qb.gitignore
-  gitignore_name: Global/OSX
+  gitignore_name: Global/macOS
   gitignore_dest: "{{ git_repo_dest }}"
   when: ansible_distribution == "MacOSX"
   

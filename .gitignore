@@ -4,7 +4,7 @@
 /tmp
 
 ##############################################################################
-# BEGIN Global/OSX.gitignore
+# BEGIN Global/macOS.gitignore
 #
 .DS_Store
 .AppleDouble
@@ -32,7 +32,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 #
-# END Global/OSX.gitignore
+# END Global/macOS.gitignore
 ##############################################################################
 
 ##############################################################################
