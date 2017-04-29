@@ -49,12 +49,3 @@
   args:
     chdir: "{{ project_dest }}"
   when: project_hub
-
-# qb artifacts
-# ============
-
-- name: ignore .qb-playbook.yml
-  lineinfile:
-    line: .qb-playbook.yml
-    dest: "{{ project_dest }}/.gitignore"
-  when: project_tmp
