@@ -8,5 +8,5 @@ dependencies:
   when: ansible_distribution == "MacOSX"
   
 - role: qb.gitignore
-  gitignore_name: Qb
+  gitignore_name: QB
   gitignore_dest: "{{ git_repo_dest }}"
