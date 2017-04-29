@@ -1,6 +1,3 @@
-# temp playbook created by qb for ansible-playbook to consume
-.qb-playbook.yml
-
 /dev/repos
 /dev/ref/tmp
 /dev/roles/tmp
@@ -214,4 +211,16 @@ jspm_packages
 .node_repl_history
 #
 # END Node.gitignore
+##############################################################################
+
+##############################################################################
+# BEGIN QB.gitingore
+#
+# generated qb playbooks
+.qb-playbook.yml
+
+# ansible retry files
+.qb-playbook.retry
+#
+# END QB.gitingore
 ##############################################################################
