@@ -1,18 +1,39 @@
 ---
 # tasks file for qb.gitignore
 
-- name: create directory
+- debug: var=gitignore_name verbosity=1
+
+- debug: var=gitignore_dest verbosity=1
+
+- name: >-
+    Create {{ gitignore_dest }} directory
   file:
     path: "{{ gitignore_dest }}"
     state: directory
 
-- name: create .gitignore
+- name: >-
+    Create {{ gitignore_dest }}/.gitignore
   copy:
     content: ''
     dest: "{{ gitignore_dest }}/.gitignore"
     force: "{{ gitignore_force }}"
+  
+- name: >-
+    Read {{ gitignore_name }}.gitignore
+  when: gitignore_name is defined
+  set_fact:
+    gitignore_content: >-
+      {{
+        lookup(
+          'file',
+          role_path+'/files/gitignore/'+gitignore_name+'.gitignore'
+        )
+      }}
 
-- name: modify .gitignore
+- debug: var=gitignore_content verbosity=1
+
+- name: >-
+    Modify {{ gitignore_dest }}/.gitignore
   blockinfile:
     content: "{{ gitignore_content }}"
     dest: "{{ gitignore_dest }}/.gitignore"
