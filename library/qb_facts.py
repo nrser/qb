@@ -4,6 +4,7 @@ import subprocess
 import os
 import glob
 import json
+import re
 
 def gemspec_path(dir):
     paths = glob.glob(os.path.join(dir, '*.gemspec'))
@@ -51,6 +52,7 @@ def main():
         'qb_git_user_name': ['git', 'config', 'user.name'],
         'qb_git_user_email': ['git', 'config', 'user.email'],
         'qb_git_repo_root': ['git', 'rev-parse', '--show-toplevel'],
+        'qb_git_origin_url': ['git', 'remote', 'get-url', 'origin'],
     }
     
     for key, cmd in cmds.iteritems():        
@@ -62,6 +64,22 @@ def main():
         except subprocess.CalledProcessError as e:
             pass
     
+    if facts['qb_git_origin_url']:
+        # git@github.com:<owner>/<name>.git
+        ssh_re = re.compile('^git@github\.com\:(.*)/(.*)\.git$')
+        # https://github.com/<owner>/<name>.git
+        https_re = re.compile('^https\://github\.com/(.*)/(.*)\.git$')
+        
+        ssh_match = ssh_re.match(facts['qb_git_origin_url'])
+        https_match = https_re.match(facts['qb_git_origin_url'])
+        
+        if ssh_match:
+            facts['qb_github_owner'] = ssh_match.group(1)
+            facts['qb_github_name'] = ssh_match.group(2)
+        elif https_match:
+            facts['qb_github_owner'] = https_match.group(1)
+            facts['qb_github_name'] = https_match.group(2)
+        
     if is_gem(qb_dir):
         ruby = '''
             require 'json'
