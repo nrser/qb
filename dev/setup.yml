@@ -22,8 +22,8 @@
       github:
       - owner: ansible
         name: ansible
-        version: v2.2.1.0
-        dir_name: ansible-v2.2.1.0
+        version: v2.3.0.0-1
+        dir_name: ansible-v2.3.0.0
         depth: 1
       
       - owner: nrser
