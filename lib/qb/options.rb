@@ -1,6 +1,6 @@
 require 'optparse'
 
-require_relative "options/errors"
+require_relative "role/errors"
 require_relative "options/option"
 
 module QB
@@ -88,7 +88,7 @@ module QB
         when String
           include_path + [include_meta['as']]
         else
-          raise QB::Options::MetadataError.new,
+          raise QB::Role::MetadataError.new,
             "bad 'as' value: #{ include_meta.inspect }"
         end
       else
@@ -125,7 +125,7 @@ module QB
           else
             ruby_type = case option.meta['type']
             when nil
-              raise QB::Options::MetadataError,
+              raise QB::Role::MetadataError,
                 "must provide type in qb metadata for option #{ option.meta_name }"
             when 'string', 'str'
               String
@@ -140,17 +140,17 @@ module QB
                   if option.meta['type']['one_of'].include? value
                     value
                   else
-                    raise QB::Options::MetadataError,
+                    raise QB::Role::MetadataError,
                       "option '#{ option.cli_name }' must be one of: #{ option.meta['type']['one_of'].join(', ') }"
                   end
                 }
                 klass
               else 
-                raise QB::Options::MetadataError,
+                raise QB::Role::MetadataError,
                   "bad type for option #{ option.meta_name }: #{ option.meta['type'].inspect }"
               end
             else
-              raise QB::Options::MetadataError,
+              raise QB::Role::MetadataError,
                 "bad type for option #{ option.meta_name }: #{ option.meta['type'].inspect }"
             end
             

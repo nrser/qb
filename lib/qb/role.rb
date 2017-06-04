@@ -3,6 +3,8 @@ require 'cmds'
 require 'parseconfig'
 require 'nrser/refinements'
 
+require_relative 'role/errors'
+
 using NRSER
 
 module QB
@@ -37,36 +39,7 @@ module QB
     #     the path qb metadata was load from. `nil` if it's never been loaded
     #     or doesn't exist.
     attr_reader :meta_path
-    
-    # errors
-    # =======================================================================
-    
-    # base for errors in the module, extends QB:Error
-    class Error < QB::Error
-    end
-    
-    # raised by `.require` when no roles match input
-    class NoMatchesError < Error
-      attr_accessor :input
-      
-      def initialize input
-        @input = input
-        
-        super "no roles match input #{ @input.inspect }"
-      end
-    end
-    
-    # raised by `.require` when multiple roles match
-    class MultipleMatchesError < Error
-      attr_accessor :input, :matches
-      
-      def initialize input, matches
-        @input = input
-        @matches = matches
-        
-        super "mutiple roles match input #{ @input.inspect }:\n#{ @matches.join("\n") }"
-      end
-    end
+
     
     # static role utils
     # =======================================================================
@@ -280,7 +253,7 @@ module QB
         when String
           current_include_path + [option_meta['as']]
         else
-          raise QB::Options::MetadataError.new,
+          raise QB::Role::MetadataError.new,
             "bad 'as' value: #{ option_meta.inspect }"
         end
       else
@@ -361,9 +334,23 @@ module QB
     #
     # if `cache` is true caches it as `@meta`
     # 
-    def load_meta cache = true      
+    def load_meta cache = true
       meta = if @meta_path.extname == '.yml'
-        YAML.load(@meta_path.read) || {}
+        contents = begin
+          @meta_path.read
+        rescue Exception => error
+          raise QB::Role::MetadataError,
+            "Failed to read metadata file at #{ @meta_path.to_s }, " +
+            "error: #{ error.inspect }"
+        end
+        
+        begin
+          YAML.load(contents) || {}
+        rescue Exception => error
+          raise QB::Role::MetadataError,
+            "Failed to load metadata YAML from #{ @meta_path.to_s }, " +
+            "error: #{ error.inspect }"
+        end
       else
         YAML.load(Cmds.out!(@meta_path.realpath.to_s)) || {}
       end
