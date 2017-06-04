@@ -1,5 +1,0 @@
----
-# defaults file for qb.yarn
-yarn_version: null
-yarn_homebrew_name: yarn
-yarn_state: present

@@ -1,0 +1,11 @@
+---
+# defaults file for qb.yarn_setup
+yarn_setup_version: null
+yarn_setup_state: present
+yarn_setup_global_packages: []
+
+yarn_setup_force: false
+
+yarn_setup_brew_create: true
+yarn_setup_brew_tap: "{{ qb_git_user_name }}/versions"
+yarn_setup_brew_link: true

@@ -1,11 +1,12 @@
 ---
-# meta/qb.yml file for qb.yarn
+# meta/qb.yml file for qb.yarn_setup
 # 
 # qb settings for this role. see README.md for more info.
 #
 
 # description of the role to show in it's help output.
-description: ensure yarn is installed and packages are present.
+description: >-
+  Install and configure Yarn package manager (for Node).
 
 # prefix for role variables
 var_prefix: null
@@ -34,39 +35,66 @@ var_prefix: null
 #     -   starting at the current direcotry and climbing up to parent 
 #         directories, use the first one that contains FILENAME. error
 #         if none is found.
-default_dir: null
+default_dir: false
 
 # default user to become for play
 default_user: null
 
 # set to false to not save options in .qb-options.yml files
-save_options: true
+save_options: false
 
-# ask for an ansible vault password
-ask_vault_pass: false
+# options to pass to ansible-playbook
+ansible_options: {}
 
-options: # []
+options:
 # - name: example
 #   description: an example of a variable.
 #   required: false
 #   type: boolean # boolean (default) | string
 #   short: e
 - name: version
-  description: version to install.
+  description: Version to install. If missing installs latest stable.
   type: string
   short: v
 
 - name: state
-  description: >
-    present to install, absent to uninstall. the rest of the options are up to
-    you to much around with if you like.
+  description: >-
+    `present` to install, `absent` to uninstall. `unlinked` should work.
+    Not sure what `head` will do. We handle linking with separate `brew_link`
+    option.
   see:
   - http://docs.ansible.com/ansible/homebrew_module.html
+  short: s
   type:
     one_of:
     - present
     - absent
     - latest
     - head
-    - linked
     - unlinked
+
+- name: brew_link
+  description: >-
+    When installing on OSX (which uses Homebrew) link the installed packages.
+  type: boolean
+
+- name: force
+  description: >-
+    Force write operations.
+  short: f
+  type: boolean
+
+- name: brew_create
+  description: >-
+    On OSX create a Homebrew formula to install the desired version if no
+    formula is found.
+  type: boolean
+
+- name: brew_tap
+  description: >-
+    The Homebrew Tap (repo) to use on OSX when creating a new formula for the
+    Yarn version.
+  short: t
+  type: string
+    
+    

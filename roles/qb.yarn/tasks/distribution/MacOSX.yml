@@ -1,7 +1,0 @@
----
-- name: manage state on OSX via homebrew
-  homebrew:
-    name: "{{ yarn_setup_homebrew_name }}"
-    state: "{{ yarn_setup_state }}"
-    update_homebrew: "{{ update_homebrew | default(False) }}"
-    

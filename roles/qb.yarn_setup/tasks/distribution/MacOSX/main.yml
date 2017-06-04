@@ -1,0 +1,42 @@
+---
+- name: >-
+    homebrew_name is 'yarn' if no versions is specified,
+    else it is 'yarn@<version>'
+  set_fact:
+    yarn_setup_brew_name: >-
+      {% if yarn_setup_version -%}
+        yarn@{{ yarn_setup_version }}
+      {%- else -%}
+        yarn
+      {%- endif %}
+
+- name: >-
+    can_brew_create is true when the brew_create option is true and the state
+    is either 'linked' or 'present'
+  set_fact:
+    yarn_setup_can_brew_create: >-
+      {{ yarn_setup_brew_create and yarn_setup_state == 'present' }}
+  
+- name: Manage Yarn installtion state on MacOSX via Homebrew
+  homebrew:
+    name: "{{ yarn_setup_brew_name }}"
+    state: "{{ yarn_setup_state }}"
+    update_homebrew: >-
+      {{ lookup('every', 'update_homebrew', days=1) }}
+  # ignore errors if we're in a config where we can create the formula
+  ignore_errors: "{{ yarn_setup_can_brew_create }}"
+  register: yarn_setup_brew_result
+
+- name: Create Homebrew formula
+  when: >-
+    yarn_setup_brew_result.failed and yarn_setup_can_brew_create
+  include: "{{ role_path }}/tasks/distribution/MacOSX/brew_create.yml"
+
+- name: Link Yarn in Homebrew
+  when: yarn_setup_brew_link
+  homebrew:
+    name: "{{ yarn_setup_brew_name }}"
+    state: linked
+    install_options:
+    - overwrite
+    

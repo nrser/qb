@@ -1,0 +1,59 @@
+# Create a Homebrew formula for a version of Yarn so we can install it.
+
+- name: >-
+    Tap {{ yarn_setup_brew_tap }} in Homebrew
+  homebrew_tap:
+    name: "{{ yarn_setup_brew_tap }}"
+
+- name: >-
+    Get location of {{ yarn_setup_brew_tap }}
+  command: >-
+    brew --repo {{ yarn_setup_brew_tap }}
+  changed_when: false
+  register: yarn_setup_brew_tap_dir
+
+- name: >-
+    The formula name is 'yarn@<version>'
+  set_fact:
+    yarn_setup_formula_name: "yarn@{{ yarn_setup_version }}"
+
+- name: >-
+    The new formula path is '<brew_tap_dir>/Formula/<formula_name>.rb'
+  set_fact:
+    yarn_setup_formula_path: >-
+      {{ yarn_setup_brew_tap_dir.stdout }}/Formula/{{ yarn_setup_formula_name }}.rb
+
+- name: >-
+    Template formula to {{ yarn_setup_formula_path }}
+  template:
+    src: yarn@M.m.p.rb.j2
+    dest: "{{ yarn_setup_formula_path }}"
+    force: "{{ yarn_setup_force }}"
+
+- name: >-
+    Install new {{ yarn_setup_formula_name }} formula
+  homebrew:
+    name: "{{ yarn_setup_brew_name }}"
+    state: present
+
+- name: >-
+    Add new formlua to {{ yarn_setup_brew_tap }} repo
+  command: >-
+    git add Formula/{{ yarn_setup_formula_name }}.rb
+  args:
+    chdir: "{{ yarn_setup_brew_tap_dir.stdout }}"
+
+- name: >-
+    Commit new formula to {{ yarn_setup_brew_tap }}
+  command: >-
+    git commit -m "qb.yarn_setup added {{ yarn_setup_formula_name }} formula"
+  args:
+    chdir: "{{ yarn_setup_brew_tap_dir.stdout }}"
+
+- name: >-
+    Push {{ yarn_setup_brew_tap }}
+  command: >-
+    git push origin master
+  args:
+    chdir: "{{ yarn_setup_brew_tap_dir.stdout }}"
+  
