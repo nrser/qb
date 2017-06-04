@@ -145,7 +145,7 @@
 # modules
 # =======
   
-- include: module.yml
+- include: module.yml 
   with_items: "{{ role_modules }}"
   loop_control:
     loop_var: role_module

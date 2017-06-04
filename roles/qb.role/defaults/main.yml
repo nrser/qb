@@ -14,7 +14,7 @@ role_readme: false
 role_library: false
 
 # modules
-qb_role_modules: []
+role_modules: []
 
 # galaxy
 role_galaxy: false
