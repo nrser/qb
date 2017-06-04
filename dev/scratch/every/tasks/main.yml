@@ -1,0 +1,8 @@
+---
+# tasks file for every
+- set_fact:
+    blah: >-
+      {{ lookup('every', 'blah', days=1) }}
+
+- debug:
+    var: blah
