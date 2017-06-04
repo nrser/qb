@@ -1,0 +1,73 @@
+---
+# tasks file for qb.yarn_release
+
+- name: load package.json
+  include_vars:
+    file: "{{ yarn_release_package_dir }}/package.json"
+    name: yarn_release_package_json
+
+- name: get current version
+  set_fact:
+    yarn_release_current_version: "{{ yarn_release_package_json.version }}"
+
+- name: create release version
+  set_fact:
+    yarn_release_release_version: >-
+      {{ yarn_release_current_version | semver_inc(yarn_release_level) }}
+
+- name: >
+    increment to version {{ yarn_release_release_version }}
+    and create the git tag
+  command: "yarn version --new-version={{ yarn_release_release_version }}"
+  args:
+    chdir: "{{ yarn_release_package_dir }}"
+
+- name: >
+    git push the v{{ yarn_release_release_version }} tag
+  command: "git push origin v{{ yarn_release_release_version }}"
+  args:
+    chdir: "{{ yarn_release_package_dir }}"
+
+- name: >
+    npm publish v{{ yarn_release_release_version }}
+  command: npm publish
+  args:
+    chdir: "{{ yarn_release_package_dir }}"
+
+- name: create the next -dev version
+  set_fact:
+    yarn_release_next_version: "{{
+      yarn_release_release_version | semver_inc(
+        level='prerelease',
+        preid='dev'
+      )
+    }}"
+
+- name: >
+    increment to {{ yarn_release_next_version }} version
+  command: >
+    yarn version
+      --new-version={{ yarn_release_next_version }}
+      --no-git-tag-version
+  args:
+    chdir: "{{ yarn_release_package_dir }}"
+
+- name: git add package.json
+  command: git add package.json
+  args:
+    chdir: "{{ yarn_release_package_dir }}"
+
+- name: >
+    git commit next dev version
+  command: git commit -m "start {{ yarn_release_next_version }}"
+  args:
+    chdir: "{{ yarn_release_package_dir }}"
+
+- name: git push next dev version
+  command: git push
+  args:
+    chdir: "{{ yarn_release_package_dir }}"
+
+- debug:
+    msg: >
+      v{{ yarn_release_release_version }} released.

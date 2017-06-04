@@ -1,4 +1,0 @@
----
-# defaults file for qb.release_yarn
-release_yarn_level: patch
-release_yarn_package_dir: "{{ qb_dir }}"
