@@ -36,6 +36,14 @@ var_prefix: null
 #         if none is found.
 default_dir: null
 
+# If `true`, QB will ensure the default dir exists before starting the play.
+# 
+# For legacy reasons, this defaults to `true` if not present, but we want to 
+# default declare it as `false` here so new roles can turn it on only if 
+# they need it.
+# 
+mkdir: false
+
 # default user to become for play
 default_user: null
 
