@@ -1,0 +1,10 @@
+---
+# tasks file for qb.facts
+
+- path_facts:
+    path: "{{ qb_dir }}"
+    github_api: "{{ facts_github_api }}"
+  register: qb_dir_facts
+
+- debug:
+    var: qb_dir_facts

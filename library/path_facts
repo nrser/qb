@@ -1,0 +1,304 @@
+#!/usr/bin/env ruby
+# WANT_JSON
+
+# init bundler in dev env
+if ENV['QB_DEV_ENV']
+  ENV.each {|k, v|
+    if k.start_with? 'QB_DEV_ENV_'
+      ENV[k.sub('QB_DEV_ENV_', '')] = v
+    end
+  }
+  require 'bundler/setup'
+end
+
+require 'ostruct'
+
+require 'qb'
+require 'cmds'
+require 'pathname'
+require 'uri'
+require 'net/http'
+
+class Result < OpenStruct
+  def to_json *args
+    to_h.to_json *args
+  end
+end
+
+GITHUB_SSH_URL_RE = /^git@github\.com\:(?<owner>.*)\/(?<name>.*)\.git$/
+GITHUB_HTTPS_URL_RE = /^https:\/\/github\.com\/(?<owner>.*)\/(?<name>.*)\.git$/
+
+# An attempt to unify NPM and Gem version schemes to a reasonable extend, 
+# and hopefully cover whatever else the cat may drag in.
+class Version
+  # Create a Version instance from a Gem::Version
+  def self.from_gem_version version
+    release_segments = version.segments.take_while {|seg| !seg.is_a?(String)}
+    prerelease_segments = version.segments[release_segments.length..-1]
+    
+    new raw: version.to_s,
+        major: release_segments[0],
+        minor: release_segments[1],
+        patch: release_segments[2],
+        prerelease: prerelease_segments,
+        build: [],
+        release: version.release
+  end
+  
+  def self.from_npm_version version
+    stmt = NRSER.squish <<-END
+      var Semver = require('semver');
+      
+      console.log(
+        JSON.stringify(
+          Semver(#{ JSON.dump version })
+        )
+      );
+    END
+    
+    parse = JSON.load Cmds.out!("node --eval %s", stmt)
+    
+    new raw: version,
+        major: parse['major'],
+        minor: parse['minor'],
+        patch: parse['patch'],
+        prerelease: parse['prerelease'],
+        build: parse['build'],
+        release: [parse['major'], parse['minor'], parse['patch']].join(".")
+  end
+  
+  # Construct a new Version
+  def initialize raw:, major:, minor:, patch:, prerelease:, build:, release:
+    @raw = raw
+    @major = major
+    @minor = minor
+    @patch = patch
+    @prerelease = prerelease
+    @build = build
+    @release = release
+    
+    @level = @prerelease[0] || 'release'
+    
+    @is_release = @prerelease.empty?
+    @is_dev = @prerelease[0] == 'dev'
+    @is_rc = @prerelease[0] == 'rc'
+  end
+  
+  # Dump all instance variables in JSON serialization
+  def to_json *args
+    instance_variables.map {|var| 
+      [var[1..-1].to_sym, instance_variable_get(var)]
+    }.to_h.to_json *args
+  end
+end
+
+class PathFacts < QB::AnsibleModule
+  # Add a bunch of useful things to know about the path
+  def add_path_facts
+    @result.expanded = @path.expand_path
+    @result.exists = @path.exist?
+    @result.is_expanded = @result.expanded == @path
+    @result.is_absolute = @path.absolute?
+    @result.is_relative = @path.relative?
+    @result.is_dir = @path.directory?
+    @result.is_file = @path.file?
+    @result.is_cwd = @path == Pathname.getwd
+    
+    # Will raise if there is no relative path between them, in which case
+    # 'relative' will be null.
+    @result.relative = begin
+      @path.relative_path_from Pathname.getwd
+    rescue ArgumentError => error
+    end
+    
+    # Pathname#realpath will raise if the path doesn't exist
+    @result.realpath = begin
+      @path.realpath
+    rescue Exception => error
+    end
+    
+    @result.is_realpath = @result.realpath == @path
+  end
+  
+  # If the path is a Git repo (has a .git file in it's root) add useful
+  # Git facts.
+  def add_git_facts
+    git_file_path = @path.join('.git')
+    
+    unless @path.directory? && git_file_path.exist?
+      @result.is_git = false
+      return
+    end
+    
+    @result.is_git = true
+    
+    Dir.chdir(@path) do  
+      git = @result.git = Result.new
+      
+      user = git.user = Result.new
+      
+      ['name', 'email'].each {|key|
+        user[key] = begin
+          Cmds.chomp! "git config user.#{ key }"
+        rescue
+        end
+      }
+      
+      git.root = begin
+        Cmds.chomp! "git rev-parse --show-toplevel"
+      rescue
+      end
+      
+      git.origin = begin
+        Cmds.chomp! "git remote get-url origin"
+      rescue
+      end
+      
+      match = GITHUB_SSH_URL_RE.match(git.origin) ||
+              GITHUB_HTTPS_URL_RE.match(git.origin)
+      
+      git.is_github = !! match
+      
+      return unless match
+      
+      git.owner = match['owner']
+      git.name = match['name']
+      git.full_name = "#{ git.owner }/#{ git.name }"
+      
+      if true == @args['github_api']
+        github = git.github = Result.new
+        github.api_url = "https://api.github.com/repos/#{ git.owner }/#{ git.name }"
+        
+        response = Net::HTTP.get_response URI(github.api_url)
+        
+        if response.is_a? Net::HTTPSuccess
+          # parse response body and add everything to github result
+          parsed = JSON.parse response.body
+          parsed.each {|k, v| github[k] = v}
+        else
+          # assume it's private if we failed to find it
+          github.private = true
+        end
+        
+      end
+      
+    end
+  end
+  
+  # Find the only *.gemspec path in the `@path` directory. Warns and returns
+  # `nil` if there is more than one match.
+  def gemspec_path
+    paths = Pathname.glob(@path.join('*.gemspec'))
+    
+    case paths.length
+    when 0
+      nil
+    when 1
+      paths[0]
+    else
+      warn "found multiple gemspecs: #{ paths }, unable to pick one."
+      nil
+    end
+  end
+  
+  # If `path` is a directory containing the source for a Ruby Gem, add 
+  # useful information about it.
+  def add_gem_facts
+    unless @path.directory?
+      @result.is_gem = false
+      return
+    end
+    
+    path = gemspec_path
+    
+    if path.nil?
+      @result.is_gem = false
+      return
+    end
+    
+    @result.is_gem = true
+    @result.package.types << 'gem'
+    
+    gem = @result.gem = Result.new
+    
+    gem.gemspec_path = gemspec_path.to_s
+    
+    spec = Gem::Specification::load(gemspec_path.to_s)
+    gem.name = spec.name
+    gem.version = Version.from_gem_version spec.version
+  end
+  
+  # Add facts about an NPM package based in `@path`, if any.
+  def add_npm_facts
+    package_json_path = @path.join('package.json')
+    
+    unless @path.directory? && package_json_path.file?
+      @result.is_npm = false
+      return
+    end
+    
+    @result.is_npm = true
+    @result.package.types << 'npm'
+    
+    npm = @result.npm = Result.new
+    
+    npm.package_json = JSON.load package_json_path.read
+    
+    # To stay consistent with Gem
+    npm.name = npm.package_json['name']
+    npm.version = Version.from_npm_version npm.package_json['version']
+  end
+  
+  # Run the module.
+  def main
+    # check the 'path' arg
+    unless @args['path'].is_a? String
+      raise ArgumentError,
+        "'path' arg must be a string, found #{ @args['path'].inspect }."
+    end
+    
+    # We'll return the value of @result
+    @result = Result.new
+    
+    # Default to signaling no change (we're not gonna change anything in this
+    # module either)
+    @result.changed = false
+    
+    # String warnings that will be shown to the user
+    @result.warnings = []
+    
+    @result.package = Result.new
+    @result.package.types = []
+    
+    # Return the input as 'raw'
+    @result.raw = @args['path']
+    
+    @path = Pathname.new @result.raw
+    
+    add_path_facts
+    add_git_facts
+    add_gem_facts
+    add_npm_facts
+    
+    # If we only have one type of package present, we set it's type and 
+    # version as `package.type` and `package.version`, which makes it easy for
+    # code to 'auto-detect' the info.
+    # 
+    # If there's more than one then we obviously can't guess what to do; the
+    # user needs to specify.
+    # 
+    if @result.package.types.length == 1
+      @result.package.type = @result.package.types[0]
+      @result.package.name = @result[@result.package.type].name
+      @result.package.version = @result[@result.package.type].version
+    end
+    
+    nil
+  end
+  
+  def done
+    exit_json @result.to_h
+  end
+end
+
+PathFacts.new.run
