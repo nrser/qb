@@ -3,4 +3,5 @@
 
 - debug:
     msg:
-      resolved: "{{ lookup('resolve', 'vars/bad.yml') }}"
+      missing: "{{ lookup('resolve', 'vars/bad.yml') }}"
+      present: "{{ lookup('resolve', 'vars/blah.yml') }}"
