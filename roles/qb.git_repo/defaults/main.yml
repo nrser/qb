@@ -1,3 +1,4 @@
 ---
 # defaults file for qb.git_repo
 git_repo_dest: "{{ qb_dir }}"
+git_repo_gitignore: []

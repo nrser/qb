@@ -1,12 +1,4 @@
 ---
 # meta file for qb.git_repo
 
-dependencies:
-- role: qb.gitignore
-  gitignore_name: Global/macOS
-  gitignore_dest: "{{ git_repo_dest }}"
-  when: ansible_distribution == "MacOSX"
-  
-- role: qb.gitignore
-  gitignore_name: QB
-  gitignore_dest: "{{ git_repo_dest }}"
+dependencies: []
