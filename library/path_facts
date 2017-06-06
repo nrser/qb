@@ -123,17 +123,23 @@ class PathFacts < QB::AnsibleModule
   # If the path is a Git repo (has a .git file in it's root) add useful
   # Git facts.
   def add_git_facts
-    git_file_path = @path.join('.git')
+    # see if we're in a git repo. first, we need a directory that exists
+    dir = @path.expand_path.ascend.find {|p| p.directory? }
     
-    unless @path.directory? && git_file_path.exist?
-      @result.is_git = false
-      return
-    end
-    
-    @result.is_git = true
-    
-    Dir.chdir(@path) do  
+    Dir.chdir(dir) do
+      root_result = Cmds.new "git rev-parse --show-toplevel"
+      
+      unless root_result.ok?
+        @result.in_git_repo = false
+        @result.is_git_root = false
+        return
+      end
+      
+      @result.in_git_repo = true
+      
       git = @result.git = Result.new
+      git.root = Pathname.new root_result.out.chomp
+      @result.is_git_root = @path == git.root
       
       user = git.user = Result.new
       
@@ -143,11 +149,6 @@ class PathFacts < QB::AnsibleModule
         rescue
         end
       }
-      
-      git.root = begin
-        Cmds.chomp! "git rev-parse --show-toplevel"
-      rescue
-      end
       
       git.origin = begin
         Cmds.chomp! "git remote get-url origin"
@@ -181,7 +182,6 @@ class PathFacts < QB::AnsibleModule
         end
         
       end
-      
     end
   end
   
