@@ -14,6 +14,7 @@ end
 require 'ostruct'
 
 require 'qb'
+require 'qb/package/version'
 require 'cmds'
 require 'pathname'
 require 'uri'
@@ -27,70 +28,6 @@ end
 
 GITHUB_SSH_URL_RE = /^git@github\.com\:(?<owner>.*)\/(?<name>.*)\.git$/
 GITHUB_HTTPS_URL_RE = /^https:\/\/github\.com\/(?<owner>.*)\/(?<name>.*)\.git$/
-
-# An attempt to unify NPM and Gem version schemes to a reasonable extend, 
-# and hopefully cover whatever else the cat may drag in.
-class Version
-  # Create a Version instance from a Gem::Version
-  def self.from_gem_version version
-    release_segments = version.segments.take_while {|seg| !seg.is_a?(String)}
-    prerelease_segments = version.segments[release_segments.length..-1]
-    
-    new raw: version.to_s,
-        major: release_segments[0],
-        minor: release_segments[1],
-        patch: release_segments[2],
-        prerelease: prerelease_segments,
-        build: [],
-        release: version.release
-  end
-  
-  def self.from_npm_version version
-    stmt = NRSER.squish <<-END
-      var Semver = require('semver');
-      
-      console.log(
-        JSON.stringify(
-          Semver(#{ JSON.dump version })
-        )
-      );
-    END
-    
-    parse = JSON.load Cmds.out!("node --eval %s", stmt)
-    
-    new raw: version,
-        major: parse['major'],
-        minor: parse['minor'],
-        patch: parse['patch'],
-        prerelease: parse['prerelease'],
-        build: parse['build'],
-        release: [parse['major'], parse['minor'], parse['patch']].join(".")
-  end
-  
-  # Construct a new Version
-  def initialize raw:, major:, minor:, patch:, prerelease:, build:, release:
-    @raw = raw
-    @major = major
-    @minor = minor
-    @patch = patch
-    @prerelease = prerelease
-    @build = build
-    @release = release
-    
-    @level = @prerelease[0] || 'release'
-    
-    @is_release = @prerelease.empty?
-    @is_dev = @prerelease[0] == 'dev'
-    @is_rc = @prerelease[0] == 'rc'
-  end
-  
-  # Dump all instance variables in JSON serialization
-  def to_json *args
-    instance_variables.map {|var| 
-      [var[1..-1].to_sym, instance_variable_get(var)]
-    }.to_h.to_json *args
-  end
-end
 
 class PathFacts < QB::AnsibleModule
   # Add a bunch of useful things to know about the path
@@ -225,7 +162,7 @@ class PathFacts < QB::AnsibleModule
     
     spec = Gem::Specification::load(gemspec_path.to_s)
     gem.name = spec.name
-    gem.version = Version.from_gem_version spec.version
+    gem.version = QB::Package::Version.from_gem_version spec.version
   end
   
   # Add facts about an NPM package based in `@path`, if any.
@@ -246,7 +183,10 @@ class PathFacts < QB::AnsibleModule
     
     # To stay consistent with Gem
     npm.name = npm.package_json['name']
-    npm.version = Version.from_npm_version npm.package_json['version']
+    
+    npm.version = QB::Package::Version.from_npm_version(
+      npm.package_json['version']
+    )
   end
   
   # Run the module.

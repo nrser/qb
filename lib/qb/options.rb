@@ -2,6 +2,7 @@ require 'optparse'
 
 require_relative "role/errors"
 require_relative "options/option"
+require 'qb/package/version'
 
 module QB
   class Options
@@ -133,6 +134,8 @@ module QB
               Array
             when 'integer', 'int'
               Integer
+            when 'version'
+              QB::Package::Version
             when Hash
               if option.meta['type'].key? 'one_of'
                 klass = Class.new
@@ -274,6 +277,10 @@ module QB
       end
       
       opt_parser = OptionParser.new do |opts|
+        opts.accept(QB::Package::Version) do |string|
+          QB::Package::Version.from_string(string).to_h
+        end
+        
         opts.banner = @role.banner
         
         opts.on(
