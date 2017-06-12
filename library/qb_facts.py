@@ -64,7 +64,7 @@ def main():
         except subprocess.CalledProcessError as e:
             pass
     
-    if facts['qb_git_origin_url']:
+    if 'qb_git_origin_url' in facts:
         # git@github.com:<owner>/<name>.git
         ssh_re = re.compile('^git@github\.com\:(.*)/(.*)\.git$')
         # https://github.com/<owner>/<name>.git
