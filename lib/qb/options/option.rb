@@ -38,7 +38,10 @@ module QB
           Options.cli_ize_name "#{ @include_path.join('-') }-#{ @meta_name }"
         end
         
-        @var_name = if role.var_prefix
+        @var_name = if @meta['var_name']
+          # prefer an explicit, exact variable name if provided
+          @meta['var_name']
+        elsif role.var_prefix
           Options.var_ize_name "#{ role.var_prefix }_#{ @meta_name }"
         else
           Options.var_ize_name @meta_name
