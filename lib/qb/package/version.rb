@@ -28,7 +28,9 @@ module QB
           );
         END
         
-        parse = JSON.load Cmds.out!("node --eval %s", stmt)
+        parse = JSON.load Cmds.new(
+          "node --eval %s", args: [stmt], chdir: QB::ROOT
+        ).out!
         
         new raw: version,
             major: parse['major'],
@@ -74,6 +76,10 @@ module QB
       # Dump all instance variables in JSON serialization
       def to_json *args
         to_h.to_json *args
+      end
+      
+      def to_s
+        "#<QB::Package::Version #{ @raw }>"
       end
     end
   end # Package
