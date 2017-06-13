@@ -49,6 +49,18 @@ module QB
         end
       end
       
+      attr_reader :raw,
+                  :major,
+                  :minor,
+                  :patch,
+                  :prerelease,
+                  :build,
+                  :release,
+                  :level,
+                  :is_release,
+                  :is_dev,
+                  :is_rc
+      
       # Construct a new Version
       def initialize raw:, major:, minor:, patch:, prerelease:, build:, release:
         @raw = raw
@@ -64,6 +76,18 @@ module QB
         @is_release = @prerelease.empty?
         @is_dev = @prerelease[0] == 'dev'
         @is_rc = @prerelease[0] == 'rc'
+      end
+      
+      def release?
+        @is_release
+      end
+      
+      def dev?
+        @is_dev
+      end
+      
+      def rc?
+        @is_rc
       end
       
       # dump all instance variables into a hash
