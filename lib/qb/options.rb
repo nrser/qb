@@ -358,7 +358,7 @@ module QB
         opts.on(
           '--PRINT=FLAGS',
           Array,
-          "set what to print before running.",
+          "set what to print before running: options, env, cmd, playbook",
           SPACER
         ) do |value|
           @qb['print'] = value
