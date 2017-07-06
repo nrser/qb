@@ -321,7 +321,7 @@ def main args
     <%= playbook_path %>
   END
   
-  cmd = Cmds.new cmd_template, {
+  cmd_options = {
     env: env.map {|k, v| [k, v.is_a?(Array) ? v.join(':') : v]}.to_h,
     
     kwds: {
@@ -334,6 +334,22 @@ def main args
     
     format: :pretty,
   }
+  
+  # If ./ansible/ansible.cfg exists chdir into there for the run.
+  # 
+  # We already look for that dir and add the role paths to the role path 
+  # specified to `ansible-playbook`, but though there might be a way to make 
+  # `ansible-playbook` perform as desired while retaining the current directory
+  # (which would be preferable - I don't like switching directories on people)
+  # for the moment it seems like the easiest way to get it to properly use
+  # things like vars and relative paths in `./ansible/ansible.cfg` is to 
+  # change directories into `./ansible`, so that's what we're doing here:
+  if File.exists? './ansible/ansible.cfg'
+    cmd_options[:chdir] = './ansible'
+  end
+  
+  cmd = Cmds.new cmd_template, cmd_options
+  
   # print
   # =====
   # 
