@@ -534,7 +534,10 @@ module QB
       case value
       when nil
         # there is no get_dir info in meta/qb.yml, can't get the dir
-        raise "unable to infer default directory: no '#{ key }' key in meta/qb.yml"
+        raise <<-END.dedent
+          unable to infer default directory: no '#{ key }' key in 'meta/qb.yml'
+          for role #{ self }
+        END
       
       when false
         # this method should not get called when the value is false (an entire
