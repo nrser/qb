@@ -194,14 +194,21 @@ module QB
         return namespaceless_prefix_matches 
       end
       
-      # see if we word match any relative paths
+      # see if we prefix match any display paths
+      path_prefix_matches = available.select {|role|
+        role.display_path.start_with? input
+      }
+      return path_prefix_matches unless path_prefix_matches.empty?
+      
+      # see if we word match any display` paths
       name_word_matches = available.select {|role|
         QB::Util.words_start_with? role.display_path.to_s, input
       }
       return name_word_matches unless name_word_matches.empty?
       
+      # nada
       []
-    end
+    end # .matches
     
     # find exactly one matching role for the input string or raise.
     def self.require input
