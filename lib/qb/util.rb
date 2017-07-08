@@ -14,7 +14,15 @@ module QB
       # QB.debug "does #{ input } match #{ full_string }?"
       
       input_words = words input
+      
+      # short-circuit if there are no input words ('./' for example)
+      return false if input_words.empty?
+      
       full_string_words = words full_string
+      
+      QB.debug "HERE",
+        input_words: input_words,
+        full_string_words: full_string_words
       
       full_string_words.each_with_index {|word, start_index|
         # compute the end index in full_string_words
