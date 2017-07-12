@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+# WANT_JSON
+
+# init bundler in dev env
+if ENV['QB_DEV_ENV']
+  ENV.each {|k, v|
+    if k.start_with? 'QB_DEV_ENV_'
+      ENV[k.sub('QB_DEV_ENV_', '')] = v
+    end
+  }
+  require 'bundler/setup'
+end
+
+require 'qb'
+require 'pp'
+
+class Chat < QB::AnsibleModule
+  def main    
+    puts "Starting chat..."
+    puts
+    puts(
+      {
+        stdin: $stdin,
+        stdout: $stdout,
+        stderr: $stderr,
+        qb_stdio_in: @qb_stdio_in,
+        qb_stdio_in_tty: @qb_stdio_in.tty?,
+        stdout_tty: $stdout.tty?,
+      }.inspect
+    )
+    puts 
+    puts
+    puts "Let's get chatting!"
+    puts
+    
+    done = false
+    
+    while !done && said = @qb_stdio_in.gets
+      puts "Say somthing ('exit' to exit):"
+      
+      if said.chomp == 'exit'
+        done = true
+      else
+        puts "You said: #{ said.chomp.inspect }"
+      end
+    end
+    
+    puts "bye bye!"
+    
+    nil
+  end
+end
+
+Chat.new.run

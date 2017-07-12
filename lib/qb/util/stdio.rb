@@ -16,9 +16,8 @@ module QB::Util::STDIO
   # their output to it, which is in turn printed to the console `qb` is running
   # in.
   class Service
-    def initialize name, dest
+    def initialize name
       @name = name
-      @dest = dest
       @thread = nil
       @server = nil
       @socket = nil
@@ -54,9 +53,7 @@ module QB::Util::STDIO
         @server = UNIXServer.new @path.to_s
         @socket = @server.accept
         
-        while (line = @socket.gets) do
-          @dest.puts line
-        end
+        work_in_thread
       end
       
       # set the env key so children can find the socket path
@@ -73,14 +70,46 @@ module QB::Util::STDIO
       # 
       debug "closing..."
       
-      @thread.kill unless @thread.nil?
       @socket.close unless @socket.nil?
       @socket = nil
       @server.close unless @server.nil?
       @server = nil
       FileUtils.rm(@path) if @path.exist?
+      @thread.kill unless @thread.nil?
       
       debug "closed."
     end
   end # Service
+  
+  # QB STDIO Service to proxy output from modules back to the main user 
+  # process.
+  class OutService < Service
+    def initialize name, dest
+      super name
+      @dest = dest
+    end
+    
+    def work_in_thread
+      while (line = @socket.gets) do
+        @dest.puts line
+      end
+    end
+  end # OutService
+  
+  # QB STDIO Service to proxy interactive user input from the main process
+  # to modules.
+  class InService < Service
+    def initialize name, src
+      super name
+      @src = src
+    end
+    
+    def work_in_thread
+      while (line = @src.gets) do
+        @socket.puts line
+      end
+      
+      close!
+    end
+  end # InService
 end # QB::Util::STDIO

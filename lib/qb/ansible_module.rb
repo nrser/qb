@@ -12,6 +12,18 @@ module QB
       @@arg_types[name.to_sym] = type
     end
     
+    def debug *args
+      if @qb_stdio_err
+        header = "<QB::AnsibleModule #{ self.class.name }>"
+        
+        if args[0].is_a? String
+          header += " " + args.shift
+        end
+        
+        QB.debug header, *args
+      end
+    end
+    
     def initialize
       @changed = false
       @input_file = ARGV[0]
@@ -19,16 +31,26 @@ module QB
       @args = JSON.load @input
       @facts = {}
       
+      @qb_stdio_out = nil
+      @qb_stdio_err = nil
+      @qb_stdio_in = nil
+      
       # if QB_STDIO_ env vars are set send stdout and stderr
       # to those sockets to print in the parent process
       
       if ENV['QB_STDIO_OUT']
-        $stdout = UNIXSocket.new ENV['QB_STDIO_OUT']
+        @qb_stdio_out = $stdout = UNIXSocket.new ENV['QB_STDIO_OUT']
       end
       
       if ENV['QB_STDIO_ERR']
-        $stderr = UNIXSocket.new ENV['QB_STDIO_ERR']
+        @qb_stdio_err = $stderr = UNIXSocket.new ENV['QB_STDIO_ERR']
       end
+      
+      if ENV['QB_STDIO_IN']
+        @qb_stdio_in = UNIXSocket.new ENV['QB_STDIO_IN']
+      end
+      
+      debug "HERE!"
       
       @@arg_types.each {|key, type|
         var_name = "@#{ key.to_s }"
