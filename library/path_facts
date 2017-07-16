@@ -87,6 +87,27 @@ class PathFacts < QB::AnsibleModule
         end
       }
       
+      git.is_clean = Cmds.chomp!('git status --porcelain 2>/dev/null').empty?
+      
+      rev_parse = Cmds.capture 'git rev-parse HEAD'
+      
+      if rev_parse.ok?
+        git.head = rev_parse.out.chomp
+        git.head_short = git.head[0...7]
+      else
+        git.head = git.head_short = nil
+      end
+      
+      branch = Cmds.capture 'git branch --no-color 2> /dev/null'
+      
+      git.branch = if branch.ok?
+        if line = branch.out.lines.find {|line| line.start_with? '*'}
+          if m = line.match(/\*\s+(\S+)/)
+            m[0]
+          end
+        end
+      end
+      
       git.origin = begin
         Cmds.chomp! "git remote get-url origin"
       rescue
