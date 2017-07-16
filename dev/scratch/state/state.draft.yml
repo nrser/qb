@@ -1,0 +1,43 @@
+---
+
+- name: beiarea/www-rails
+  
+  vars:
+    # put settings/config, metadata, global options here
+  
+  roles:
+  - role: nrser.dev_ref_repo
+    dev_refs_owner: beiarea
+    dev_refs_name: www-rails
+    dev_refs_version: rethink
+  
+  - role: nrser.dev_ref_repo
+    dev_refs_owner: beiarea
+    dev_refs_name: wall
+    dev_refs_version: rails
+  
+  - role: nrser.dev_ref_repo
+    dev_ref_repo_owner: plataformatec
+    dev_ref_repo_name: devise
+    dev_ref_repo_version: v4.3.0
+    dev_ref_repo_dir_name: devise@v4.3.0
+  
+  - role: nrser.dev_ref_repo
+    dev_ref_repo_owner: rails
+    dev_ref_repo_name: rails
+    dev_ref_repo_version: v5.1.1
+    dev_ref_repo_dir_name: rails@v5.1.1
+  
+  - role: nrser.dev_ref_repo
+    dev_ref_repo_owner: rails
+    dev_ref_repo_name: sprockets
+    dev_ref_repo_version: v3.7.1
+    dev_ref_repo_dir_name: sprockets@v3.7.1
+  
+  - role: nrser.dev_ref_repo
+    dev_ref_repo_owner: twbs
+    dev_ref_repo_name: bootstrap-sass
+    dev_ref_repo_version: v3.3.7
+    dev_ref_repo_dir_name: bootstrap-sass@v3.3.7
+  
+  - role:
