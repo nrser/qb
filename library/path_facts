@@ -184,9 +184,11 @@ class PathFacts < QB::AnsibleModule
     # To stay consistent with Gem
     npm.name = npm.package_json['name']
     
-    npm.version = QB::Package::Version.from_npm_version(
-      npm.package_json['version']
-    )
+    if npm.package_json['version']
+      npm.version = QB::Package::Version.from_npm_version(
+        npm.package_json['version']
+      )
+    end
   end
   
   # Run the module.
