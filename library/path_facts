@@ -103,7 +103,7 @@ class PathFacts < QB::AnsibleModule
       git.branch = if branch.ok?
         if line = branch.out.lines.find {|line| line.start_with? '*'}
           if m = line.match(/\*\s+(\S+)/)
-            m[0]
+            m[1]
           end
         end
       end
