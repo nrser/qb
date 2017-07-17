@@ -64,7 +64,7 @@ class PathFacts < QB::AnsibleModule
     dir = @path.expand_path.ascend.find {|p| p.directory? }
     
     Dir.chdir(dir) do
-      root_result = Cmds.new "git rev-parse --show-toplevel"
+      root_result = Cmds.capture "git rev-parse --show-toplevel"
       
       unless root_result.ok?
         @result.in_git_repo = false
