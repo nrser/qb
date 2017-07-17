@@ -1,4 +1,8 @@
 ---
 # tasks file for stream
+- path_facts:
+    path: "{{ qb_cwd }}"
+  register: path_facts
+
 - stream:
     cmd: ping nrser.com
