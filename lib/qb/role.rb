@@ -617,6 +617,23 @@ module QB
       meta_or 'ansible_options', {}
     end
     
+    
+    # Get the {Gem::Requirement} parse of the `qb_requirement` key in
+    # {#meta} (if it is defined), which specifies the required version of 
+    # `qb` for the role.
+    # 
+    # @return [Gem::Requirement, nil]
+    #   The requirement if `required_qb_version` key is in {#meta}, else `nil`.
+    # 
+    def qb_requirement
+      if  meta['requirements'] &&
+          meta['requirements']['gems'] &&
+          meta['requirements']['gems']['qb']
+        Gem::Requirement.new meta['requirements']['gems']['qb']
+      end
+    end
+    
+    
     # language inter-op
     # -----------------------------------------------------------------------
     
