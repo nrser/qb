@@ -51,9 +51,12 @@ module QB::Util::STDIO
         debug "thread started."
         
         @server = UNIXServer.new @path.to_s
-        @socket = @server.accept
         
-        work_in_thread
+        while true do
+          @socket = @server.accept
+          
+          work_in_thread
+        end
       end
       
       # set the env key so children can find the socket path
@@ -91,6 +94,7 @@ module QB::Util::STDIO
     
     def work_in_thread
       while (line = @socket.gets) do
+        debug "#{ @name } received: #{ line.inspect }"
         @dest.puts line
       end
     end

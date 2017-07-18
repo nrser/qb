@@ -1,4 +1,5 @@
 require 'json'
+require 'pp'
 
 module QB
   class AnsibleModule
@@ -35,22 +36,29 @@ module QB
       @qb_stdio_err = nil
       @qb_stdio_in = nil
       
+      debug "HERE!"
+      debug ENV
+      
       # if QB_STDIO_ env vars are set send stdout and stderr
       # to those sockets to print in the parent process
       
-      if ENV['QB_STDIO_OUT']
-        @qb_stdio_out = $stdout = UNIXSocket.new ENV['QB_STDIO_OUT']
-      end
-      
       if ENV['QB_STDIO_ERR']
         @qb_stdio_err = $stderr = UNIXSocket.new ENV['QB_STDIO_ERR']
+        
+        debug "Connected to QB stderr stream at #{ ENV['QB_STDIO_ERR'] } #{ @qb_stdio_err.path }."
+      end
+      
+      if ENV['QB_STDIO_OUT']
+        @qb_stdio_out = $stdout = UNIXSocket.new ENV['QB_STDIO_OUT']
+        
+        debug "Connected to QB stdout stream at #{ ENV['QB_STDIO_OUT'] }."
       end
       
       if ENV['QB_STDIO_IN']
         @qb_stdio_in = UNIXSocket.new ENV['QB_STDIO_IN']
+        
+        debug "Connected to QB stdin stream at #{ ENV['QB_STDIO_IN'] }."
       end
-      
-      debug "HERE!"
       
       @@arg_types.each {|key, type|
         var_name = "@#{ key.to_s }"
@@ -97,6 +105,20 @@ module QB
       # print JSON response to process' actual STDOUT (instead of $stdout,
       # which may be pointing to the qb parent process)
       STDOUT.print JSON.dump(self.class.stringify_keys(hash))
+      
+      [
+        [:stdin, @qb_stdio_in],
+        [:stdout, @qb_stdio_out],
+        [:stderr, @qb_stdio_err],
+      ].each do |name, socket|
+        if socket
+          debug "Flushing socket #{ name }."
+          socket.flush
+          debug "Closing #{ name } socket at #{ socket.path.to_s }."
+          socket.close
+        end
+      end
+      
       exit 0
     end
     

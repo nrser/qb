@@ -64,7 +64,7 @@ class PathFacts < QB::AnsibleModule
     dir = @path.expand_path.ascend.find {|p| p.directory? }
     
     Dir.chdir(dir) do
-      root_result = Cmds.new "git rev-parse --show-toplevel"
+      root_result = Cmds.capture "git rev-parse --show-toplevel"
       
       unless root_result.ok?
         @result.in_git_repo = false
@@ -86,6 +86,27 @@ class PathFacts < QB::AnsibleModule
         rescue
         end
       }
+      
+      git.is_clean = Cmds.chomp!('git status --porcelain 2>/dev/null').empty?
+      
+      rev_parse = Cmds.capture 'git rev-parse HEAD'
+      
+      if rev_parse.ok?
+        git.head = rev_parse.out.chomp
+        git.head_short = git.head[0...7]
+      else
+        git.head = git.head_short = nil
+      end
+      
+      branch = Cmds.capture 'git branch --no-color 2> /dev/null'
+      
+      git.branch = if branch.ok?
+        if line = branch.out.lines.find {|line| line.start_with? '*'}
+          if m = line.match(/\*\s+(\S+)/)
+            m[1]
+          end
+        end
+      end
       
       git.origin = begin
         Cmds.chomp! "git remote get-url origin"
@@ -184,9 +205,11 @@ class PathFacts < QB::AnsibleModule
     # To stay consistent with Gem
     npm.name = npm.package_json['name']
     
-    npm.version = QB::Package::Version.from_npm_version(
-      npm.package_json['version']
-    )
+    if npm.package_json['version']
+      npm.version = QB::Package::Version.from_npm_version(
+        npm.package_json['version']
+      )
+    end
   end
   
   # Run the module.

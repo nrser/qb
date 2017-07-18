@@ -126,6 +126,8 @@ def main args
     exit 1
   end
   
+  QB.check_qb_version role
+  
   options = QB::Options.new role, args
   
   QB.debug "role options set on cli", options.role_options.select {|k, o|
