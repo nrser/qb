@@ -6,6 +6,8 @@ module QB
   
   VERSION = "0.2.0.dev"
   
+  MIN_ANSIBLE_VERSION = Gem::Version.new '2.1.2'
+  
   def self.gemspec
     Gem.loaded_specs[GEM_NAME]
   end
