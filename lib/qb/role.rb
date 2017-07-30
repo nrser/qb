@@ -123,14 +123,31 @@ module QB
     
     # array of QB::Role found in search path.
     def self.available
+      # search_path.
+      #   select {|search_dir|
+      #     # make sure it's there (and a directory)
+      #     search_dir.directory?
+      #   }.
+      #   map {|search_dir|
+      #     # grab all the child directories that are role directories
+      #     search_dir.children.select {|child| role_dir? child }
+      #   }.
+      #   flatten.
+      #   map {|role_dir|
+      #     QB::Role.new role_dir
+      #   }.
+      #   uniq
+      
       search_path.
         select {|search_dir|
           # make sure it's there (and a directory)
           search_dir.directory?
         }.
         map {|search_dir|
-          # grab all the child directories that are role directories
-          search_dir.children.select {|child| role_dir? child }
+          Pathname.glob(search_dir.join '**', 'meta', 'qb.yml').
+            map {|meta_path|
+              meta_path.dirname.dirname
+            }
         }.
         flatten.
         map {|role_dir|

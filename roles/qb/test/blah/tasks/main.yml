@@ -1,0 +1,5 @@
+---
+# tasks file for blah
+- debug:
+    msg: >-
+      qb/test/blah blah_example {{ blah_example }}

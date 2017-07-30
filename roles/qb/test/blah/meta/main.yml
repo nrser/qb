@@ -1,0 +1,8 @@
+---
+# meta file for blah
+
+allow_duplicates: yes
+
+dependencies: []
+# - role: role-name
+

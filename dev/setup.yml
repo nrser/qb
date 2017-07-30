@@ -23,7 +23,7 @@
       - owner: ansible
         name: ansible
         version: v2.3.0.0-1
-        dir_name: ansible-v2.3.0.0
+        dir_name: ansible@v2.3.0.0
         depth: 1
       
       - owner: nrser
@@ -34,6 +34,11 @@
       
       - owner: nrser
         name: ansible-nrser.profile
+      
+      - owner: erikhuda
+        name: thor
+        version: v0.19.4
+        dir_name: thor@v0.19.4
       
       archive: []
 

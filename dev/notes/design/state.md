@@ -1,4 +1,4 @@
-# State Design Notes
+# State Playbook Design Notes
 
 Basically... create a kind of `package.json` or `Gemfile` equivalent for QB roles that saves role invocations in an Ansible playbook - which I'm thinking of calling `state.yml` - that can then be run to bring the system up to sync.
 
