@@ -36,8 +36,8 @@ module QB
       @qb_stdio_err = nil
       @qb_stdio_in = nil
       
-      debug "HERE!"
-      debug ENV
+      # debug "HERE!"
+      # debug ENV
       
       # if QB_STDIO_ env vars are set send stdout and stderr
       # to those sockets to print in the parent process
