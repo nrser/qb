@@ -1,16 +1,17 @@
 ---
 # symlink to src directory
 
-- name: |
+- when: install_force
+  name: |
     remove destination
     
       {{ install_path }}/{{ install_name }}
     
     prior to linking.
   file:
-    path: "{{ install_path }}/{{ install_name }}"
+    path: >-
+      {{ install_path }}/{{ install_name }}
     state: absent
-  when: "{{ install_force }}"
 
 - name: |
     symlink
@@ -21,7 +22,9 @@
     
       {{ install_src | realpath }}
   file:
-    src: "{{ install_src | realpath }}"
-    dest: "{{ install_path }}/{{ install_name }}"
+    src: >-
+      {{ install_src | realpath }}
+    dest: >-
+      {{ install_path }}/{{ install_name }}
     state: link
     

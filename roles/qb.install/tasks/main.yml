@@ -7,5 +7,5 @@
 - include: link.yml
   when: install_link
 
-- include: create.yml
-  when: install_create
+- include: edit.yml
+  when: install_edit

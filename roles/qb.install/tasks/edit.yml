@@ -1,0 +1,9 @@
+---
+  
+- name: >-
+    Open new qb role repo in Atom
+  shell: >-
+    {{ ansible_env.EDITOR.replace('--wait', '') }}
+    {% if install_add_to_project %}--add{% endif %}
+    {{ install_src }}
+  
