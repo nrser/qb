@@ -16,4 +16,8 @@ module QB
   # Raised when the current QB version doesn't satisfy a role as defined
   # in `<role_dir>/meta/qb[.yml]:required_qb_version`).
   class QBVersionError < VersionError; end
+  
+  # Raised when the file system is in a state that doesn't work for what we're
+  # trying to do.
+  class FSStateError < Error; end
 end # module QB

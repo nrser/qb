@@ -29,6 +29,7 @@ end
 GITHUB_SSH_URL_RE = /^git@github\.com\:(?<owner>.*)\/(?<name>.*)\.git$/
 GITHUB_HTTPS_URL_RE = /^https:\/\/github\.com\/(?<owner>.*)\/(?<name>.*)\.git$/
 
+
 class PathFacts < QB::AnsibleModule
   # Add a bunch of useful things to know about the path
   def add_path_facts
@@ -57,8 +58,9 @@ class PathFacts < QB::AnsibleModule
     @result.is_realpath = @result.realpath == @path
   end
   
-  # If the path is a Git repo (has a .git file in it's root) add useful
-  # Git facts.
+  
+  # If the path is part of a Git repo, as well as useful general
+  # Git environment facts.
   def add_git_facts
     # see if we're in a git repo. first, we need a directory that exists
     dir = @path.expand_path.ascend.find {|p| p.directory? }
@@ -143,6 +145,7 @@ class PathFacts < QB::AnsibleModule
     end
   end
   
+  
   # Find the only *.gemspec path in the `@path` directory. Warns and returns
   # `nil` if there is more than one match.
   def gemspec_path
@@ -158,6 +161,7 @@ class PathFacts < QB::AnsibleModule
       nil
     end
   end
+  
   
   # If `path` is a directory containing the source for a Ruby Gem, add 
   # useful information about it.
@@ -186,6 +190,8 @@ class PathFacts < QB::AnsibleModule
     gem.version = QB::Package::Version.from_gem_version spec.version
   end
   
+  
+  
   # Add facts about an NPM package based in `@path`, if any.
   def add_npm_facts
     package_json_path = @path.join('package.json')
@@ -212,6 +218,57 @@ class PathFacts < QB::AnsibleModule
     end
   end
   
+  
+  # Add version/package facts derives from @path/VERSION file if one exists.
+  # 
+  # Added values:
+  # 
+  # -   Always:
+  #     -   `has_version_file` - Boolean
+  #         -   True if `@path/VERSION` exists and was successfully parsed.
+  # 
+  # -   If `has_version_file` is `true`:
+  #     -   
+  # 
+  def add_version_file_facts
+    unless @path.directory?
+      @result.has_version_file = false
+      return
+    end
+    
+    version_file_path = @path.join 'VERSION'
+    
+    unless version_file_path.file?
+      @result.has_version_file = false
+      return
+    end
+    
+    version = begin
+      QB::Package::Version.from_string version_file_path.read
+    rescue Exception => e
+      warn "Unable to parse version from #{ version_file_path.to_s }; #{ e }"
+      @result.has_version_file = false
+      return
+    end
+    
+    @result.has_version_file = true
+    
+    version_file = @result.version_file = Result.new
+    @result.package.types << 'version_file'
+    
+    # get the name from git if we have it
+    if @result.is_git && @result.git.name
+      version_file.name = @result.git.name
+    else
+      # otherwise use the directory name
+      version_file.name = version_file_path.dirname.basename.to_s
+    end
+    
+    version_file.version = version
+    version_file.path = version_file_path
+  end
+  
+  
   # Run the module.
   def main
     # check the 'path' arg
@@ -225,13 +282,14 @@ class PathFacts < QB::AnsibleModule
     
     # Default to signaling no change (we're not gonna change anything in this
     # module either)
-    @result.changed = false
+    @result.changed = @changed
     
     # String warnings that will be shown to the user
-    @result.warnings = []
+    @result.warnings = @warnings
     
-    @result.package = Result.new
-    @result.package.types = []
+    # Set this up here so `add_*_facts` can append to `package.types`
+    package = @result.package = Result.new
+    package.types = []
     
     # Return the input as 'raw'
     @result.raw = @args['path']
@@ -239,9 +297,18 @@ class PathFacts < QB::AnsibleModule
     @path = Pathname.new @result.raw
     
     add_path_facts
+    
+    # Add git facts if @path is in a git repo
     add_git_facts
+    
+    # Add Ruby Gem version/package facts if @path is the root of a Ruby Gem
     add_gem_facts
+    
+    # Add version/package facts from a @path/package.json file if present
     add_npm_facts
+    
+    # Add version/package facts from a @path/VERSION file if present
+    add_version_file_facts
     
     # If we only have one type of package present, we set it's type and 
     # version as `package.type` and `package.version`, which makes it easy for
@@ -250,10 +317,48 @@ class PathFacts < QB::AnsibleModule
     # If there's more than one then we obviously can't guess what to do; the
     # user needs to specify.
     # 
-    if @result.package.types.length == 1
-      @result.package.type = @result.package.types[0]
-      @result.package.name = @result[@result.package.type].name
-      @result.package.version = @result[@result.package.type].version
+    if package.types.length == 1
+      package.type = package.types[0]
+      package.name = @result[package.type].name
+      package.version = @result[package.type].version
+    else
+      # Otherwise, if all the present info matches, we can use that.
+      # 
+      # We won't have a `type` though, because that doesn't make any sense.
+      # 
+      
+      # See if we have a unique common version that we can use for the overall
+      # version of the package.
+      # 
+      versions = package.types.
+        # Map the types to their version object
+        map { |type| @result[type].version }.
+        # Omit any that don't have a version
+        reject(&:nil?).
+        # Reduce to unique versions
+        uniq
+      
+      # Do we have a single unique version?
+      if versions.length == 1
+        # Yes!
+        package.version = versions.first
+      end
+      
+      # See if we have a unique common name that we can use use for the overall
+      # name of the package
+      # 
+      # TODO  since version_file kinda fudges this using the git repo name or
+      #       directory name, this might be problematic since those may not
+      #       stay consistent... we'll have to see how it goes.
+      # 
+      names = package.types.
+        map { |type| @result[type].name }.
+        reject(&:nil?).
+        uniq
+      
+      if names.length == 1
+        package.name = names.first
+      end
     end
     
     nil
