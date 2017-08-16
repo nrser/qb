@@ -1,3 +1,5 @@
+require 'time'
+
 require 'nrser/types'
 
 T = NRSER::Types
