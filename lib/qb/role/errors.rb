@@ -19,7 +19,16 @@ module QB
         @input = input
         @matches = matches
         
-        super "mutiple roles match input #{ @input.inspect }:\n#{ @matches.join("\n") }"
+        super <<-END
+multiple roles match input #{ @input.inspect }:\
+
+#{
+  @matches.map { |role|
+    "-   #{ role.to_s } (#{ role.path.to_s })"
+  }.join("\n")
+}
+
+END
       end
     end
     
