@@ -1,0 +1,5 @@
+---
+# tasks file for hash_opt
+- debug:
+    var: hash_opt_services
+  

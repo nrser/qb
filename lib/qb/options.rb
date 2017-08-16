@@ -136,18 +136,31 @@ module QB
               Integer
             when 'version'
               QB::Package::Version
+            when 'hash', 'dict'
+              Class.new.tap { |klass|
+                opts.accept(klass) {|value|
+                  value.split(',').map { |pair_str|
+                    split = pair_str.split ':'
+                    if split.length > 2
+                      raise "Can only have a single ':' in hash options, " +
+                            "found #{ pair_str.inspect } in #{ value.inspect }"
+                    end
+                    [split[0], split[1]]
+                  }.to_h
+                }
+              }
             when Hash
               if option.meta['type'].key? 'one_of'
-                klass = Class.new
-                opts.accept(klass) {|value|
-                  if option.meta['type']['one_of'].include? value
-                    value
-                  else
-                    raise QB::Role::MetadataError,
-                      "option '#{ option.cli_name }' must be one of: #{ option.meta['type']['one_of'].join(', ') }"
-                  end
+                Class.new.tap { |klass|
+                  opts.accept(klass) {|value|
+                    if option.meta['type']['one_of'].include? value
+                      value
+                    else
+                      raise QB::Role::MetadataError,
+                        "option '#{ option.cli_name }' must be one of: #{ option.meta['type']['one_of'].join(', ') }"
+                    end
+                  }
                 }
-                klass
               else 
                 raise QB::Role::MetadataError,
                   "bad type for option #{ option.meta_name }: #{ option.meta['type'].inspect }"
