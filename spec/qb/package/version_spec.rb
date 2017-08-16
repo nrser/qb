@@ -181,15 +181,33 @@ describe QB::Package::Version do
     context "dev version with everything" do
       include_context :version_everything_dev
       
-      subject {
-        version.build_version branch: 'blah',
-                              ref: 'aaabbbc',
-                              time: Time.new(2017, 1, 1, 0, 0, 0, '+00:00')
-      }
+      context "clean" do
+        subject {
+          version.build_version branch: 'blah',
+                                ref: 'aaabbbc',
+                                time: Time.new(2017, 1, 1, 0, 0, 0, '+00:00')
+        }
+        
+        it "replaces build info" do
+          expect(subject.build).to eq ['blah', 'aaabbbc', "20170101T000000Z"]
+        end
+      end # clean
       
-      it "replaces build info" do
-        expect(subject.build).to eq ['blah', 'aaabbbc', "20170101T000000Z"]
-      end
+      context "dirty" do
+        subject {
+          version.build_version branch: 'blah',
+                                ref: 'aaabbbc',
+                                time: Time.new(2017, 1, 1, 0, 0, 0, '+00:00'),
+                                dirty: true
+        }
+        
+        it "replaces build info" do
+          expect(subject.build).to eq(
+            ['blah', 'aaabbbc', 'dirty', "20170101T000000Z"]
+          )
+        end
+      end # dirty
+      
     end # dev version with everything
     
   end # #build_version

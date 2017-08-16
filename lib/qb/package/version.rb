@@ -268,10 +268,15 @@ module QB
       # 
       # @return [QB::Package::Version]
       # 
-      def build_version branch: nil, ref: nil, time: nil
+      def build_version branch: nil, ref: nil, time: nil, dirty: nil
         time = self.class.to_time_segment(time) unless time.nil?
         
-        segments = [branch, ref, time].reject &:nil?
+        segments = [
+          branch,
+          ref,
+          ('dirty' if dirty),
+          time,
+        ].reject &:nil?
         
         if segments.empty?
           raise ArgumentError,
