@@ -260,7 +260,7 @@ module QB
       
       
       def merge overrides = {}
-        self.class.new self.to_h.merge(overrides)
+        self.class.from_h self.to_h.merge(overrides)
       end
       
       
@@ -278,8 +278,7 @@ module QB
                 "Need to provide at least one of branch, ref, time."
         end
         
-        merge raw: nil,
-              build: segments.join('.')
+        merge raw: nil, build: segments
       end
       
       

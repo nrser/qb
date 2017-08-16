@@ -177,6 +177,25 @@ describe QB::Package::Version do
   end # #release_version
   
   
+  describe "#build_version" do
+    context "dev version with everything" do
+      include_context :version_everything_dev
+      
+      subject {
+        version.build_version branch: 'blah',
+                              ref: 'aaabbbc',
+                              time: Time.new(2017, 1, 1, 0, 0, 0, '+00:00')
+      }
+      
+      it "replaces build info" do
+        expect(subject.build).to eq ['blah', 'aaabbbc', "20170101T000000Z"]
+      end
+    end # dev version with everything
+    
+  end # #build_version
+  
+  
+  
   describe "#normalized" do
     context "Ruby Gems-style version 0.1.2.dev.3" do
       include_context :version_gem_style
