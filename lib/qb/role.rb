@@ -139,7 +139,10 @@ module QB
         uniq
     end
     
-    # get an array of QB::Role that match an input string
+    # Get an array of QB::Role that match an input string.
+    # 
+    # @return [Array<QB::Role>]
+    # 
     def self.matches input
       # keep this here to we don't re-gen every loop
       available = self.available
