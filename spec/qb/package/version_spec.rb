@@ -26,6 +26,14 @@ RSpec.shared_context :version_bad_gem_style do
   let(:raw) { '0.1.2.3.dev.4' }
 end #:version_gem_style
 
+
+RSpec.shared_context :version_with_build_info do
+  let(:raw) { '0.1.2-dev.0+master.aaabbbc.20170101T000000Z' }
+  let(:version) { QB::Package::Version.from_string raw }
+  subject { version }
+end #:version_with_build_info
+
+
 describe QB::Package::Version do
   
   describe ".new" do
@@ -214,15 +222,44 @@ describe QB::Package::Version do
   
   
   
-  describe "#normalized" do
+  describe "#semver" do
     context "Ruby Gems-style version 0.1.2.dev.3" do
       include_context :version_gem_style
       
       it do
-        expect(subject.normalized).to eq "0.1.2-dev.3"
+        expect(subject.semver).to eq "0.1.2-dev.3"
       end
     end # Ruby Gems-style version 0.1.2.dev.3
-  end # #normalized
+  end # #semver
+  
+  
+  # Docker Tag
+  # ---------------------------------------------------------------------
+  
+  describe "#docker_tag" do
+    context "version with build info" do
+      include_context :version_with_build_info
+      
+      it "forms the correct Docker image tag" do
+        expect(subject.docker_tag).to eq \
+          "0.1.2-dev.0_master.aaabbbc.20170101T000000Z"
+      end
+    end # version with build info
+  end # #docker_tag
+  
+  
+  describe ".from_docker_tag" do
+    context "version with build info" do
+      include_context :version_with_build_info
+      
+      it "re-parses into an equal version" do
+        expect(
+          QB::Package::Version.from_docker_tag version.docker_tag
+        ).to eq version
+      end
+    end # version with build info
+  end # .from_docker_tag
+  
   
   
   # Language Interface

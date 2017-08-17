@@ -2,6 +2,8 @@ require 'time'
 
 require 'nrser/types'
 
+require 'qb/util/docker_mixin'
+
 T = NRSER::Types
 
 module QB
@@ -12,6 +14,7 @@ module QB
     # Intended to be immutable for practical purposes.
     # 
     class Version
+      include QB::Util::DockerMixin
       
       # Class Methods
       # =====================================================================
@@ -25,6 +28,7 @@ module QB
       def self.to_time_segment time
         time.utc.iso8601.gsub /[^0-9A-Za-z]/, ''
       end
+      
       
       # Instance Builders
       # ---------------------------------------------------------------------
@@ -78,9 +82,34 @@ module QB
             build: parse['build']
       end
       
+      
+      # Parse Docker image tag version into a string. Reverse of 
+      # {QB::Package::Version#docker_tag}.
+      # 
+      # @param [String] version
+      #   String version to parse.
+      # 
+      # @return [QB::Package::Version]
+      # 
+      def self.from_docker_tag version
+        from_string version.gsub('_', '+')
+      end # .from_docker_tag
+      
+      
+      
+      # Parse string version into an instance. Accept Semver, Ruby Gem and 
+      # Docker image tag formats.
+      # 
+      # @param [String]
+      #   String version to parse.
+      # 
+      # @return [QB::Package::Version]
+      # 
       def self.from_string string
         if string.include? '-'
           self.from_npm_version string
+        elsif string.include? '_'
+          self.from_docker_tag string
         else
           self.from_gem_version Gem::Version.new(string)
         end
@@ -233,9 +262,10 @@ module QB
       # ---------------------------------------------------------------------
       
       # @return [String]
-      #   A normalized raw version string in
-      #   `Major.minor.patch-prerelease+build` format.
-      def normalized
+      #   The Semver version string
+      #   (`Major.minor.patch-prerelease+build` format).
+      # 
+      def semver
         result = release
         
         unless prerelease.empty?
@@ -247,7 +277,9 @@ module QB
         end
         
         result
-      end # #normalized
+      end # #semver
+      
+      alias_method :normalized, :semver
       
       
       # @return [QB::Package::Version]
@@ -285,6 +317,17 @@ module QB
         
         merge raw: nil, build: segments
       end
+      
+      # Docker image tag for the version.
+      # 
+      # See {QB::Util::DockerMixin::ClassMethods#to_docker_tag}.
+      # 
+      # @return [String]
+      #   
+      def docker_tag
+        self.class.to_docker_tag semver
+      end # #docker_tag
+      
       
       
       # Language Interface
@@ -365,7 +408,8 @@ module QB
           is_dev: dev?,
           is_rc: rc?,
           has_level: level?,
-          normalized: normalized,
+          semver: semver,
+          docker_tag: docker_tag,
         ).to_json *args
       end
       
