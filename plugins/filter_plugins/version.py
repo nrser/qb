@@ -103,6 +103,29 @@ def semver_parse(version):
 # semver_parse()
 
 
+def qb_version_parse(version):
+    '''Parse version into QB::Package::Version
+    '''
+    
+    ruby_code = (
+        '''
+        require 'qb'
+        
+        puts JSON.parse(
+            QB::Package::Version.from_string %s
+        )
+        ''' % json.dumps(version)
+    )
+    
+    cmd = ['/usr/bin/env', 'ruby', '-e', ruby_code]
+    
+    out = subprocess.check_output(cmd)
+    
+    qb_version = json.loads(out)
+    
+    return version
+
+
 class FilterModule(object):
     ''' version manipulation filters '''
 
@@ -110,6 +133,7 @@ class FilterModule(object):
         return {
             'semver_inc': semver_inc,
             'semver_parse': semver_parse,
+            'qb_version_parse': qb_version_parse,
         }
     # filters()
 # FilterModule
