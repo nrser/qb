@@ -14,7 +14,12 @@ module QB
     # Intended to be immutable for practical purposes.
     # 
     class Version
+      include NRSER::Meta::Props
       include QB::Util::DockerMixin
+      
+      NUMBER_SEGMENT = T.non_neg_int
+      NAME_SEGMENT = T.str
+      MIXED_SEGMENT = T.union NUMBER_SEGMENT, NAME_SEGMENT
       
       # Class Methods
       # =====================================================================
@@ -116,50 +121,32 @@ module QB
       end
       
       
-      # Instantiate from a hash. Slices out
-      # 
-      # -   `raw`
-      # -   `major`
-      # -   `minor`
-      # -   `patch`
-      # -   `prerelease`
-      # -   `build`
-      # 
-      # And passes their values to the constructor. Keys may be strings or 
-      # symbols. All other key/values are ignored, allowing you to pass in 
-      # the JSON encoding of a version instance.
-      # 
-      # @param [Hash] hash
-      #   Values to be passed to constructor.
-      # 
-      # @return [QB::Package::Version]
-      # 
-      def self.from_h hash
-        self.new(
-          NRSER.slice_keys(
-            NRSER.symbolize_keys(hash),
-            :raw,
-            :major,
-            :minor,
-            :patch,
-            :prerelease,
-            :build,
-          )
-        )
-      end # #from_h
+      # Props
+      # =====================================================================
       
+      prop :raw,            type: T.maybe(T.str)
+      prop :major,          type: NUMBER_SEGMENT
+      prop :minor,          type: NUMBER_SEGMENT,         default: 0
+      prop :patch,          type: NUMBER_SEGMENT,         default: 0
+      prop :prerelease,     type: T.array(MIXED_SEGMENT), default: []
+      prop :build,          type: T.array(MIXED_SEGMENT), default: []
+      
+      prop :release,        type: T.str,    source: :@release
+      prop :level,          type: T.str,    source: :@level
+      prop :is_release,     type: T.bool,   source: :release?
+      prop :is_prerelease,  type: T.bool,   source: :prerelease?
+      prop :is_build,       type: T.bool,   source: :build?
+      prop :is_dev,         type: T.bool,   source: :dev?
+      prop :is_rc,          type: T.bool,   source: :rc?
+      prop :has_level,      type: T.bool,   source: :level?
+      prop :semver,         type: T.str,    source: :semver
+      prop :docker_tag,     type: T.str,    source: :docker_tag
       
       
       # Attributes
       # =====================================================================
       
-      attr_reader :raw,
-                  :major,
-                  :minor,
-                  :patch,
-                  :prerelease,
-                  :build,
-                  :release,
+      attr_reader :release,
                   :level
       
       
@@ -167,28 +154,17 @@ module QB
       # =====================================================================
       
       # Construct a new Version
-      def initialize(
-        raw: nil,
-        major:,
-        minor: 0,
-        patch: 0,
-        prerelease: [],
-        build: []
-      )
-        @raw = T.maybe(T.str).check raw
-        @major = T.non_neg_int.check major
-        @minor = T.non_neg_int.check minor
-        @patch = T.non_neg_int.check patch
-        @prerelease = T.array(T.union(T.non_neg_int, T.str)).check prerelease
-        @build = T.array(T.union(T.non_neg_int, T.str)).check build
+      def initialize **values
+        initialize_props values
+        
         @release = [major, minor, patch].join '.'
         
-        @level = T.match @prerelease[0], {
+        @level = T.match prerelease[0], {
           T.is(nil) => ->(_) { nil },
           
-          T.str => ->(str) { str },
+          NAME_SEGMENT => ->(str) { str },
           
-          T.non_neg_int => ->(int) { nil },
+          NUMBER_SEGMENT => ->(int) { nil },
         }
       end
       
@@ -203,7 +179,7 @@ module QB
       #   True if this version is a release (no prerelease or build values).
       # 
       def release?
-        @prerelease.empty? && @build.empty?
+        prerelease.empty? && build.empty?
       end
       
       
@@ -214,7 +190,7 @@ module QB
       #   empty.
       # 
       def prerelease?
-        !@prerelease.empty?
+        !prerelease.empty?
       end
       
       
@@ -227,7 +203,7 @@ module QB
       #   Gem version.
       # 
       def build?
-        !@build.empty?
+        !build.empty?
       end
       
       
@@ -236,7 +212,7 @@ module QB
       #   we consider the 'level'.
       #   
       def level?
-        !@level.nil?
+        !level.nil?
       end
       
       
@@ -245,7 +221,7 @@ module QB
       #   is 'dev').
       # 
       def dev?
-        @level == 'dev'
+        level == 'dev'
       end
       
       
@@ -254,7 +230,7 @@ module QB
       #   is 'rc').
       # 
       def rc?
-        @level == 'rc'
+        level == 'rc'
       end
       
       
@@ -388,29 +364,6 @@ module QB
       
       def eql? other
         self == other && self.hash == other.hash
-      end
-      
-      
-      # dump all instance variables into a hash
-      def to_h
-        instance_variables.map {|var| 
-          [var[1..-1], instance_variable_get(var)]
-        }.to_h
-      end # #to_h
-      
-      
-      # Dump all instance variables in JSON serialization
-      def to_json *args
-        to_h.merge(
-          is_release: release?,
-          is_prerelease: prerelease?,
-          is_build: build?,
-          is_dev: dev?,
-          is_rc: rc?,
-          has_level: level?,
-          semver: semver,
-          docker_tag: docker_tag,
-        ).to_json *args
       end
       
       
