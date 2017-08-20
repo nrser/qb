@@ -20,10 +20,6 @@ module Interop
       # method body
       yaml = $stdin.read
       
-      File.open('./receive.log', 'w') { |f|
-        f.write yaml
-      }
-      
       payload = YAML.load yaml
       
       data = payload.fetch 'data'
