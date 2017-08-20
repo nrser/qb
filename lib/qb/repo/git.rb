@@ -1,4 +1,7 @@
 require 'cmds'
+require 'nrser/refinements/types'
+
+using NRSER::Types
 
 module QB 
 module Repo
@@ -13,8 +16,8 @@ class Git < NRSER::Meta::Props::Base
   GITHUB_HTTPS_URL_RE = /^https:\/\/github\.com\/(?<owner>.*)\/(?<name>.*)\.git$/
   
   class User < NRSER::Meta::Props::Base
-    prop :name, type: NRSER::Types.maybe(NRSER::Types.str), default: nil
-    prop :email, type: NRSER::Types.maybe(NRSER::Types.str), default: nil
+    prop :name, type: t.maybe(t.str), default: nil
+    prop :email, type: t.maybe(t.str), default: nil
   end
   
   
@@ -22,11 +25,11 @@ class Git < NRSER::Meta::Props::Base
   #   SSH_URL_RE = /^git@github\.com\:(?<owner>.*)\/(?<name>.*)\.git$/
   #   HTTPS_URL_RE = /^https:\/\/github\.com\/(?<owner>.*)\/(?<name>.*)\.git$/
   #   
-  #   prop :owner,  type: NRSER::Types.str
-  #   prop :name,   type: NRSER::Types.str
-  #   prop :api_response, type: NRSER::Types.maybe(NRSER::Types.hash)
+  #   prop :owner,  type: t.str
+  #   prop :name,   type: t.str
+  #   prop :api_response, type: t.maybe(t.hash)
   #   
-  #   prop :full_name,    type: NRSER::Types.str,  source: :full_name
+  #   prop :full_name,    type: t.str,  source: :full_name
   #   
   #   
   #   # Class Methods
@@ -217,20 +220,20 @@ class Git < NRSER::Meta::Props::Base
   # Props
   # =====================================================================
   
-  prop :raw_input_path, type: NRSER::Types.maybe(T.union(Pathname, T.str)), default: nil
+  prop :raw_input_path, type: t.maybe(t.union(Pathname, t.str)), default: nil
   prop :root, type: Pathname
   prop :user, type: User
-  prop :is_clean, type: NRSER::Types.bool
-  prop :head, type: NRSER::Types.maybe(NRSER::Types.str), default: nil
-  prop :branch, type: NRSER::Types.maybe(NRSER::Types.str), default: nil
-  prop :origin, type: NRSER::Types.maybe(NRSER::Types.str), default: nil
-  prop :owner, type: NRSER::Types.maybe(NRSER::Types.str), default: nil
-  prop :name, type: NRSER::Types.maybe(NRSER::Types.str), default: nil
-  prop :github, type: NRSER::Types.maybe(NRSER::Types.hash_t), default: nil
+  prop :is_clean, type: t.bool
+  prop :head, type: t.maybe(t.str), default: nil
+  prop :branch, type: t.maybe(t.str), default: nil
+  prop :origin, type: t.maybe(t.str), default: nil
+  prop :owner, type: t.maybe(t.str), default: nil
+  prop :name, type: t.maybe(t.str), default: nil
+  prop :github, type: t.maybe(t.hash_), default: nil
   
-  prop :head_short, type: NRSER::Types.maybe(NRSER::Types.str), source: :head_short
-  prop :full_name, type: NRSER::Types.maybe(NRSER::Types.str), source: :full_name
-  prop :is_github, type: NRSER::Types.bool, source: :github?
+  prop :head_short, type: t.maybe(t.str), source: :head_short
+  prop :full_name, type: t.maybe(t.str), source: :full_name
+  prop :is_github, type: t.bool, source: :github?
   
   
   # Instance Methods

@@ -1,10 +1,10 @@
 require 'time'
 
-require 'nrser/types'
+require 'nrser/refinements/types'
+
+using NRSER::Types
 
 require 'qb/util/docker_mixin'
-
-T = NRSER::Types
 
 module QB
   module Package
@@ -24,31 +24,31 @@ module QB
       # Constants
       # =====================================================================
       
-      NUMBER_SEGMENT = T.non_neg_int
-      NAME_SEGMENT = T.str
-      MIXED_SEGMENT = T.union NUMBER_SEGMENT, NAME_SEGMENT
+      NUMBER_SEGMENT = t.non_neg_int
+      NAME_SEGMENT = t.str
+      MIXED_SEGMENT = t.union NUMBER_SEGMENT, NAME_SEGMENT
       
       
       # Props
       # =====================================================================
 
-      prop :raw,            type: T.maybe(T.str),         default: nil
+      prop :raw,            type: t.maybe(t.str),         default: nil
       prop :major,          type: NUMBER_SEGMENT
       prop :minor,          type: NUMBER_SEGMENT,         default: 0
       prop :patch,          type: NUMBER_SEGMENT,         default: 0
-      prop :prerelease,     type: T.array(MIXED_SEGMENT), default: []
-      prop :build,          type: T.array(MIXED_SEGMENT), default: []
+      prop :prerelease,     type: t.array(MIXED_SEGMENT), default: []
+      prop :build,          type: t.array(MIXED_SEGMENT), default: []
 
-      prop :release,        type: T.str,    source: :@release
-      prop :level,          type: T.str,    source: :@level
-      prop :is_release,     type: T.bool,   source: :release?
-      prop :is_prerelease,  type: T.bool,   source: :prerelease?
-      prop :is_build,       type: T.bool,   source: :build?
-      prop :is_dev,         type: T.bool,   source: :dev?
-      prop :is_rc,          type: T.bool,   source: :rc?
-      prop :has_level,      type: T.bool,   source: :level?
-      prop :semver,         type: T.str,    source: :semver
-      prop :docker_tag,     type: T.str,    source: :docker_tag
+      prop :release,        type: t.str,    source: :@release
+      prop :level,          type: t.str,    source: :@level
+      prop :is_release,     type: t.bool,   source: :release?
+      prop :is_prerelease,  type: t.bool,   source: :prerelease?
+      prop :is_build,       type: t.bool,   source: :build?
+      prop :is_dev,         type: t.bool,   source: :dev?
+      prop :is_rc,          type: t.bool,   source: :rc?
+      prop :has_level,      type: t.bool,   source: :level?
+      prop :semver,         type: t.str,    source: :semver
+      prop :docker_tag,     type: t.str,    source: :docker_tag
 
 
       # Attributes
@@ -167,8 +167,8 @@ module QB
         
         @release = [major, minor, patch].join '.'
         
-        @level = T.match prerelease[0], {
-          T.is(nil) => ->(_) { nil },
+        @level = t.match prerelease[0], {
+          t.is(nil) => ->(_) { nil },
           
           NAME_SEGMENT => ->(str) { str },
           
