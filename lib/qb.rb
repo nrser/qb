@@ -39,3 +39,4 @@ end
 # needs QB::*_ROLES_DIR
 require 'qb/role'
 require 'qb/options'
+require_relative './qb/repo'

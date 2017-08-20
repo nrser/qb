@@ -59,9 +59,15 @@ class PathFacts < QB::AnsibleModule
   end
   
   
+  def add_git_facts
+    @result.git = QB::Repo::Git.from_path @path,
+                                          use_github_api: !!@args['github_api']
+  end
+  
+  
   # If the path is part of a Git repo, as well as useful general
   # Git environment facts.
-  def add_git_facts
+  def add_git_facts_old
     # see if we're in a git repo. first, we need a directory that exists
     dir = @path.expand_path.ascend.find {|p| p.directory? }
     

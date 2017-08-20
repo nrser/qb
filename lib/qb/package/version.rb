@@ -13,13 +13,50 @@ module QB
     # 
     # Intended to be immutable for practical purposes.
     # 
-    class Version
-      include NRSER::Meta::Props
+    class Version < NRSER::Meta::Props::Base
+      
+      # Mixins
+      # =====================================================================
+      
       include QB::Util::DockerMixin
+      
+      
+      # Constants
+      # =====================================================================
       
       NUMBER_SEGMENT = T.non_neg_int
       NAME_SEGMENT = T.str
       MIXED_SEGMENT = T.union NUMBER_SEGMENT, NAME_SEGMENT
+      
+      
+      # Props
+      # =====================================================================
+
+      prop :raw,            type: T.maybe(T.str),         default: nil
+      prop :major,          type: NUMBER_SEGMENT
+      prop :minor,          type: NUMBER_SEGMENT,         default: 0
+      prop :patch,          type: NUMBER_SEGMENT,         default: 0
+      prop :prerelease,     type: T.array(MIXED_SEGMENT), default: []
+      prop :build,          type: T.array(MIXED_SEGMENT), default: []
+
+      prop :release,        type: T.str,    source: :@release
+      prop :level,          type: T.str,    source: :@level
+      prop :is_release,     type: T.bool,   source: :release?
+      prop :is_prerelease,  type: T.bool,   source: :prerelease?
+      prop :is_build,       type: T.bool,   source: :build?
+      prop :is_dev,         type: T.bool,   source: :dev?
+      prop :is_rc,          type: T.bool,   source: :rc?
+      prop :has_level,      type: T.bool,   source: :level?
+      prop :semver,         type: T.str,    source: :semver
+      prop :docker_tag,     type: T.str,    source: :docker_tag
+
+
+      # Attributes
+      # =====================================================================
+
+      attr_reader :release,
+                  :level
+      
       
       # Class Methods
       # =====================================================================
@@ -121,41 +158,12 @@ module QB
       end
       
       
-      # Props
-      # =====================================================================
-      
-      prop :raw,            type: T.maybe(T.str)
-      prop :major,          type: NUMBER_SEGMENT
-      prop :minor,          type: NUMBER_SEGMENT,         default: 0
-      prop :patch,          type: NUMBER_SEGMENT,         default: 0
-      prop :prerelease,     type: T.array(MIXED_SEGMENT), default: []
-      prop :build,          type: T.array(MIXED_SEGMENT), default: []
-      
-      prop :release,        type: T.str,    source: :@release
-      prop :level,          type: T.str,    source: :@level
-      prop :is_release,     type: T.bool,   source: :release?
-      prop :is_prerelease,  type: T.bool,   source: :prerelease?
-      prop :is_build,       type: T.bool,   source: :build?
-      prop :is_dev,         type: T.bool,   source: :dev?
-      prop :is_rc,          type: T.bool,   source: :rc?
-      prop :has_level,      type: T.bool,   source: :level?
-      prop :semver,         type: T.str,    source: :semver
-      prop :docker_tag,     type: T.str,    source: :docker_tag
-      
-      
-      # Attributes
-      # =====================================================================
-      
-      attr_reader :release,
-                  :level
-      
-      
       # Constructor
       # =====================================================================
       
       # Construct a new Version
       def initialize **values
-        initialize_props values
+        super **values
         
         @release = [major, minor, patch].join '.'
         
