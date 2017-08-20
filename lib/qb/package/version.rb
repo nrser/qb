@@ -266,6 +266,14 @@ module QB
       alias_method :normalized, :semver
       
       
+      
+      # Related Versions
+      # ---------------------------------------------------------------------
+      # 
+      # Functions that construct new version instances based on the current 
+      # one as well as additional information provided.
+      # 
+      
       # @return [QB::Package::Version]
       #   A new {QB::Package::Version} created from {#release}. Even if `self`
       #   *is* a release version already, still returns a new instance.
@@ -273,11 +281,6 @@ module QB
       def release_version
         self.class.from_string release
       end # #release_version
-      
-      
-      def merge overrides = {}
-        self.class.from_h self.to_h.merge(overrides)
-      end
       
       
       # Return a new {QB::Package::Version} with build information added.
@@ -301,6 +304,17 @@ module QB
         
         merge raw: nil, build: segments
       end
+      
+      
+      # @return [QB::Package::Version]
+      #   A new {QB::Package::Version} created from {#release} and
+      #   {#prerelease} data, but without any build information.
+      # 
+      def prerelease_version
+        merge raw: nil, build: []
+      end # #prerelease_version
+      
+      
       
       # Docker image tag for the version.
       # 

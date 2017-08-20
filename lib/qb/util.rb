@@ -1,3 +1,6 @@
+require_relative './util/stdio'
+require_relative './util/interop'
+
 require 'nrser'
 
 using NRSER

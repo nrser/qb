@@ -108,21 +108,6 @@ describe QB::Package::Version do
   end # .from_string
   
   
-  describe ".from_hash" do
-    context "dev version with everything" do
-      include_context :version_everything_dev
-      
-      let(:hash) { version.to_h }
-      subject { QB::Package::Version.from_h hash}
-      
-      it "is equal to original version" do
-        expect(version == subject).to be true
-      end
-    end # dev version with everything
-  end # .from_hash
-  
-  
-  
   describe "#to_a" do
     
     context "dev version with everything" do
