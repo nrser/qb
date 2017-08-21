@@ -134,7 +134,7 @@ module QB
       # @return [QB::Package::Version]
       # 
       def self.from_docker_tag version
-        from_string version.gsub('_', '+')
+        from_string(version.gsub('_', '+')).merge raw: version
       end # .from_docker_tag
       
       
