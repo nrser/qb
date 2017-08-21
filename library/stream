@@ -16,9 +16,24 @@ require 'cmds'
 
 class Stream < QB::AnsibleModule
   def main
-    Dir.chdir @args['chdir'] if @args['chdir']
+    template = @args['template'] || @args['cmd']
     
-    Cmds.stream! @args['cmd']
+    if template.nil?
+      raise ArgumentError,
+            "Must supply `template` or `cmd` argument."
+    end
+    
+    opts = {}
+    
+    [:args, :kwds, :input, :assert, :env, :chdir].each { |key|
+      opts[key] = @args[key.to_s] if @args.key?(key.to_s)
+    }
+    
+    [:format, :env_mode].each { |key|
+      opts[key] = @args[key].to_sym if @args.key?(key.to_s)
+    }
+    
+    Cmds.new(template, **opts).stream!
     
     changed!
   end
