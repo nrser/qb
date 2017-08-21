@@ -103,7 +103,7 @@ def semver_parse(version):
 # semver_parse()
 
 
-def qb_version_parse(version):
+def qb_version_parse(version_string):
     '''Parse version into QB::Package::Version
     '''
     
@@ -111,17 +111,17 @@ def qb_version_parse(version):
         '''
         require 'qb'
         
-        puts JSON.parse(
+        puts JSON.dump(
             QB::Package::Version.from_string %s
         )
-        ''' % json.dumps(version)
+        ''' % json.dumps(version_string)
     )
     
     cmd = ['/usr/bin/env', 'ruby', '-e', ruby_code]
     
     out = subprocess.check_output(cmd)
     
-    qb_version = json.loads(out)
+    version = json.loads(out)
     
     return version
 
