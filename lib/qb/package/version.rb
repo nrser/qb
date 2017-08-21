@@ -148,10 +148,10 @@ module QB
       # @return [QB::Package::Version]
       # 
       def self.from_string string
-        if string.include? '-'
-          self.from_npm_version string
-        elsif string.include? '_'
+        if string.include? '_'
           self.from_docker_tag string
+        elsif string.include? '-'
+          self.from_npm_version string
         else
           self.from_gem_version Gem::Version.new(string)
         end
