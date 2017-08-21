@@ -10,3 +10,10 @@
       {{ role_dest }}/filter_plugins/{{ name }}_plugins.py
     force: >-
       {{ role_force }}
+
+- name: >-
+    Make filter plugin executable so it's easier to run doctests.
+  file:
+    dest: >-
+      {{ role_dest }}/filter_plugins/{{ name }}_plugins.py
+    mode: a+x

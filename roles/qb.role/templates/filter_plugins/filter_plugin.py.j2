@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 # `{{ name }}` Ansible/Jinja2 Filters for `{{ role_role_name }}` Role.
 # 
 
@@ -29,6 +31,9 @@ from ansible.errors import AnsibleError
 def my_{{ name }}_filter(subject, *args, **kwds):
     '''
     TODO doc me!
+    
+    >>> my_{{ name }}_filter('yao')
+    "buyao"
     '''
     
     raise NotImplementedError("Implement me!")
