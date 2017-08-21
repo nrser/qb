@@ -5,6 +5,7 @@ from ansible.errors import AnsibleError
 
 import subprocess
 import yaml
+from ansible.parsing.yaml.dumper import AnsibleDumper
 
 def qb_send(data, method, *args, **kwds):
     '''
@@ -18,7 +19,7 @@ def qb_send(data, method, *args, **kwds):
         'kwds': kwds,
     }
     
-    input = yaml.safe_dump(payload)
+    input = yaml.dump(payload, Dumper=AnsibleDumper)
     
     ruby_code = '''
         # init bundler in dev env
@@ -54,7 +55,7 @@ def qb_send(data, method, *args, **kwds):
         ''' % (err))
     
     try:
-        result = yaml.load(out)
+        result = yaml.safe_load(out)
     except Exception as error:
         raise AnsibleError('''
             qb_send failed to parse response:
