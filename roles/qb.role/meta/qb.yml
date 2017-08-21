@@ -90,5 +90,17 @@ vars:
     
     --modules=some_module
 
+- name: filter_plugins
+  description: >-
+    Generate `filter_plugins` directory and file boilerplate(s).
+  type: array
+  examples:
+  - |
+    Generates a `filter_plugins/filter_plugins.py`
+    
+    qb qb.role roles/owner.new_role --filter-plugins
+    
+    
+
 - include: qb.project
   

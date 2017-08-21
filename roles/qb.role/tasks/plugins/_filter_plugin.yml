@@ -1,0 +1,12 @@
+---
+# Generate a filter plugin boilerplate file.
+
+- name: >-
+    Generate `filter_plugins/{{ name }}_filters.py` filter plugin file.
+  template:
+    src: >-
+      {{ role_path }}/templates/filter_plugins/filter_plugin.py.j2
+    dest: >-
+      {{ role_dest }}/filter_plugins/{{ name }}_plugins.py
+    force: >-
+      {{ role_force }}

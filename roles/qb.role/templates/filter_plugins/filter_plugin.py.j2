@@ -1,0 +1,67 @@
+# `{{ name }}` Ansible/Jinja2 Filters for `{{ role_role_name }}` Role.
+# 
+
+
+# Imports
+# ============================================================================
+
+# Make Python 2 more Python 3-like
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
+
+from ansible.errors import AnsibleError
+
+# Some imports you may often want:
+# import sys
+# improt os
+# import subprocess
+# import yaml
+# improt json
+
+
+# Functions
+# ============================================================================
+# 
+# Suggested practice seems to be to define each filter as a top-level function
+# then expose them via the `FilterModule#filters` method below.
+# 
+
+def my_{{ name }}_filter(subject, *args, **kwds):
+    '''
+    TODO doc me!
+    '''
+    
+    raise NotImplementedError("Implement me!")
+
+
+# Module
+# ============================================================================
+# 
+# How Ansible finds the filters. It looks like it gets instantiated with
+# no arguments, at least most of the time, so it pretty much just serves as
+# a well-known name to obtain the function references from.
+# 
+class FilterModule(object):
+    '''
+    `{{ name }}` Ansible/Jinja2 filters for `{{ role_role_name }}` role.
+    '''
+
+    def filters(self):
+        return {
+            'my_{{ name }}_filter': my_{{ name }}_filter,
+        }
+    # filters()
+# FilterModule
+
+
+# Testing
+# ============================================================================
+# 
+# This is not standard Ansible-ness - they use `unittest.TestCase` in separate
+# files - but `doctest` seemed like a really easy way to add and run tests 
+# for these typically simple functions.
+# 
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+    

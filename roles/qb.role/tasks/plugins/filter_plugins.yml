@@ -1,0 +1,38 @@
+---
+# Generate filter plugins boilerplate(s).
+
+- name: >-
+    Create `filter_plugins` directory.
+  file:
+    dest: >-
+      {{ role_dest }}/filter_plugins
+    state: directory
+
+- name: >-
+    Figure out if we received a single truthy value that indicates we should
+    use the default filter plugin name.
+  set_fact:
+    role_filter_plugins_default: >-
+      {{
+        role_filter_plugins|length == 1 and
+        role_filter_plugins[0].lower() in ['1', 'true', 't', 'yes', 'y']
+      }}
+
+- when: role_filter_plugins_default
+  name: >-
+    Create default `filter_plugins/{{ role_role_name }}_plugins.py`
+  include: >-
+    {{ role_path }}/tasks/plugins/_filter_plugin.yml
+  vars:
+    name: >-
+      {{ role_role_name }}
+
+- when: not role_filter_plugins_default
+  name: >-
+    Create each of filter plugins sepcified in `role_filter_plugins`.
+  with_items: >-
+    {{ role_filter_plugins }}
+  loop_control:
+    loop_var: name
+  include: >-
+    {{ role_path }}/tasks/plugins/_filter_plugin.yml
