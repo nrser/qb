@@ -39,16 +39,18 @@ module QB
       prop :prerelease,     type: t.array(MIXED_SEGMENT), default: []
       prop :build,          type: t.array(MIXED_SEGMENT), default: []
 
-      prop :release,        type: t.str,    source: :@release
-      prop :level,          type: t.str,    source: :@level
-      prop :is_release,     type: t.bool,   source: :release?
-      prop :is_prerelease,  type: t.bool,   source: :prerelease?
-      prop :is_build,       type: t.bool,   source: :build?
-      prop :is_dev,         type: t.bool,   source: :dev?
-      prop :is_rc,          type: t.bool,   source: :rc?
-      prop :has_level,      type: t.bool,   source: :level?
-      prop :semver,         type: t.str,    source: :semver
-      prop :docker_tag,     type: t.str,    source: :docker_tag
+      prop :release,        type: t.str,            source: :@release
+      prop :level,          type: t.str,            source: :@level
+      prop :is_release,     type: t.bool,           source: :release?
+      prop :is_prerelease,  type: t.bool,           source: :prerelease?
+      prop :is_build,       type: t.bool,           source: :build?
+      prop :is_dev,         type: t.bool,           source: :dev?
+      prop :is_rc,          type: t.bool,           source: :rc?
+      prop :has_level,      type: t.bool,           source: :level?
+      prop :semver,         type: t.str,            source: :semver
+      prop :docker_tag,     type: t.str,            source: :docker_tag
+      prop :build_commit,   type: t.maybe(t.str),   source: :build_commit
+      prop :is_build_dirty, type: t.maybe(t.bool),  source: :build_dirty?
 
 
       # Attributes
@@ -215,6 +217,23 @@ module QB
       end
       
       
+      
+      # @todo Document build_dirty? method.
+      # 
+      # @param [type] arg_name
+      #   @todo Add name param description.
+      # 
+      # @return [return_type]
+      #   @todo Document return value.
+      # 
+      def build_dirty?
+        if build?
+          build.include? 'dirty'
+        end
+      end # #build_dirty?
+      
+      
+      
       # @return [Boolean]
       #   True if self is a prerelease version that starts with a string that
       #   we consider the 'level'.
@@ -242,7 +261,7 @@ module QB
       end
       
       
-      # Transformations
+      # Derived Properties
       # ---------------------------------------------------------------------
       
       # @return [String]
@@ -265,6 +284,31 @@ module QB
       
       alias_method :normalized, :semver
       
+      
+      # @todo Document commit method.
+      # 
+      # @param [type] arg_name
+      #   @todo Add name param description.
+      # 
+      # @return [return_type]
+      #   @todo Document return value.
+      # 
+      def build_commit
+        if build?
+          build.find { |seg| seg =~ /[0-9a-f]{7}/ }
+        end
+      end # #commit
+      
+      
+      # Docker image tag for the version.
+      # 
+      # See {QB::Util::DockerMixin::ClassMethods#to_docker_tag}.
+      # 
+      # @return [String]
+      #   
+      def docker_tag
+        self.class.to_docker_tag semver
+      end # #docker_tag
       
       
       # Related Versions
@@ -313,18 +357,6 @@ module QB
       def prerelease_version
         merge raw: nil, build: []
       end # #prerelease_version
-      
-      
-      
-      # Docker image tag for the version.
-      # 
-      # See {QB::Util::DockerMixin::ClassMethods#to_docker_tag}.
-      # 
-      # @return [String]
-      #   
-      def docker_tag
-        self.class.to_docker_tag semver
-      end # #docker_tag
       
       
       
