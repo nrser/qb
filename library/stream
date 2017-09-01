@@ -33,7 +33,13 @@ class Stream < QB::AnsibleModule
       opts[key] = @args[key].to_sym if @args.key?(key.to_s)
     }
     
-    Cmds.new(template, **opts).stream!
+    cmd = Cmds.new(template, **opts)
+    
+    if @args['log']
+      info "STREAMING #{ cmd.prepare.inspect }"
+    end
+    
+    cmd.stream!
     
     changed!
   end
