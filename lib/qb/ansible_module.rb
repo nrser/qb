@@ -118,6 +118,12 @@ module QB
       end
     end
     
+    def info msg
+      if @qb_stdio_err
+        $stderr.puts msg
+      end
+    end
+    
     # Append a warning message to @warnings.
     def warn msg
       @warnings << msg
