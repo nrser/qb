@@ -1,0 +1,6 @@
+# tasks file for path_filters
+- name: Install Python pathlib2 package via pip.
+  pip:
+    name: pathlib2
+    version: 2.3.0
+    

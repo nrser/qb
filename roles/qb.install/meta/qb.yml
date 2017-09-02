@@ -39,11 +39,17 @@ default_user: null
 save_options: false
 
 examples:
-  create a new role backed by a GitHub repo: >
+  Create a new role backed by a GitHub repo: >
     
     qb install --create --name=nrser.blah
     
     (`name` needs to have the namespace attached if one is desired)
+  
+  Add a newly created role to the current Atom project:
+    
+    (Assumes $EDITOR is set to Atom's path)
+    
+    qb install --create --name=nrser.blah --add-to-project
 
 options:
 # - name: example
@@ -101,3 +107,18 @@ options:
   required: false
   type: boolean
   short: c
+
+- name: edit
+  description: >-
+    Open the role direcotry in EDITOR when done.
+  type: boolean
+  short: e
+
+- name: add_to_project
+  description: >-
+    Include an `--add` option when opening role directory in EDITOR.
+    Added for Atom to add to current project, but who knows, maybe
+    works elsewhere too.
+  type: boolean
+  short: a
+    

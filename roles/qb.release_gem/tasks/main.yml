@@ -7,10 +7,37 @@
     bind:
       qb_dir: "{{ qb_dir }}"
     src: |
-      spec = Gem::Specification::load(Dir.glob("#{ qb_dir }/*.gemspec")[0])
-      name = spec.name
+      spec_pattern = "#{ qb_dir }/*.gemspec"
+      spec_path = Dir.glob(spec_pattern)[0]
       
-      segments = spec.version.segments.dup
+      if spec_path.nil?
+        raise "No gemspec found for pattern #{ spec_pattern }"
+      end
+      
+      spec = Gem::Specification.load spec_path
+      
+      # The gem *may already be loaded*, which would break the standard gemspec
+      # approach because the `require` will be a no-op, resulting in the 
+      # already loaded version number being used instead of the one in the
+      # file.
+      # 
+      # This is only a problem for NRSER, which is loaded in vars.rb.rb, but
+      # this fix should work for any module without worrying about what is
+      # currently loaded... grab the info we need in a clean child process.
+      # 
+      code = <<-END
+        require 'json'
+        spec = Gem::Specification.load(#{ JSON.dump spec_path })
+        puts JSON.dump({
+          'version' => spec.version.version,
+          'name' => spec.name,
+        })
+      END
+      obj = JSON.load `ruby -e #{ code.shellescape }`
+      version = Gem::Version.new obj['version']
+      name = obj['name']
+      
+      segments = version.segments.dup
       segments.pop while segments.any? {|s| s.is_a? String}
       
       segments[-1] = segments[-1].succ
@@ -18,24 +45,27 @@
       
       next_version = segments.join('.')
       
-      # match = /^(\d+)\.(\d+)\.(\d+)(\.dev)?$/.match(current_version)
-      
-      # if current_version.ends_with? '.dev'
-      # end
-      
       {
         'name' => name,
-        'current_version' => spec.version.version,
-        'release_version' => spec.version.release,
+        'current_version' => version.version,
+        'release_version' => version.release,
         'next_version' => next_version,
         'version_path' => "#{ qb_dir }/lib/#{ name }/version.rb",
+        'spec_path' => spec_path,
       }
   
 - debug:
-    msg: >
-      current: {{ release_gem_current_version }} | 
-      release: {{ release_gem_release_version }} | 
-      next: {{ release_gem_next_version }}
+    msg:
+    # - spec_path: >-
+    #     {{ release_gem_spec_path }}
+    # - version_path: >-
+    #     {{ release_gem_version_path }}
+    - current: >-
+        {{ release_gem_current_version }}
+    - release: >-
+        {{ release_gem_release_version }}
+    - next: >-
+        {{ release_gem_next_version }}
 
 - name: "change version to release version {{ release_gem_release_version }}"
   replace:

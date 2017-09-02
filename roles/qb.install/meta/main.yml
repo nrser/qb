@@ -6,7 +6,7 @@ allow_duplicates: yes
 dependencies: # []
 # - role: role-name
 - role: qb.qb_role
-  when: "{{ install_create }}"
+  when: install_create
   role_dest: "{{ install_src }}"
   role_role_name: "{{ install_name }}"
   role_project: true

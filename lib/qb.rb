@@ -1,10 +1,9 @@
 require 'nrser/extras'
 
 require_relative './qb/errors'
-require_relative "./qb/version"
-require_relative "./qb/util"
-require_relative './qb/util/stdio'
-require_relative "./qb/ansible_module"
+require_relative './qb/version'
+require_relative './qb/util'
+require_relative './qb/ansible_module'
 
 module QB
   ROOT = (Pathname.new(__FILE__).dirname + '..').expand_path
@@ -39,3 +38,4 @@ end
 # needs QB::*_ROLES_DIR
 require 'qb/role'
 require 'qb/options'
+require_relative './qb/repo'

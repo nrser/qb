@@ -149,3 +149,18 @@
   with_items: "{{ role_modules }}"
   loop_control:
     loop_var: role_module
+
+
+# Plugins
+# =====================================================================
+
+# Filter PLugins
+# ---------------------------------------------------------------------
+
+- when: role_filter_plugins|length > 0
+  name: >-
+    Generate filter plugin files.
+  include: >-
+    {{ role_path }}/tasks/plugins/filter_plugins.yml
+  
+

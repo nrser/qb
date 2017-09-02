@@ -16,6 +16,9 @@ role_library: false
 # modules
 role_modules: []
 
+# filter plugins
+role_filter_plugins: []
+
 # galaxy
 role_galaxy: false
 role_author: "{{ git_user_name }}"
