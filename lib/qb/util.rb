@@ -9,7 +9,7 @@ module QB
   module Util
     # split a string into 'words' for word-based matching
     def self.words string
-      string.split(/[\W_-]+/).reject {|w| w.empty?}
+      string.split(/[\W_\-\/]+/).reject {|w| w.empty?}
     end # .words
     
     # see if words from an input match words 

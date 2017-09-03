@@ -175,41 +175,47 @@ module QB
       separator_variations = [
         input,
         input.gsub('-', '_'),
-        input.gsub('_', '_'),
+        input.gsub('_', '-'),
       ]
       
-      separator_variations.each {|variation|
-        available.each {|role|
+      separator_variations.each { |variation|
+        available.each { |role|
           # exact match to full name
           return [role] if role.name == variation
-        }.each {|role|
+        }.each { |role|
           # exact match without the namespace prefix ('qb.' or similar)
           return [role] if role.namespaceless == variation
         }  
       }
       
       # see if we prefix match any full names
-      name_prefix_matches = available.select {|role|
-        role.name.start_with? input
+      separator_variations.each { |variation|
+        name_prefix_matches = available.select { |role|
+          role.name.start_with? variation
+        }
+        return name_prefix_matches unless name_prefix_matches.empty?
       }
-      return name_prefix_matches unless name_prefix_matches.empty?
       
       # see if we prefix match any name
-      namespaceless_prefix_matches = available.select {|role|
-        role.namespaceless.start_with? input
+      separator_variations.each { |variation|
+        namespaceless_prefix_matches = available.select { |role|
+          role.namespaceless.start_with? variation
+        }
+        unless namespaceless_prefix_matches.empty?
+          return namespaceless_prefix_matches 
+        end
       }
-      unless namespaceless_prefix_matches.empty?
-        return namespaceless_prefix_matches 
-      end
       
       # see if we prefix match any display paths
-      path_prefix_matches = available.select {|role|
-        role.display_path.start_with? input
+      separator_variations.each { |variation|
+        path_prefix_matches = available.select { |role|
+          role.display_path.start_with? variation
+        }
+        return path_prefix_matches unless path_prefix_matches.empty?
       }
-      return path_prefix_matches unless path_prefix_matches.empty?
       
       # see if we word match any display paths
-      name_word_matches = available.select {|role|
+      name_word_matches = available.select { |role|
         QB::Util.words_start_with? role.display_path.to_s, input
       }
       return name_word_matches unless name_word_matches.empty?
