@@ -12,6 +12,19 @@ module QB
   # 
   # 
   class Role
+    
+    # Constants
+    # =====================================================================
+    
+    PATH = [
+      File.join('.', 'dev', 'roles'),
+      File.join('.', 'roles'),
+      File.join('.', 'ansible', 'roles'),
+      QB::USER_ROLES_DIR,
+      QB::GEM_ROLES_DIR,
+    ]
+    
+    
     # attrs
     # =======================================================================
     
@@ -108,17 +121,7 @@ module QB
     #   places to look for role dirs.
     # 
     def self.search_path
-      [
-        QB::USER_ROLES_DIR,
-        QB::GEM_ROLES_DIR
-      ] + [
-        QB::Util.resolve,
-        QB::Util.resolve('ansible'),
-        QB::Util.resolve('dev'),
-      ].map {|dir|
-        roles_paths dir
-      }.
-      flatten
+      QB::Role::PATH.map { |dir| QB::Util.resolve dir }
     end
     
     # array of QB::Role found in search path.
@@ -131,12 +134,12 @@ module QB
         map {|search_dir|
           Pathname.glob(search_dir.join '**', 'meta', 'qb.yml').
             map {|meta_path|
-              meta_path.dirname.dirname
+              [meta_path.dirname.dirname, search_dir: search_dir] 
             }
         }.
-        flatten.
-        map {|role_dir|
-          QB::Role.new role_dir
+        flatten(1).
+        map {|args|
+          QB::Role.new *args
         }.
         uniq
     end
@@ -292,11 +295,17 @@ module QB
     # instance methods
     # =======================================================================
     
+    # Instantiate a Role.
     # 
     # @param [String|Pathname] path
     #   location of the role directory
     # 
-    def initialize path
+    # @param [nil, Pathname] search_dir
+    #   Directory in {QB::Role.search_path} that the role was found in.
+    #   Used to figure out it's name correctly when using directory-structure
+    #   namespacing.
+    # 
+    def initialize path, search_dir: nil
       @path = if path.is_a?(Pathname) then path else Pathname.new(path) end
       
       # check it...
@@ -318,7 +327,12 @@ module QB
         raise Errno::ENOENT.new "#{ @path.join('meta').to_s }/[qb|qb.yml]"
       end
       
-      @name = @path.to_s.split(File::SEPARATOR).last
+      
+      if search_dir.nil?
+        @name = @path.to_s.split(File::SEPARATOR).last
+      else
+        @name = @path.relative_path_from(search_dir).to_s
+      end
     end
     
     def to_s
@@ -326,15 +340,19 @@ module QB
     end
     
     def namespace
-      if @name.include? '.'
-        @name.split('.').first
-      else
+      *namespace_segments, last = @name.split File::Separator
+      
+      namespace_segments << last.split('.').first if last.include?('.')
+       
+      if namespace_segments.empty?
         nil
+      else
+        File.join *namespace_segments
       end
     end
     
     def namespaceless
-      @name.split('.', 2).last
+      File.basename(@name).split('.', 2).last
     end
     
     def options_key

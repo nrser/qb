@@ -4,6 +4,9 @@ require 'fileutils'
 require 'pp'
 
 TEST_ROLES_DIR = QB::ROOT.join 'test', 'roles'
+
+QB::Role::PATH.unshift TEST_ROLES_DIR
+
 TEST_ROLE_TEMPLATE_DIR = TEST_ROLES_DIR.join 'test_template'
 
 # @param [String] name
@@ -35,3 +38,59 @@ def test_role name, merge = [], &block
   
   QB::Role.new dest
 end
+
+
+
+# Shared Contexts
+# =====================================================================
+
+shared_context "require QB::Role for path" do
+  subject(:role) { QB::Role.require path }
+end # QB::Role
+
+
+shared_context "test role paths" do
+  let(:deep_role_path) { 'qb/deep/role/test' }
+  let(:legacy_name_role_path) { 'qb.legacy_name' }
+  let(:mixed_name_role_path) { 'qb/mixed/name.test' }
+end # test role paths
+
+
+
+
+# Shared Examples
+# =====================================================================
+
+shared_examples "subject has attributes" do |attrs|
+  it { is_expected.to have_attributes attrs }
+end # attrs
+
+
+shared_examples :instance do |klass, **kwds|
+  it { is_expected.to be_a klass }
+  
+  if kwds[:attrs]
+    it { is_expected.to have_attributes kwds[:attrs] }
+  end
+end # :instance
+
+
+
+shared_examples "an instance of" do |klass, **kwds|
+  context klass do
+    include_examples :instance, klass, **kwds
+  end #klass.name  
+end # an instance of
+
+
+shared_examples "an instance of the described class" do |**kwds|
+  include_examples "an instance of", described_class, **kwds
+end # an instance
+
+
+shared_examples QB::Role do |**kwds|
+  include_examples :instance, QB::Role, **kwds
+end # QB::Role
+
+
+

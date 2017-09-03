@@ -1,0 +1,67 @@
+---
+# meta/qb.yml file for name.test
+# 
+# qb settings for this role. see README.md for more info.
+#
+
+# description of the role to show in it's help output.
+description: null
+
+# Gemspec-style requirements. Right now only `gems:qb` is used, but plan to
+# generalize in the future.
+requirements:
+  gems:
+    qb: ~> 0.3.0
+
+# prefix for role variables
+var_prefix: null
+
+# how to get a default for `dir` if it's not provided as the only
+# positional argument. if a positional argument is provided it will
+# override the method defined here.
+# 
+# options:
+# 
+# -   null
+#     -   require the value on the command line.
+# -   false
+#     -   don't provide qb_dir (means doesn't load or save options either).
+# -   git_root
+#     -   use the git root fof the directory that the `qb` command is invoked
+#         from. useful for 'project-centric' commands so they can be invoked
+#         from anywhere in the repo.
+# -   cwd
+#     -   use the directory the `qb` command is invoked form.
+# -   {exe: PATH}
+#     -   invoke an execuable, passing a JSON serialization of the options 
+#         mapping their CLI names to values. path can be relative to role
+#         directory.
+# -   {find_up: FILENAME}
+#     -   starting at the current direcotry and climbing up to parent 
+#         directories, use the first one that contains FILENAME. error
+#         if none is found.
+default_dir: null
+
+# If `true`, QB will ensure the default dir exists before starting the play.
+# 
+# For legacy reasons, this defaults to `true` if not present, but we want to 
+# default declare it as `false` here so new roles can turn it on only if 
+# they need it.
+# 
+mkdir: false
+
+# default user to become for play
+default_user: null
+
+# set to false to not save options in .qb-options.yml files
+save_options: true
+
+# options to pass to ansible-playbook
+ansible_options: {}
+
+options: []
+# - name: example
+#   description: an example of a variable.
+#   required: false
+#   type: boolean # boolean (default) | string
+#   short: e
