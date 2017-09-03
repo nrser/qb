@@ -1,0 +1,27 @@
+global:
+
+  help:
+  
+commands:
+  help:
+    
+  run:
+    ansible:
+      hosts: >-
+        who to target
+      inventory: >-
+        inventory file to use
+      user: >-
+        who to become
+      tags: >-
+        tags to limit to
+      verbose:
+        forms: -V[LEVEL], -V, -VV, -VVV, etc.
+      facts: >-
+        can provide --NO-FACTS to skip fact collection.
+      print: >-
+        spew out stuff... options, env, cmd, playbook
+      run: >-
+        can provide --NO-RUN to not actually run the playbook
+    role_options: >-
+      custom to each role.      
