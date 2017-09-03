@@ -129,8 +129,10 @@ module QB
           search_dir.directory?
         }.
         map {|search_dir|
-          # grab all the child directories that are role directories
-          search_dir.children.select {|child| role_dir? child }
+          Pathname.glob(search_dir.join '**', 'meta', 'qb.yml').
+            map {|meta_path|
+              meta_path.dirname.dirname
+            }
         }.
         flatten.
         map {|role_dir|
@@ -203,7 +205,7 @@ module QB
       }
       return path_prefix_matches unless path_prefix_matches.empty?
       
-      # see if we word match any display` paths
+      # see if we word match any display paths
       name_word_matches = available.select {|role|
         QB::Util.words_start_with? role.display_path.to_s, input
       }
