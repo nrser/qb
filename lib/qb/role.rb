@@ -110,7 +110,7 @@ module QB
     def self.search_path
       [
         QB::USER_ROLES_DIR,
-        QB::GEM_ROLES_DIR
+        QB::QB_GEM_ROLES_DIR
       ] + [
         QB::Util.resolve,
         QB::Util.resolve('ansible'),
@@ -297,8 +297,8 @@ module QB
     #   path to display.
     # 
     def self.to_display_path path
-      if path.realpath.start_with? QB::GEM_ROLES_DIR
-        path.realpath.sub (QB::GEM_ROLES_DIR.to_s + '/'), ''
+      if path.realpath.start_with? QB::QB_GEM_ROLES_DIR
+        path.realpath.sub (QB::QB_GEM_ROLES_DIR.to_s + '/'), ''
       else
         QB::Util.contract_path path
       end

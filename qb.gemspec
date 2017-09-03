@@ -99,6 +99,10 @@ Gem::Specification.new do |spec|
   spec.add_dependency "state_mate", '~> 0.0', ">= 0.0.9"
   spec.add_dependency 'parseconfig', '~> 1.0', '>= 1.0.8'
   
+  # Thread-safe collections, etc. Used for package-level global collections
+  # so the lib doesn't necessarily shit the bed if you want to use some threads.
+  spec.add_dependency 'concurrent-ruby', '~> 1.0', '>= 1.0.5'
+  
   
   if QB::VERSION.end_with? '.dev'
     commit = `git rev-parse HEAD`.strip
