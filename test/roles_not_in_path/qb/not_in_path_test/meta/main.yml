@@ -1,0 +1,8 @@
+---
+# meta file for not_in_path_test
+
+allow_duplicates: yes
+
+dependencies: []
+# - role: role-name
+

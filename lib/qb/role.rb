@@ -16,11 +16,86 @@ module QB
     # Constants
     # =====================================================================
     
+    # Array of string paths to directories to search for roles or paths to 
+    # `ansible.cfg` files to look for an extract role paths from.
+    # 
+    # For the moment at least you can just mutate this value like you would
+    # `$LOAD_PATH`:
+    # 
+    #     QB::Role::PATH.unshift '~/where/some/roles/be'
+    #     QB::Role::PATH.unshift '~/my/ansible.cfg'
+    # 
+    # The paths are searched from first to last.
+    # 
+    # **WARNING**
+    # 
+    #   Search is **deep** - don't point this at large directory trees and 
+    #   expect any sort of reasonable performance (any directory that 
+    #   contains `node_modules` is usually a terrible idea for instance).
+    # 
     PATH = [
+      
+      # Development Paths
+      # =================
+      # 
+      # These come first because:
+      # 
+      # 1.  They are working dir-local.
+      # 
+      # 2.  They should only be present in local development, and should be
+      #     capable of overriding roles in other local directories to allow
+      #     custom development behavior (the same way `./dev/bin` is put in
+      #     front or `./bin`).
+      # 
+      
+      # Role paths declared in ./dev/ansible.cfg, if it exists.
+      File.join('.', 'dev', 'ansible.cfg'),
+      
+      # Roles in ./dev/roles
       File.join('.', 'dev', 'roles'),
+      
+      
+      # Working Directory Paths
+      # =======================
+      # 
+      # Next up, `ansible.cfg` and `roles` directory in the working dir.
+      # Makes sense, right?
+      # 
+      
+      # ./ansible.cfg
+      File.join('.', 'ansible.cfg'),
+      
+      # ./roles
       File.join('.', 'roles'),
+      
+      
+      # Working Directory-Local Ansible Directory
+      # =========================================
+      # 
+      # `ansible.cfg` and `roles` in a `./ansible` directory, making a common
+      # place to put Ansible stuff in an project accessible when running from
+      # the project root.
+      # 
+      
+      # ./ansible/ansible.cfg
+      File.join('.', 'ansible', 'ansible.cfg'),
+      
+      # ./ansible/roles
       File.join('.', 'ansible', 'roles'),
+      
+      # TODO  Git repo root relative?
+      #       Some sort of flag file for a find-up?
+      #       System Ansible locations?
+      
+      
+      # QB Gem Role Directories
+      # =======================
+      # 
+      # Last, but far from least, paths provided by the QB Gem to the user's
+      # QB role install location and the roles that come built-in to the gem.
+      
       QB::USER_ROLES_DIR,
+      
       QB::GEM_ROLES_DIR,
     ]
     
@@ -33,10 +108,12 @@ module QB
     #     location of the role directory.
     attr_reader :path
     
+    
     # @!attribute [r] name
     #   @return [String]
     #     the role's ansible "name", which is it's directory name.
     attr_reader :name
+    
     
     # @!attribute [r] display_path
     # 
@@ -46,6 +123,7 @@ module QB
     # 
     #   @return [Pathname]
     attr_reader :display_path
+    
     
     # @!attribute [r] meta_path
     #   @return [String, nil]
@@ -102,14 +180,8 @@ module QB
     # 2.  paths specific to the current directory:
     #     a.  paths specified in ./ansible.cfg (if it exists)
     #     b.  ./roles
-    #     c.  ./roles/tmp
-    #         -   used for roles that are downloaded but shouldn't be included
-    #             in source control.
     #     d.  paths specified in ./ansible/ansible.cfg (if it exists)
     #     e.  ./ansible/roles
-    #     f.  ./ansible/roles/tmp
-    #         -   used for roles that are downloaded but shouldn't be included
-    #             in source control.
     #     g.  paths specified in ./dev/ansible.cfg (if it exists)
     #     h.  ./dev/roles
     #     i.  ./dev/roles/tmp

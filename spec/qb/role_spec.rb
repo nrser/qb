@@ -37,6 +37,17 @@ describe QB::Role do
       }
     end # stupid mix of legacy and directory structured (pls don't use)
     
+    describe "role not in QB::Role::PATH" do
+      subject { QB::Role.require not_in_path_role_rel_path }
+      
+      it_behaves_like QB::Role, attrs: {
+        name: 'not_in_path_test',
+        namespace: nil,
+        namespaceless: 'not_in_path_test',
+      }
+    end # role not in QB::Role::PATH
+    
+    
   end # names and spaces
   
 end # QB::Role

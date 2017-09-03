@@ -51,8 +51,14 @@ end # QB::Role
 
 shared_context "test role paths" do
   let(:deep_role_path) { 'qb/deep/role/test' }
+  
   let(:legacy_name_role_path) { 'qb.legacy_name' }
+  
   let(:mixed_name_role_path) { 'qb/mixed/name.test' }
+  
+  let(:not_in_path_role_rel_path) { 
+    'test/roles_not_in_path/qb/not_in_path_test'
+  }
 end # test role paths
 
 
