@@ -33,7 +33,7 @@ module QB
     #   expect any sort of reasonable performance (any directory that 
     #   contains `node_modules` is usually a terrible idea for instance).
     # 
-    PATH = [
+    BUILTIN_PATH = [
       
       # Development Paths
       # =================
@@ -97,43 +97,50 @@ module QB
       QB::USER_ROLES_DIR,
       
       QB::GEM_ROLES_DIR,
-    ]
+    ].freeze
     
     
-    # attrs
-    # =======================================================================
-    
-    # @!attribute [r] path
-    #   @return [Pathname]
-    #     location of the role directory.
-    attr_reader :path
-    
-    
-    # @!attribute [r] name
-    #   @return [String]
-    #     the role's ansible "name", which is it's directory name.
-    attr_reader :name
-    
-    
-    # @!attribute [r] display_path
+    # Array of string paths to directories to search for roles or paths to 
+    # `ansible.cfg` files to look for an extract role paths from.
     # 
-    # the path to the role that we display. we only show the directory name
-    # for QB roles, and use {QB::Util.compact_path} to show `.` and `~` for
-    # paths relative to the current directory and home directory, respectively.
+    # Value is a duplicate of the frozen {QB::Role::BUILTIN_PATH}. You can
+    # reset to those values at any time via {QB::Role.reset_path!}.
     # 
-    #   @return [Pathname]
-    attr_reader :display_path
-    
-    
-    # @!attribute [r] meta_path
-    #   @return [String, nil]
-    #     the path qb metadata was load from. `nil` if it's never been loaded
-    #     or doesn't exist.
-    attr_reader :meta_path
+    # For the moment at least you can just mutate this value like you would
+    # `$LOAD_PATH`:
+    # 
+    #     QB::Role::PATH.unshift '~/where/some/roles/be'
+    #     QB::Role::PATH.unshift '~/my/ansible.cfg'
+    # 
+    # The paths are searched from first to last.
+    # 
+    # **WARNING**
+    # 
+    #   Search is **deep** - don't point this at large directory trees and 
+    #   expect any sort of reasonable performance (any directory that 
+    #   contains `node_modules` is usually a terrible idea for instance).
+    # 
+    PATH = BUILTIN_PATH.dup
 
     
-    # static role utils
+    # Class Methods
     # =======================================================================
+    
+    
+    # Reset {QB::Role::PATH} to the original built-in values in 
+    # {QB::Role::BUILTIN_PATH}.
+    # 
+    # Created for testing but might be useful elsewhere as well.
+    # 
+    # @return [Array<String>]
+    #   The reset {QB::Role::PATH}.
+    # 
+    def self.reset_path!
+      PATH.clear
+      BUILTIN_PATH.each { |path| PATH << path }
+      PATH
+    end # .reset_path!
+    
     
     # true if pathname is a QB role directory.
     def self.role_dir? pathname
@@ -382,7 +389,40 @@ module QB
       end
     end
     
-    # instance methods
+    
+    # Attributes
+    # =======================================================================
+    
+    # @!attribute [r] path
+    #   @return [Pathname]
+    #     location of the role directory.
+    attr_reader :path
+    
+    
+    # @!attribute [r] name
+    #   @return [String]
+    #     the role's ansible "name", which is it's directory name.
+    attr_reader :name
+    
+    
+    # @!attribute [r] display_path
+    # 
+    # the path to the role that we display. we only show the directory name
+    # for QB roles, and use {QB::Util.compact_path} to show `.` and `~` for
+    # paths relative to the current directory and home directory, respectively.
+    # 
+    #   @return [Pathname]
+    attr_reader :display_path
+    
+    
+    # @!attribute [r] meta_path
+    #   @return [String, nil]
+    #     the path qb metadata was load from. `nil` if it's never been loaded
+    #     or doesn't exist.
+    attr_reader :meta_path
+    
+    
+    # Constructor
     # =======================================================================
     
     # Instantiate a Role.
@@ -423,7 +463,11 @@ module QB
       else
         @name = @path.relative_path_from(search_dir).to_s
       end
-    end
+    end # #initialize
+    
+    
+    # Instance Methods
+    # =====================================================================
     
     def to_s
       @display_path.to_s

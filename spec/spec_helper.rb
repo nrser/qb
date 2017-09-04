@@ -39,6 +39,19 @@ def test_role name, merge = [], &block
   QB::Role.new dest
 end
 
+# Merge "expectation" hashes by appending all clauses for each state.
+def merge_expectations *expectations
+  Hash.new { |result, state|
+    result[state] = []
+  }.tap { |result| 
+    expectations.each { |ex|
+      ex.each { |state, clauses|
+        result[state] += clauses.to_a
+      }
+    }
+  }
+end
+
 
 
 # Shared Contexts
@@ -56,47 +69,53 @@ shared_context "test role paths" do
   
   let(:mixed_name_role_path) { 'qb/mixed/name.test' }
   
+  let(:roles_not_in_path_dir) {
+    QB::ROOT.join('test/roles_not_in_path').to_s
+  }
+  
+  let(:not_in_path_role_name) { 'qb/not_in_path_test' }
+  
   let(:not_in_path_role_rel_path) { 
     'test/roles_not_in_path/qb/not_in_path_test'
   }
 end # test role paths
 
+shared_context "reset role path" do
+  before { QB::Role.reset_path! }
+  after { QB::Role.reset_path! }
+end # reset role path
 
 
 
 # Shared Examples
 # =====================================================================
 
-shared_examples "subject has attributes" do |attrs|
-  it { is_expected.to have_attributes attrs }
-end # attrs
+shared_examples "is expected" do |expectations|
+  expectations.each { |state, specs|
+    specs.each { |verb, noun|
+      it {
+        # like: is_expected.to(include(noun))
+        is_expected.send state, self.send(verb, noun)
+      }
+    }
+  }
+end # is expected
 
 
-shared_examples :instance do |klass, **kwds|
-  it { is_expected.to be_a klass }
-  
-  if kwds[:attrs]
-    it { is_expected.to have_attributes kwds[:attrs] }
-  end
-end # :instance
-
-
-
-shared_examples "an instance of" do |klass, **kwds|
-  context klass do
-    include_examples :instance, klass, **kwds
-  end #klass.name  
-end # an instance of
-
-
-shared_examples "an instance of the described class" do |**kwds|
-  include_examples "an instance of", described_class, **kwds
-end # an instance
-
-
-shared_examples QB::Role do |**kwds|
-  include_examples :instance, QB::Role, **kwds
+shared_examples QB::Role do |**expectations|
+  include_examples "is expected", merge_expectations(
+    { to: { be_a: QB::Role } },
+    *expectations.values,
+  )
 end # QB::Role
 
 
+shared_examples "QB::Role::PATH" do |**expectations|
+  subject { QB::Role::PATH }
+  
+  include_examples "is expected", merge_expectations(
+    { to: { be_a: Array } },
+    *expectations.values,
+  )
+end # QB::Role::PATH
 
