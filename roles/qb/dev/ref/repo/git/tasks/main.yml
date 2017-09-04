@@ -1,0 +1,16 @@
+---
+# tasks file for qb/ref/repo/git
+
+- name: >-
+    Clone {{ full_name }}@{{ version }} Git repo for reference.
+  git:
+    repo: >-
+      {{ ssh_user }}@{{ host }}:{{ full_name }}.git
+    dest: >-
+      {{ dest }}
+    version: >-
+      {{ version }}
+    depth: >-
+      {{ depth }}
+    update: >-
+      {{ update }}
