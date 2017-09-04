@@ -1,8 +1,8 @@
 require_relative './util/stdio'
 require_relative './util/interop'
+require_relative './util/bundler'
 
 require 'nrser'
-
 using NRSER
 
 module QB
