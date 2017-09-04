@@ -39,3 +39,5 @@ end
 require 'qb/role'
 require 'qb/options'
 require_relative './qb/repo'
+require_relative './qb/cli'
+require_relative './qb/ansible'

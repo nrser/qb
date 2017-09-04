@@ -143,14 +143,15 @@ module QB
       ['qb.yml', 'qb'].any? {|filename| pathname.join('meta', filename).file?}
     end
     
-    # get role paths from ansible.cfg if it exists in a directory.
+    # Get role paths from ansible.cfg if it exists in a directory.
     # 
     # @param dir [Pathname] directory to look for ansible.cfg in.
     # 
-    # @return [Array<String>] role paths
+    # @return [Array<String>]
+    #   Absolute role paths.
     # 
-    def self.cfg_roles_path dir
-      path = dir.join 'ansible.cfg'
+    def self.cfg_roles_paths path
+      path = File.join(path, 'ansible.cfg') unless File.basename(path) == 'ansible.cfg'
       
       if path.file?
         config = ParseConfig.new path.to_s
@@ -193,7 +194,18 @@ module QB
     #   places to look for role dirs.
     # 
     def self.search_path
-      QB::Role::PATH.map { |dir| QB::Util.resolve dir }
+      QB::Role::PATH.
+        map { |path|
+          if QB::Ansible::ConfigFile.file_path?(path)
+            if File.file?(path)
+              QB::Ansible::ConfigFile.new(path).defaults.roles_path
+            end
+          else
+            QB::Util.resolve path
+          end
+        }.
+        flatten.
+        reject(&:nil?)
     end
     
     # array of QB::Role found in search path.
