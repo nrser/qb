@@ -1,0 +1,26 @@
+---
+
+- name: >-
+    Change file names to all upper case.
+  with_items: >-
+    {{ change_case_from }}
+  command: >-
+    git mv {{ item }} {{ (item.strip('/') + '.RENAME_TEMP') | quote }}
+
+- name: >-
+    Commit temp file names in Git.
+  command: >-
+    git commit -m {{ "Temp file renames when upcasing on OSX" | quote }}
+
+- name: >-
+    Change file name to desired upper case.
+  with_items: >-
+    {{ change_case_from }}
+  command: >-
+    git mv  {{ (item.strip('/') + '.RENAME_TEMP') | quote }}
+            {{ item | path_upcase_filename }}
+
+- name: >-
+    Commit final file names in Git.
+  command: >-
+    git commit -m {{ "Final file renames when upcasing on OSX" | quote }}

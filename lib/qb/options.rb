@@ -4,6 +4,10 @@ require_relative "role/errors"
 require_relative "options/option"
 require 'qb/package/version'
 
+require 'nrser/refinements'
+using NRSER
+
+
 module QB
   class Options
     # constants
@@ -126,33 +130,69 @@ module QB
           else
             ruby_type = case option.meta['type']
             when nil
-              raise QB::Role::MetadataError,
-                "must provide type in qb metadata for option #{ option.meta_name }"
+              raise QB::Role::MetadataError.squished <<-END
+                must provide type in QB metadata for option
+                #{ option.meta_name }
+              END
+              
             when 'string', 'str'
               String
+              
             when 'array', 'list'
               Array
+              
             when 'integer', 'int'
               Integer
+              
             when 'version'
               QB::Package::Version
+              
             when 'hash', 'dict'
               Class.new.tap { |klass|
-                opts.accept(klass) {|value|
+                opts.accept(klass) { |value|
                   value.split(',').map { |pair_str|
                     split = pair_str.split ':'
                     if split.length > 2
-                      raise "Can only have a single ':' in hash options, " +
-                            "found #{ pair_str.inspect } in #{ value.inspect }"
+                      raise ArgumentError.dedented <<-END
+                        
+                        Can only have a single ':' in `hash` options.
+                        
+                        Found #{ pair_str.inspect }
+                        
+                        In #{ value.inspect }
+                        
+                      END
                     end
                     [split[0], split[1]]
                   }.to_h
                 }
               }
+              
+            when 'path'
+              String
+              # Class.new.tap { |klass|
+              #   opts.accept(klass) { |value|
+              #     
+              #   }
+              # }
+            
+            when 'glob'
+              Class.new.tap { |klass|
+                opts.accept(klass) { |glob|
+                  if glob.start_with? '//'
+                    glob = NRSER.git_root(Dir.getwd).
+                      join(glob[2..-1]).
+                      to_s
+                  end
+                  
+                  Dir[glob]
+                }
+              }
+              
             when Hash
               if option.meta['type'].key? 'one_of'
                 Class.new.tap { |klass|
-                  opts.accept(klass) {|value|
+                  opts.accept(klass) { |value|
                     if option.meta['type']['one_of'].include? value
                       value
                     else
@@ -209,7 +249,8 @@ module QB
             option.examples.each_with_index {|example, index|
               lines = example.lines.to_a
               
-              pp lines
+              # was this debuggin? had to be...
+              # pp lines
               
               on_args << ((index + 1).to_s + '.').ljust(4) + lines.first.chomp
               

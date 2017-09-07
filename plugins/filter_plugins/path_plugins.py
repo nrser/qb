@@ -45,7 +45,41 @@ def resolve(*path_segments):
     '''
     
     return Path(*path_segments).resolve().__str__()
+
+
+def path_upcase_filename(path):
+    '''
+    Implemented pretty much just for `qb/osx/git/change_case` role...
+    just upcase the file (or directory) name at `path`, leaving any "normal"
+    file extension as is (will prob fuck up in weird file extension cases).
     
+    >>> path_upcase_filename('./a.txt')
+    './A.txt'
+    
+    >>> path_upcase_filename('./a/b.txt')
+    './a/B.txt'
+    
+    >>> path_upcase_filename('./a')
+    './A'
+    
+    >>> path_upcase_filename('./a/b')
+    './a/B'
+    
+    >>> path_upcase_filename('./a.b.txt')
+    './A.B.txt'
+    
+    >>> path_upcase_filename('./products/sg-v1/')
+    './products/SG-V1'
+    
+    >>> path_upcase_filename('./products/sg-v1')
+    './products/SG-V1'
+    '''
+    
+    head, ext = os.path.splitext(path.strip('/'))
+    dirname = os.path.dirname(head)
+    filename = os.path.basename(head)
+    return os.path.join(dirname, filename.upper() + ext)
+
 
 class FilterModule(object):
     '''
@@ -56,6 +90,7 @@ class FilterModule(object):
         return {
             'path_join': os.path.join,
             'path_resolve': resolve,
+            'path_upcase_filename': path_upcase_filename,
         }
 
 

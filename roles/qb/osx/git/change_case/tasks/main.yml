@@ -1,0 +1,6 @@
+---
+# tasks file for change_case
+
+- when: change_case_upcase
+  include: >-
+    {{ role_path }}/tasks/upcase.yml
