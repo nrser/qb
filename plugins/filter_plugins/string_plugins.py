@@ -1,3 +1,22 @@
+# **WARNING**
+# 
+# Naming this file `string.py` fucks something up:
+# 
+#       $ python2 plugins/filter_plugins/path.py
+#       Traceback (most recent call last):
+#         File "plugins/filter_plugins/path.py", line 17, in <module>
+#           from pathlib2 import Path
+#         File "/usr/local/lib/python2.7/site-packages/pathlib2.py", line 21, in <module>
+#           from urllib import quote as urlquote_from_bytes
+#         File "/usr/local/Cellar/python/2.7.13_1/Frameworks/Python.framework/Versions/2.7/lib/python2.7/urllib.py", line 30, in <module>
+#           import base64
+#         File "/usr/local/Cellar/python/2.7.13_1/Frameworks/Python.framework/Versions/2.7/lib/python2.7/base64.py", line 98, in <module>
+#           _urlsafe_encode_translation = string.maketrans(b'+/', b'-_')
+#       AttributeError: 'module' object has no attribute 'maketrans'
+# 
+# https://stackoverflow.com/questions/35139025/can-not-handle-attributeerror-module-object-has-no-attribute-maketrans
+# 
+
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
