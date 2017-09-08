@@ -1,0 +1,48 @@
+
+# We're working normally (sequentially)...
+
+- name: Init/update all Git submodules
+  command: git submodule update --init
+
+# OK, now we're ready to kick off some tasks that are independent of each other
+# and can take quite a while to complete:
+
+- name: Start independent asynchronous background tasks...
+  async:
+    # I structured these as a dict to emphasis that they're not running in
+    # order, like a list might suggest. The keys (user-defined - whatever 
+    # you want) could then be used to access results on the handle.
+    tasks:
+      git_lfs_pull:
+        name: Pull Git LFS files
+        command: git lfs pull
+      
+      bundle_install:
+        name: Install gems with Bundler
+        bundler:
+          state: present
+  # A handle you receive back that can be used to wait for the tasks.
+  register: async_handle
+
+# Now we can keep working in sequence...
+
+- name: Install some Python packages with Pip
+  with_items:
+  - pathlib2
+  - docker-compose
+  pip:
+    name: "{{ item }}"
+
+# ...whatever else as usual...
+
+# OK, now we're at the point where we need the async tasks to be done
+
+- name: Wait for async tasks to be done.
+  await:
+    handle: "{{ async_handle }}"
+
+# Once here, we know the async stuff is done and successful (or failed with the
+# usual message, etc.)
+
+- name: Kick off a build...
+  command: docker-compose build .
