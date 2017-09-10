@@ -1,0 +1,39 @@
+---
+#####################
+# main.yml
+#####################
+
+- set_fact:
+    handles: []
+
+- name: Run items asynchronously in batch of two items
+  vars:
+    sleep_durations:
+      durations_1:
+        - 10
+        - 10
+        - 10
+      durations_2:
+        - 10
+        - 10
+    job_name: >-
+      {{ item.key }}
+    durations: >-
+      {{ item.value }}
+  include: execute_batch.yml
+  with_dict: >-
+    {{ sleep_durations }}
+
+- debug: var=handles
+
+- name: Check sync status
+  async_status:
+    jid: >-
+      {{ async_result_item.ansible_job_id }}
+  with_items: >-
+    {{ handles }}
+  loop_control:
+    loop_var: async_result_item
+  register: async_poll_results
+  until: async_poll_results.finished
+  retries: 30

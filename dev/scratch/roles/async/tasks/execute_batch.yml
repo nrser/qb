@@ -1,0 +1,22 @@
+#####################
+# execute_batch.yml
+#####################
+- debug: var=job_name
+- debug: var=durations
+
+- name: Async sleeping for batched_items
+  command: >-
+    sleep {{ async_item }}
+  async: 45
+  poll: 0
+  with_items: >-
+    {{ durations }}
+  loop_control:
+    loop_var: async_item
+  register: handle
+
+- debug: var=handle
+
+- set_fact:
+    handles: >-
+      {{ handles }} + [{{ handle.results }}]
