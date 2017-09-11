@@ -1,0 +1,4 @@
+---
+# defaults file for notif
+
+osx_notif_terminal_notifier_path: /usr/local/bin/terminal-notifier

@@ -1,0 +1,14 @@
+---
+# tasks file for notif
+
+- name: >-
+    Install `terminal-notifier` via Homebrew
+  homebrew:
+    name: terminal-notifier
+
+- name: >-
+    Send notification.
+  command: >-
+    {{ osx_notif_terminal_notifier_path | quote }}
+      -title {{ osx_notif_title | quote }}
+      -message {{ osx_notif_message | quote }}
