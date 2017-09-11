@@ -20,3 +20,8 @@
     Include `qb.project` role.
   include_role:
     name: qb.project
+  vars:
+    project_name: >-
+      {{ gem_name }}
+    project_force: >-
+      {{ force }}
