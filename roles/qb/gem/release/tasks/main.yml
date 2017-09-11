@@ -1,13 +1,31 @@
 ---
-# tasks file for qb.release_gem
+# tasks file for qb/gem/release
 
-- name: get gem and version info
+- name: >-
+    Check that the git repo at {{ gem_root }} is clean.
+  include_role:
+    name: qb/git/check/clean
+  vars:
+    git_root: >-
+      {{ gem_root }}
+
+
+- name: >-
+    Do a `bundle install`.
+  bundler:
+    state: present
+    chdir: >-
+      {{ gem_root }}
+
+
+- name: >-
+    Get gem and version info
   vars.rb:
-    namespace: release_gem
+    namespace: gem
     bind:
-      qb_dir: "{{ qb_dir }}"
+      gem_root: "{{ gem_root }}"
     src: |
-      spec_pattern = "#{ qb_dir }/*.gemspec"
+      spec_pattern = "#{ gem_root }/*.gemspec"
       spec_path = Dir.glob(spec_pattern)[0]
       
       if spec_path.nil?
@@ -50,68 +68,72 @@
         'current_version' => version.version,
         'release_version' => version.release,
         'next_version' => next_version,
-        'version_path' => "#{ qb_dir }/lib/#{ name }/version.rb",
+        'version_path' => "#{ gem_root }/lib/#{ name }/version.rb",
         'spec_path' => spec_path,
       }
   
 - debug:
     msg:
     # - spec_path: >-
-    #     {{ release_gem_spec_path }}
+    #     {{ gem_spec_path }}
     # - version_path: >-
-    #     {{ release_gem_version_path }}
+    #     {{ gem_version_path }}
     - current: >-
-        {{ release_gem_current_version }}
+        {{ gem_current_version }}
     - release: >-
-        {{ release_gem_release_version }}
+        {{ gem_release_version }}
     - next: >-
-        {{ release_gem_next_version }}
+        {{ gem_next_version }}
 
-- name: "change version to release version {{ release_gem_release_version }}"
+- name: "change version to release version {{ gem_release_version }}"
   replace:
-    dest: "{{ release_gem_version_path }}"
-    regexp: "VERSION\\s*=\\s*\"{{ release_gem_current_version }}\""
-    replace: "VERSION = \"{{ release_gem_release_version }}\""
-  when: release_gem_current_version != release_gem_release_version
+    dest: "{{ gem_version_path }}"
+    regexp: "VERSION\\s*=\\s*\"{{ gem_current_version }}\""
+    replace: "VERSION = \"{{ gem_release_version }}\""
+  when: gem_current_version != gem_release_version
 
-- name: add release version to git
-  command: "git add {{ release_gem_version_path }}"
-  args:
-    chdir: "{{ qb_dir }}"
-  when: release_gem_current_version != release_gem_release_version
 
-- name: commit release version
-  command: git commit -m "bump to v{{ release_gem_release_version }}"
+- name: >-
+    Add version file {{ gem_version_path }} to Git.
+  command: "git add {{ gem_version_path }}"
   args:
-    chdir: "{{ qb_dir }}"
-  when: release_gem_current_version != release_gem_release_version
+    chdir: "{{ gem_root }}"
+  when: gem_current_version != gem_release_version
+
+
+- name: >-
+    Commit version file {{ gem_version_path }} in Git.
+  command: git commit -m "bump to v{{ gem_release_version }}"
+  args:
+    chdir: "{{ gem_root }}"
+  when: gem_current_version != gem_release_version
 
 - name: release with bundler
   shell: bundle exec rake release
   args:
-    chdir: "{{ qb_dir }}"
+    chdir: "{{ gem_root }}"
 
-- name: "change version to next version {{ release_gem_next_version }}"
+- name: "change version to next version {{ gem_next_version }}"
   replace:
-    dest: "{{ release_gem_version_path }}"
-    regexp: "VERSION\\s*=\\s*\"{{ release_gem_release_version }}\""
-    replace: "VERSION = \"{{ release_gem_next_version }}\""
+    dest: "{{ gem_version_path }}"
+    regexp: "VERSION\\s*=\\s*\"{{ gem_release_version }}\""
+    replace: "VERSION = \"{{ gem_next_version }}\""
 
 - name: add next dev version to git
-  command: "git add {{ release_gem_version_path }}"
+  command: "git add {{ gem_version_path }}"
   args:
-    chdir: "{{ qb_dir }}"
+    chdir: "{{ gem_root }}"
 
 - name: commit next dev version
-  command: git commit -m "start {{ release_gem_next_version }}"
+  command: git commit -m "start {{ gem_next_version }}"
   args:
-    chdir: "{{ qb_dir }}"
+    chdir: "{{ gem_root }}"
 
 - name: push next dev version
   command: git push
   args:
-    chdir: "{{ qb_dir }}"
+    chdir: "{{ gem_root }}"
 
 - debug:
     msg: >
-      v{{ release_gem_release_version }} released.
+      v{{ gem_release_version }} released.

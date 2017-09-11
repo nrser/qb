@@ -1,5 +1,5 @@
 ---
-# meta file for qb.release_gem
+# meta file for qb/gem/release
 
 allow_duplicates: yes
 

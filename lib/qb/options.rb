@@ -19,6 +19,7 @@ module QB
       'print' => ['cmd'],
       'verbose' => false,
       'run' => true,
+      'ask' => false,
     }
     
     # appended on the end of an `opts.on` call to create a newline after
@@ -310,9 +311,26 @@ module QB
     def initialize role, argv
       @role = role
       @argv = argv
+      @qb = QB_DEFAULTS.clone
       
       parse!
     end
+    
+    
+    
+    # @todo Document ask? method.
+    # 
+    # @param [type] arg_name
+    #   @todo Add name param description.
+    # 
+    # @return [return_type]
+    #   @todo Document return value.
+    # 
+    def ask?
+      @qb['ask']
+    end # #ask?
+    
+    
     
     private
     # =======================================================================
@@ -323,8 +341,6 @@ module QB
       parse_ansible!
       
       @role_options = {}
-      
-      @qb = QB_DEFAULTS.clone
       
       if @role.meta['default_user']
         @qb['user'] = @role.meta['default_user']
@@ -424,6 +440,21 @@ module QB
           SPACER
         ) do |value|
           @qb['run'] = false
+        end
+        
+        opts.on(
+          '-A',
+          '--ASK',
+          "interactively ask for argument and option values",
+          SPACER
+        ) do |value|
+          if value && !$stdin.isatty
+            raise ArgumentError.squished <<-END
+              Interactive args & options only works with TTY $stdin.
+            END
+          end
+          
+          @qb['ask'] = value
         end
         
         self.class.add opts, @role_options, @role

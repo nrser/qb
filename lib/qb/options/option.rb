@@ -108,6 +108,7 @@ module QB
         if value.is_a? String then [value] else value end
       end
       
+      
       private
       
       # get the value at the first found of the keys or the default.

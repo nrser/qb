@@ -1,19 +1,19 @@
 ---
-# tasks file for qb.git_check_clean
+# tasks file for qb/git/check/clean
 
 - name: >
-    get git status for repo {{ git_check_clean_dir }}
+    Get git status for repo {{ git_root }}
   shell: git status --porcelain 2>/dev/null
   args:
-    chdir: "{{ git_check_clean_dir }}"
+    chdir: "{{ git_root }}"
   register: git_check_clean_status
   changed_when: false
 
 - name: >
-    fail if the repo has any untracked or modified files
+    Fail if the repo at {{ git_root }} has any untracked or modified files.
   fail:
     msg: >
-      repo at {{ git_check_clean_dir }} can not have any untracked or
+      Repo at {{ git_root }} can not have any untracked or
       modified files, please commit or stash and retry.
   when: (git_check_clean_status.stdout_lines | length) != 0
 

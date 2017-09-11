@@ -1,0 +1,8 @@
+---
+# meta file for qb/git/check/clean
+
+allow_duplicates: yes
+
+dependencies: []
+# - role: role-name
+

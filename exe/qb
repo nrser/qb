@@ -10,6 +10,13 @@ require 'cmds'
 
 require 'qb'
 
+require 'nrser/refinements'
+using NRSER
+
+require 'nrser/refinements/types'
+using NRSER::Types
+
+
 # constants
 # =========
 
@@ -98,7 +105,21 @@ def main args
       # 
       # in some cases (like projects) the dir can be figured out in other ways:
       # 
-      role.default_dir cwd, options.role_options
+      
+      if options.ask?
+        default = begin
+          role.default_dir cwd, options.role_options
+        rescue QB::UserInputError => e
+          NRSER::NO_ARG
+        end
+        
+        QB::CLI.ask name: "target directory (`qb_dir`)",
+                    type: t.non_empty_str,
+                    default: default
+        
+      else
+        role.default_dir cwd, options.role_options
+      end
       
     when 1
       # there is a single positional arg, which is used as dir
@@ -158,6 +179,23 @@ def main args
       end
     end
   end # unless default_dir == false
+  
+  
+  # Interactive Input
+  # =====================================================================
+  
+  if options.ask?
+    # Incomplete
+    raise "COMING SOON!!!...?"
+    QB::CLI.ask_for_options role: role, options: options
+  end
+  
+  
+  # Validation
+  # =====================================================================
+  # 
+  # Should have already been taken care of if we used interactive input.
+  # 
   
   # check that required options are present
   missing = options.role_options.values.select {|option|

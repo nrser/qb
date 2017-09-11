@@ -1,9 +1,10 @@
 require 'yaml'
 require 'cmds'
 require 'parseconfig'
-require 'nrser/refinements'
 
 require_relative 'role/errors'
+
+require 'nrser/refinements'
 
 using NRSER
 
@@ -469,10 +470,6 @@ module QB
     # Instance Methods
     # =====================================================================
     
-    def to_s
-      @display_path.to_s
-    end
-    
     def namespace
       *namespace_segments, last = @name.split File::Separator
       
@@ -698,7 +695,7 @@ module QB
       case value
       when nil
         # there is no get_dir info in meta/qb.yml, can't get the dir
-        raise <<-END.dedent
+        raise QB::UserInputError.dedented <<-END
           unable to infer default directory: no '#{ key }' key in 'meta/qb.yml'
           for role #{ self }
         END
@@ -706,7 +703,9 @@ module QB
       when false
         # this method should not get called when the value is false (an entire
         # section is skipped in exe/qb when `default_dir = false`)
-        raise "role does not use default directory (meta/qb.yml:default_dir = false)"
+        raise QB::StateError.squished <<-END
+          role does not use default directory (meta/qb.yml:default_dir = false)
+        END
       
       when 'git_root'
         QB.debug "returning the git root relative to cwd"
@@ -761,7 +760,9 @@ module QB
           QB::Util.find_up filename
           
         else
-          raise "bad key: #{ hash_key } in #{ self.meta_path.to_s }:default_dir"
+          raise QB::Role::MetadataError.squised <<-END
+            bad key: #{ hash_key } in #{ self.meta_path.to_s }:default_dir
+          END
           
         end
       end
@@ -798,28 +799,39 @@ module QB
       path.realpath.hash
     end
     
+    
     def == other
       other.is_a?(Role) && other.path.realpath == path.realpath
     end
     
     alias_method :eql?, :==
     
+    # @return [String]
+    #   {QB::Role#display_path}
+    # 
+    def to_s
+      @display_path.to_s
+    end
+    
+    
     private
     # -----------------------------------------------------------------------
     
-    # get the value at the first found of the keys or the default.
-    # 
-    # `nil` (`null` in yaml files) are treated like they're not there at
-    # all. you need to use `false` if you want to tell QB not to do something.
-    # 
-    def meta_or keys, default
-      keys = [keys] if keys.is_a? String
-      keys.each do |key|
-        if meta.key?(key) && !meta[key].nil?
-          return meta[key]
+      # get the value at the first found of the keys or the default.
+      # 
+      # `nil` (`null` in yaml files) are treated like they're not there at
+      # all. you need to use `false` if you want to tell QB not to do something.
+      # 
+      def meta_or keys, default
+        keys = [keys] if keys.is_a? String
+        keys.each do |key|
+          if meta.key?(key) && !meta[key].nil?
+            return meta[key]
+          end
         end
-      end
-      default
-    end # meta_or
+        default
+      end # meta_or
+      
+    # end private
   end # Role
 end # QB

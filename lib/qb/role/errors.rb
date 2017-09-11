@@ -1,7 +1,7 @@
 module QB
   class Role
     # raised by `.require` when no roles match input
-    class NoMatchesError < QB::Error
+    class NoMatchesError < QB::UserInputError
       attr_accessor :input
       
       def initialize input
@@ -12,7 +12,7 @@ module QB
     end
     
     # raised by `.require` when multiple roles match
-    class MultipleMatchesError < QB::Error
+    class MultipleMatchesError < QB::UserInputError
       attr_accessor :input, :matches
       
       def initialize input, matches
@@ -33,7 +33,7 @@ END
     end
     
     # raised when there's bad metadata 
-    class MetadataError < QB::Error
+    class MetadataError < QB::StateError
     end
   end # Role
 end # QB

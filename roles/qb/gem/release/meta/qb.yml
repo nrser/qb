@@ -1,5 +1,5 @@
 ---
-# meta/qb.yml file for qb.release_gem
+# meta/qb.yml file for qb/gem/release
 # 
 # qb settings for this role. see README.md for more info.
 #
@@ -10,7 +10,7 @@ var_prefix: null
 # how to get a default for `dir` if it's not provided as the 
 default_dir: null
 
-# set to false to not save options in /Users/nrser/dev/gh/nrser/qb/roles/qb.release_gem/.qb-options.yml
+# set to false to not save options in /Users/nrser/dev/gh/nrser/qb/roles/qb/gem/release/.qb-options.yml
 save_options: true
 
 vars: []
