@@ -15,7 +15,7 @@ requirements:
     qb: ~> 0.3.0
 
 # prefix for role variables
-var_prefix: null
+var_prefix: gem
 
 # how to get a default for `dir` if it's not provided as the only
 # positional argument. if a positional argument is provided it will
@@ -67,7 +67,24 @@ options:
 #   type: boolean # boolean (default) | string
 #   short: e
 
-- include: qb.role
+- name: name
+  description: >-
+    Name of the new gem.
+  type: string
+  short: n
+
+- name: is_project
+  description: >-
+    Structure the gem as a project.
+  type: boolean
+  short: p
+
+- include: qb.project
   as: false
 
-
+- name: force
+  var_name: force
+  description: >-
+    Override existing files with newly generated ones.
+  type: boolean
+  short: f

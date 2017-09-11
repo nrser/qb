@@ -374,6 +374,7 @@ module QB
       end
     end
     
+    
     # the path we display in the CLI, see {#display_path}.
     # 
     # @param [Pathname | String] path
@@ -387,6 +388,25 @@ module QB
         path.realpath.sub (QB::GEM_ROLES_DIR.to_s + '/'), ''
       else
         QB::Util.contract_path path
+      end
+    end
+    
+    
+    def self.guess_role_name dest
+      path = QB::Util.resolve dest
+      
+      search_dirs = search_path.find_all { |pathname|
+        path.fnmatch? pathname.join('**')
+      }
+      
+      case search_dirs.length
+      when 0
+        # It's not in any of the search directories
+        # 
+        # If it has 'roles' as a segment than use what's after that
+        # 
+        split = path.to_s.split('/roles/')
+        
       end
     end
     

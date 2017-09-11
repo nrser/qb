@@ -1,0 +1,97 @@
+---
+# Run `bundle gem <gem_name>` targeting a temp directory, then merge the
+# results into `gem_root`.
+
+- name: >-
+    Create a tempdir to run `bundle gem {{ gem_name }}` in.
+  tempfile:
+    state: directory
+    suffix: gem
+  register: tempdir
+  changed_when: false
+
+
+- name: >-
+    Run `bundle gem {{ gem_name }}` in tempdir `{{ tempdir.path }}`.
+  stream:
+    cmd: >-
+      bundle gem %{gem_name}
+    kwds:
+      gem_name: >-
+        {{ gem_name }}
+    chdir: >-
+      {{ tempdir.path }}
+  changed_when: false
+
+
+- name: >-
+    Get rid of the `.git` directory and `.gitignore` file since we don't want 
+    to merge them.
+  with_items:
+  - .git
+  - .gitignore
+  file:
+    path: >-
+      {{ tempdir.path | path_join(gem_name, item) }}
+    state: absent
+  changed_when: false
+
+
+- name: >-
+    Create destination directories in gem root `{{ gem_root }}`.
+  with_filetree: >-
+    {{ tempdir.path | path_join(gem_name) }}
+  when: item.state == 'directory'
+  file:
+    dest: >-
+      {{ gem_root | path_join(item.path) }}
+    state: directory
+  changed_when: false
+
+
+- name: >-
+    Copy files from tempdir to gem root `{{ gem_root }}`.
+  with_filetree: >-
+    {{ tempdir.path | path_join(gem_name) }}
+  when: item.state == 'file'
+  copy:
+    src: >-
+      {{ item.src }}
+    dest: >-
+      {{ gem_root | path_join(item.path) }}
+    force: >-
+      {{ force }}
+
+
+# Prob don't need this, but what the hell...
+#       
+# From
+# 
+#   http://docs.ansible.com/ansible/latest/playbooks_loops.html#looping-over-filetrees
+# 
+# along with the rest of it. Seem to work for relative symlinks.
+# 
+- name: >-
+    Recreate symlinks from tempdir to gem root `{{ gem_root }}`.
+  with_filetree: >-
+    {{ tempdir.path | path_join(gem_name) }}
+  when: item.state == 'link'
+  file:
+    src: >-
+      {{ item.src }}
+    dest: >-
+      {{ gem_root | path_join(item.path) }}
+    state: link
+    force: >-
+      {{ force }}
+    mode: >-
+      {{ item.mode }}
+
+
+- name: >-
+    Remove the temp dir at `{{ tempdir.path }}`.
+  file:
+    path: >-
+      {{ tempdir.path }}
+    state: absent
+  changed_when: false

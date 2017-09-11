@@ -1,2 +1,12 @@
 ---
 # defaults file for qb/gem/new
+
+gem_is_project: false
+
+gem_root: >-
+  {{ qb_dir }}
+
+gem_name: >-
+  {{ gem_root | basename }}
+
+force: false

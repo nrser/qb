@@ -29,6 +29,7 @@
   lineinfile:
     line: /tmp
     dest: "{{ project_dest }}/.gitignore"
+    create: true
   when: project_tmp
 
 # readme
