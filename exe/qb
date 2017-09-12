@@ -256,34 +256,10 @@ def main args
   playbook_path = Pathname.new(Dir.getwd) + '.qb-playbook.yml'
   QB.debug playbook_path: playbook_path.to_s
   
-  env = {
-    ANSIBLE_ROLES_PATH: [
-      # stick the role path in front to make sure we get **that** role
-      role.path.expand_path.dirname,
-      
-      # then include the full role search path
-      
-      # NOTE  this includes role paths pulled from a call-site local
-      #       ansible.cfg
-      QB::Role.search_path,
-    ].
-      flatten. # since QB::Role.search_path is an Array
-      select(&:directory?).
-      map(&:realpath). # so uniq works
-      uniq, # drop dups (seems to keep first instance so preserves priority)
-    
-    ANSIBLE_LIBRARY: [
-      QB::ROOT.join('library'),
-    ],
-    
-    ANSIBLE_FILTER_PLUGINS: [
-      QB::ROOT.join('plugins', 'filter_plugins'),
-    ],
-    
-    ANSIBLE_LOOKUP_PLUGINS: [
-      QB::ROOT.join('plugins', 'lookup_plugins'),
-    ],
-  }
+  env = QB::Ansible::Env.new
+  
+  # stick the role path in front to make sure we get **that** role
+  env.roles_path.unshift role.path.expand_path.dirname
   
   cmd_options = options.ansible.clone
   
@@ -312,7 +288,7 @@ def main args
   END
   
   cmd_options = {
-    env: env.map {|k, v| [k, v.is_a?(Array) ? v.join(':') : v]}.to_h,
+    env: env.to_h.map_values {|k, v| v.is_a?(Array) ? v.join(':') : v },
     
     kwds: {
       cmd_options: cmd_options,
@@ -351,7 +327,7 @@ def main args
   end
   
   if options.qb['print'].include? 'env'
-    dump = YAML.dump env.map {|k, v| [k.to_s, v.map {|i| i.to_s}]}.to_h
+    dump = YAML.dump env.to_h.map_values {|k, v| v.map {|i| i.to_s} }
     puts "ENV:\n\n#{ dump }\n\n"
   end
   
