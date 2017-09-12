@@ -253,62 +253,16 @@ def main args
   
   QB.debug "playbook", playbook
   
-  playbook_path = Pathname.new(Dir.getwd) + '.qb-playbook.yml'
-  QB.debug playbook_path: playbook_path.to_s
-  
   env = QB::Ansible::Env.new
   
   # stick the role path in front to make sure we get **that** role
   env.roles_path.unshift role.path.expand_path.dirname
   
-  cmd = QB::Ansible::Cmds::Playbook.new(
+  cmd = QB::Ansible::Cmds::Playbook.new \
     env: env,
     playbook: playbook,
     role_options: options,
-    chdir: (File.exists?('./ansible/ansible.cfg') ? './ansible' : nil),
-  )                              
-  
-  cmd_options = options.ansible.clone
-  
-  if options.qb['inventory']
-    cmd_options['inventory-file'] = options.qb['inventory']
-    
-  elsif play['hosts'] != ['localhost']
-    cmd_options['inventory-file'] = play['hosts']
-    
-  end
-    
-  if options.qb['tags']
-    cmd_options['tags'] = options.qb['tags']
-  end
-  
-  
-  cmd_options = {
-    env: env.to_h.map_values {|k, v| v.is_a?(Array) ? v.join(':') : v },
-    
-    kwds: {
-      cmd_options: cmd_options,
-      
-      verbose: options.qb['verbose'],
-      
-      playbook_path: playbook_path.to_s,
-    },
-  }
-  
-  # If ./ansible/ansible.cfg exists chdir into there for the run.
-  # 
-  # We already look for that dir and add the role paths to the role path 
-  # specified to `ansible-playbook`, but though there might be a way to make 
-  # `ansible-playbook` perform as desired while retaining the current directory
-  # (which would be preferable - I don't like switching directories on people)
-  # for the moment it seems like the easiest way to get it to properly use
-  # things like vars and relative paths in `./ansible/ansible.cfg` is to 
-  # change directories into `./ansible`, so that's what we're doing here:
-  if File.exists? './ansible/ansible.cfg'
-    cmd_options[:chdir] = './ansible'
-  end
-  
-  # cmd = Cmds.new QB::Ansible::Cmds::Playbook::TEMPLATE, cmd_options
+    chdir: (File.exists?('./ansible/ansible.cfg') ? './ansible' : nil)
   
   # print
   # =====
@@ -321,8 +275,7 @@ def main args
   end
   
   if options.qb['print'].include? 'env'
-    dump = YAML.dump cmd.env.to_h.map_values {|k, v| v.map &:to_s }
-    puts "ENV:\n\n#{ dump }\n\n"
+    puts "ENV:\n\n#{ YAML.dump cmd.env.to_h }\n\n"
   end
   
   if options.qb['print'].include? 'cmd'
@@ -341,10 +294,6 @@ def main args
   # 
   # stuff below here does stuff
   # 
-  
-  playbook_path.open('w') do |f|
-    f.write YAML.dump(playbook)
-  end
   
   # save the options back
   if (
