@@ -261,6 +261,13 @@ def main args
   # stick the role path in front to make sure we get **that** role
   env.roles_path.unshift role.path.expand_path.dirname
   
+  cmd = QB::Ansible::Cmds::Playbook.new(
+    env: env,
+    playbook: playbook,
+    role_options: options,
+    chdir: (File.exists?('./ansible/ansible.cfg') ? './ansible' : nil),
+  )                              
+  
   cmd_options = options.ansible.clone
   
   if options.qb['inventory']
@@ -275,17 +282,6 @@ def main args
     cmd_options['tags'] = options.qb['tags']
   end
   
-  cmd_template = <<-END    
-    ansible-playbook
-    
-    <%= cmd_options %>
-    
-    <% if verbose %>
-      -<%= 'v' * verbose %>
-    <% end %>
-    
-    <%= playbook_path %>
-  END
   
   cmd_options = {
     env: env.to_h.map_values {|k, v| v.is_a?(Array) ? v.join(':') : v },
@@ -297,8 +293,6 @@ def main args
       
       playbook_path: playbook_path.to_s,
     },
-    
-    format: :pretty,
   }
   
   # If ./ansible/ansible.cfg exists chdir into there for the run.
@@ -314,7 +308,7 @@ def main args
     cmd_options[:chdir] = './ansible'
   end
   
-  cmd = Cmds.new cmd_template, cmd_options
+  # cmd = Cmds.new QB::Ansible::Cmds::Playbook::TEMPLATE, cmd_options
   
   # print
   # =====
@@ -327,7 +321,7 @@ def main args
   end
   
   if options.qb['print'].include? 'env'
-    dump = YAML.dump env.to_h.map_values {|k, v| v.map {|i| i.to_s} }
+    dump = YAML.dump cmd.env.to_h.map_values {|k, v| v.map &:to_s }
     puts "ENV:\n\n#{ dump }\n\n"
   end
   

@@ -97,7 +97,11 @@ class QB::Ansible::Env
       :filter_plugins,
       :lookup_plugins
     ].map { |name|
-      [self.class.to_var_name(name), self.send(name)]
+      value = self.send(name)
+      
+      value = value.join(':') if value.is_a?(Array)
+      
+      [self.class.to_var_name(name), value]
     }.to_h
   end # #to_h
   
