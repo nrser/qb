@@ -19,6 +19,23 @@
 
 
 - name: >-
+    See if a pre-release script exists at `//dev/hooks/pre-release`.
+  stat:
+    path: >-
+      {{ gem_root | path_join( 'dev', 'hooks', 'pre-release' ) }}
+  register: gem_pre_release_script_stat
+
+
+- when: gem_pre_release_script_stat.stat.executable
+  name: >-
+    Execute `//dev/hooks/pre-release` script.
+  stream:
+    cmd: ./dev/hooks/pre-release
+    chdir: >-
+      {{ gem_root }}
+
+
+- name: >-
     Get gem and version info
   vars.rb:
     namespace: gem

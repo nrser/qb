@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require 'qb'
+
+require 'nrser/refinements'
+using NRSER
+
+# Make sure we're not pointing to any local dev gems
+path_sources = Bundler.definition.locked_gems.sources.select { |source|
+  source.is_a?( Bundler::Source::Path ) && source.is_a_path?
+}
+
+unless path_sources.empty?
+  raise RuntimeError.new binding.erb <<-END
+    Found gem dependencies using local paths:
+    
+    <% path_sources.each do |path_source| %>
+    -   <%= path_source %>
+    <% end %>
+  END
+end
