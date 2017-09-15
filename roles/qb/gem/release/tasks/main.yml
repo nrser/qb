@@ -69,26 +69,32 @@
         'version_path' => "#{ gem_root }/lib/#{ name }/version.rb",
         'spec_path' => spec_path,
       }
-  
+
+
 - debug:
     msg:
-    # - spec_path: >-
-    #     {{ gem_spec_path }}
-    # - version_path: >-
-    #     {{ gem_version_path }}
     - current: >-
         {{ gem_current_version }}
     - release: >-
         {{ gem_release_version }}
     - next: >-
         {{ gem_next_version }}
+    # - spec_path: >-
+    #     {{ gem_spec_path }}
+    # - version_path: >-
+    #     {{ gem_version_path }}
 
-- name: "change version to release version {{ gem_release_version }}"
+
+- when: gem_current_version != gem_release_version
+  name: >-
+    Change version to release version `{{ gem_release_version }}`.
   replace:
-    dest: "{{ gem_version_path }}"
-    regexp: "VERSION\\s*=\\s*\"{{ gem_current_version }}\""
-    replace: "VERSION = \"{{ gem_release_version }}\""
-  when: gem_current_version != gem_release_version
+    dest: >-
+      {{ gem_version_path }}
+    regexp: >-
+      VERSION\\s*=\\s*"{{ gem_current_version }}"
+    replace: >-
+      VERSION = "{{ gem_release_version }}"
 
 
 - name: >-
@@ -106,31 +112,51 @@
     chdir: "{{ gem_root }}"
   when: gem_current_version != gem_release_version
 
-- name: release with bundler
+
+- name: >-
+    Release with Bundler via `bundle exec rake release`.
   shell: bundle exec rake release
   args:
-    chdir: "{{ gem_root }}"
+    chdir: >-
+      {{ gem_root }}
 
-- name: "change version to next version {{ gem_next_version }}"
+
+- name: >-
+    Change version to next version `{{ gem_next_version }}`.
   replace:
-    dest: "{{ gem_version_path }}"
-    regexp: "VERSION\\s*=\\s*\"{{ gem_release_version }}\""
-    replace: "VERSION = \"{{ gem_next_version }}\""
+    dest: >-
+      {{ gem_version_path }}
+    regexp: >-
+      VERSION\\s*=\\s*"{{ gem_release_version }}"
+    replace: >-
+      VERSION = "{{ gem_next_version }}"
 
-- name: add next dev version to git
-  command: "git add {{ gem_version_path }}"
+
+- name: >-
+    Add next dev version to git.
+  command: >-
+    git add {{ gem_version_path }}
   args:
-    chdir: "{{ gem_root }}"
+    chdir: >-
+      {{ gem_root }}
 
-- name: commit next dev version
-  command: git commit -m "start {{ gem_next_version }}"
+
+- name: >-
+    Commit next dev version.
+  command: >-
+    git commit -m "start {{ gem_next_version }}"
   args:
-    chdir: "{{ gem_root }}"
+    chdir: >-
+      {{ gem_root }}
 
-- name: push next dev version
+
+- name: >-
+    Push next dev version.
   command: git push
   args:
-    chdir: "{{ gem_root }}"
+    chdir: >-
+      {{ gem_root }}
+
 
 - debug:
     msg: >
