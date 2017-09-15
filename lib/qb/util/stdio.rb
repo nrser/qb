@@ -1,15 +1,67 @@
+# Requirements
+# =====================================================================
+
+# stdlib
 require 'thread'
 require 'socket'
 require 'securerandom'
 require 'fileutils'
 require 'nrser'
 
+# Refinements
+# =====================================================================
+
+require 'nrser/refinements'
 using NRSER
+
+
+# Declarations
+# =====================================================================
 
 module QB; end
 module QB::Util; end
 
+
+# Definitions
+# =====================================================================
+
+# Utilities for QB's standard-IO (`stdio`) handling feature.
+# 
+# Normally, Ansible modules can't really do much with `stdio` - they return 
+# results by writing JSON to `stdout`, can't do anything useful with `stdin`,
+# and I think things written to `stderr` don't go anywhere useful.
+# 
+# This makes dealing with logging, error reporting and wrapping executables
+# that report useful progress info to `stdout` or `stderr` pretty shitty.
+# 
+# So, what we do is create streaming sockets for `stdout`, `stderr` and 
+# `stdin` in the QB process and write their paths to environment variables,
+# which will be available to modules.
+# 
+# {QB::Ansible::Module} automatically detects these variables and sets up
+# `$stdout`, `$stderr` and `$stdin` to point to the sockets, which proxy 
+# back to the QB process' `stdio`.
+# 
+# Of course other modules written in any language can also connect to these
+# file sockets in the same manner.
+# 
+# @note
+#   This feature only works for `localhost`. I have no idea what it will do
+#   in other cases. It doesn't seem like it should break anything, but remotely
+#   executing modules definitely won't be able to connect to the sockets on 
+#   the host.
+# 
+# @todo
+#   `stdin` support is pretty experimental / broken at this point. That would
+#   be nice to fix in the future so that programs that make use of user 
+#   interaction work seamlessly through QB. This will probably require 
+#   using pseudo-TTY streams or whatever.
+# 
 module QB::Util::STDIO
+  
+  # Constants
+  # =====================================================================
+  
   SOCKET_DIR = Pathname.new('/').join 'tmp', 'qb-stdio'
   
   # STDIO as a service exposed on a UNIX socket so that modules can stream
