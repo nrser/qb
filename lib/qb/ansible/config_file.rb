@@ -95,17 +95,22 @@ class QB::Ansible::ConfigFile < ParseConfig
   # =====================================================================
   
   
-  # @todo Document path? method.
+  # Test if a file path *looks* like it points to an Ansible config file -
+  # a file with {FILE_NAME} as the basename.
+  # 
+  # *Explicitly does not check if the file actually exists and is a file.*
+  # This is because we need this test to differentiate role search path 
+  # elements that are meant to point to Ansible config files from those that
+  # aren't in {QB::Role.search_path}.
   # 
   # @param [String, Pathname] file_path
   #   
-  # 
   # @return [Boolean]
-  #   `true` 
+  #   `true` if `path`'s basename is {FILE_NAME}.
   # 
-  def self.file_path? file_path
+  def self.end_with_config_file? file_path
     File.basename(file_path).to_s == FILE_NAME
-  end # .path?
+  end # .end_with_config_file?
   
   
   # Attributes

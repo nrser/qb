@@ -204,7 +204,7 @@ module QB
     def self.search_path
       QB::Role::PATH.
         map { |path|
-          if QB::Ansible::ConfigFile.file_path?(path)
+          if QB::Ansible::ConfigFile.end_with_config_file?(path)
             if File.file?(path)
               QB::Ansible::ConfigFile.new(path).defaults.roles_path
             end
