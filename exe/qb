@@ -337,7 +337,7 @@ def main args
     user_in_service.close!
     
     if status != 0
-      puts "ERROR ansible-playbook failed."
+      $stderr.puts "ERROR ansible-playbook failed."
     end
     
     exit status
