@@ -13,7 +13,7 @@ end
 
 require 'qb'
 
-class Test < QB::AnsibleModule
+class Test < QB::Ansible::Module
   def main
     changed! blah: "blow me: #{ @args['x'] }"
   end

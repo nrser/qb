@@ -14,7 +14,7 @@ end
 require 'qb'
 require 'pp'
 
-class Test < QB::AnsibleModule
+class Test < QB::Ansible::Module
   def main
     QB.debug args: @args
     

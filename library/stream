@@ -14,7 +14,7 @@ end
 require 'qb'
 require 'cmds'
 
-class Stream < QB::AnsibleModule
+class Stream < QB::Ansible::Module
   def main
     template = @args['template'] || @args['cmd']
     

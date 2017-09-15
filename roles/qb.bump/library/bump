@@ -86,7 +86,7 @@ class Version
   # ------------------------------------------------------------------------
   
   def to_json options
-    QB::AnsibleModule.stringify_keys(to_hash).to_json options
+    QB::Ansible::Module.stringify_keys(to_hash).to_json options
   end # #to_json
 end # Version
 
@@ -179,7 +179,7 @@ class NodeBumper < Bumper
 end # NodeBumper
 
 
-class Bump < QB::AnsibleModule
+class Bump < QB::Ansible::Module
   
   def check_repo_clean!
     unless Cmds.chomp!('git status --porcelain 2>/dev/null') == ''

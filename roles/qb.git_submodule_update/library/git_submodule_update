@@ -19,7 +19,7 @@ require 'nrser'
 
 using NRSER
 
-class GitSubmoduleUpdate < QB::AnsibleModule
+class GitSubmoduleUpdate < QB::Ansible::Module
   def main_dir
     File.realpath @args['dir']
   end

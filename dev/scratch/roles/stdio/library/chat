@@ -14,7 +14,7 @@ end
 require 'qb'
 require 'pp'
 
-class Chat < QB::AnsibleModule
+class Chat < QB::Ansible::Module
   def main    
     puts "Starting chat..."
     puts

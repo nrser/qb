@@ -30,7 +30,7 @@ GITHUB_SSH_URL_RE = /^git@github\.com\:(?<owner>.*)\/(?<name>.*)\.git$/
 GITHUB_HTTPS_URL_RE = /^https:\/\/github\.com\/(?<owner>.*)\/(?<name>.*)\.git$/
 
 
-class PathFacts < QB::AnsibleModule
+class PathFacts < QB::Ansible::Module
   # Add a bunch of useful things to know about the path
   def add_path_facts
     @result.expanded = @path.expand_path

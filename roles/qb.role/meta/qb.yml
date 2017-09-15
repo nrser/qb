@@ -79,7 +79,7 @@ vars:
   
 - name: modules
   description: >-
-    create ruby module boilerplate(s) in library using QB::AnsibleModule.
+    create ruby module boilerplate(s) in library using QB::Ansible::Module.
   type: array
   required: false
   # TODO not yet implemented
