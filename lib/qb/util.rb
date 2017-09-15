@@ -95,13 +95,25 @@ module QB
     # @param [Pathname] from (Pathname.pwd)
     #   directory to start from.
     # 
+    # @param [Boolean] raise_on_not_found:
+    #   When `true`, a {QB::FSStateError} will be raised if no file is found
+    #   (default behavior).
+    #   
+    #   This is something of a legacy behavior - I think it would be better 
+    #   to have {find_up} return `nil` in that case and add a `find_up!`
+    #   method that raises on not found. But I'm not going to do it right now.
+    # 
     # @return [Pathname]
     #   Pathname of found file.
     # 
-    # @raise
-    #   if file is not found in `from` or any of it's parent directories.
+    # @return [nil]
+    #   If no file is found and the `raise_on_not_found` option is `false`.
     # 
-    def self.find_up filename, from = Pathname.pwd
+    # @raise [QB::FSStateError]
+    #   If file is not found in `from` or any of it's parent directories
+    #   and the `raise_on_not_found` option is `true` (default behavior).
+    # 
+    def self.find_up filename, from = Pathname.pwd, raise_on_not_found: true
       path = from + filename
       
       return from if path.exist?
@@ -109,10 +121,14 @@ module QB
       parent = from.parent
       
       if from == parent
-        raise "not found in current or any parent directories: #{ filename }"
+        if raise_on_not_found
+          raise "not found in current or any parent directories: #{ filename }"
+        else
+          return nil
+        end
       end
       
-      return find_up filename, parent
+      return find_up filename, parent, raise_on_not_found: raise_on_not_found
     end # .find_up
   end # Util
 end # QB
