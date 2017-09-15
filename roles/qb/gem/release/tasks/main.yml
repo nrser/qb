@@ -32,8 +32,6 @@
         raise "No gemspec found for pattern #{ spec_pattern }"
       end
       
-      spec = Gem::Specification.load spec_path
-      
       # The gem *may already be loaded*, which would break the standard gemspec
       # approach because the `require` will be a no-op, resulting in the 
       # already loaded version number being used instead of the one in the
