@@ -52,6 +52,14 @@ module QB::CLI
       playbook_path: playbook_path,
       chdir: chdir
     
+    status = cmd.stream
+    
+    if status != 0
+      $stderr.puts "ERROR ansible-playbook failed."
+    end
+    
+    exit status
+    
   end # .play
   
 end # module QB::CLI

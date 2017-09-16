@@ -7,13 +7,18 @@ require 'yaml'
 # deps
 require 'cmds'
 
+# package
+require 'qb/util/bundler'
+require 'qb/util/stdio'
+
 
 module QB; end
 module QB::Ansible; end
 module QB::Ansible::Cmds; end
 
 
-# @todo document QB::Ansible::Playbook class.
+# A command object that runs a playbook with all the QB specialness.
+# 
 class QB::Ansible::Cmds::Playbook < ::Cmds
   DEFAULT_PLAYBOOK_PATH = '.qb-playbook.yml'
   
@@ -182,10 +187,34 @@ class QB::Ansible::Cmds::Playbook < ::Cmds
   protected
   # ========================================================================
     
+    # @return [Fixnum]
+    #   
     def spawn *args, **kwds, &input_block
       before_spawn
-      super *args, **kwds, &input_block
-    end
+      
+      QB::Util::Bundler.with_clean_env do
+        # boot up stdio out services so that ansible modules can stream to our
+        # stdout and stderr to print stuff (including debug lines) in real-time
+        stdio_out_services = {'out' => $stdout, 'err' => $stderr}.
+          map {|name, dest|
+            QB::Util::STDIO::OutService.new(name, dest).tap { |s| s.open! }
+          }
+        
+        # and an in service so that modules can prompt for user input
+        user_in_service = QB::Util::STDIO::InService.new('in', $stdin).
+          tap { |s| s.open! }
+        
+        status = super *args, **kwds, &input_block
+        
+        # close the stdio services
+        stdio_out_services.each {|s| s.close! }
+        user_in_service.close!
+        
+        # and return the status
+        status
+      end
+      
+    end # #spawn
     
   # end protected
   
