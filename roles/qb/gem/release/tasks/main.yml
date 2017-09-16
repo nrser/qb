@@ -25,8 +25,18 @@
       {{ gem_root | path_join( 'dev', 'hooks', 'pre-release' ) }}
   register: gem_pre_release_script_stat
 
+- debug: var=gem_pre_release_script_stat
 
-- when: gem_pre_release_script_stat.stat.executable
+
+# NOTE  Contrary to how it might seems in the [docs][1],
+#       the `stat` object seems to *only* have the `exists` property if the
+#       path does not exist (set to `false`), necessitating we 
+# 
+# [1]: http://docs.ansible.com/ansible/latest/stat_module.html
+# 
+- when: >-
+    gem_pre_release_script_stat.stat.exists and
+      gem_pre_release_script_stat.stat.executable
   name: >-
     Execute `//dev/hooks/pre-release` script.
   stream:
@@ -104,30 +114,38 @@
 
 - when: gem_current_version != gem_release_version
   name: >-
-    Change version to release version `{{ gem_release_version }}`.
-  replace:
-    dest: >-
-      {{ gem_version_path }}
-    regexp: >-
-      VERSION\\s*=\\s*"{{ gem_current_version }}"
-    replace: >-
-      VERSION = "{{ gem_release_version }}"
+    Change version in `{{ gem_version_path }}` from current 
+    `{{ gem_current_version }}` to `{{ gem_release_version }}`.
+  block:
+  - name: >-
+      Change version to release version `{{ gem_release_version }}`.
+    replace:
+      dest: >-
+        {{ gem_version_path }}
+      regexp: >-
+        VERSION\s*=\s*["']{{ gem_current_version }}["']
+      replace: >-
+        VERSION = "{{ gem_release_version }}"
+  
+  
+  - name: >-
+      Add version file `{{ gem_version_path }}` to Git.
+    command: >-
+      git add {{ gem_version_path }}
+    args:
+      chdir: >-
+        {{ gem_root }}
+    when: gem_current_version != gem_release_version
 
-
-- name: >-
-    Add version file {{ gem_version_path }} to Git.
-  command: "git add {{ gem_version_path }}"
-  args:
-    chdir: "{{ gem_root }}"
-  when: gem_current_version != gem_release_version
-
-
-- name: >-
-    Commit version file {{ gem_version_path }} in Git.
-  command: git commit -m "bump to v{{ gem_release_version }}"
-  args:
-    chdir: "{{ gem_root }}"
-  when: gem_current_version != gem_release_version
+  
+  - name: >-
+      Commit version file `{{ gem_version_path }}` in Git.
+    command: git commit -m "bump to v{{ gem_release_version }}"
+    args:
+      chdir: >-
+        {{ gem_root }}
+    when: gem_current_version != gem_release_version
+  # /block
 
 
 - name: >-
@@ -144,7 +162,7 @@
     dest: >-
       {{ gem_version_path }}
     regexp: >-
-      VERSION\\s*=\\s*"{{ gem_release_version }}"
+      VERSION\s*=\s*["']{{ gem_release_version }}["']
     replace: >-
       VERSION = "{{ gem_next_version }}"
 
