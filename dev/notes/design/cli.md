@@ -13,9 +13,11 @@ We're now going from having one implicit command that executes roles to having a
     
     However, it should probably have a name.
     
-    -   `run`
-    -   `exec`
-    -   `play`
+    -   chose:
+        -   `run`
+    -   also ran:
+        -   `exec`
+        -   `play`
     
 2.  List roles we can run.
     

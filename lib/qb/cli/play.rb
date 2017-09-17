@@ -33,7 +33,7 @@ module QB::CLI
     playbook_path = QB::Util.resolve args[0]
     
     unless playbook_path.file?
-      raise "Can't find Ansible playbook at #{ path.to_s }"
+      raise "Can't find Ansible playbook at `#{ playbook_path.to_s }`"
     end
     
     # By default, we won't change directories to run the command.
@@ -55,8 +55,8 @@ module QB::CLI
     end
     
     cmd = QB::Ansible::Cmds::Playbook.new \
-      playbook_path: playbook_path,
-      chdir: chdir
+      chdir: chdir,
+      playbook_path: playbook_path
     
     status = cmd.stream
     

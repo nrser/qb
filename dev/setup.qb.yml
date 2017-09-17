@@ -1,0 +1,36 @@
+---
+# playbook to setup the dev env for this repo
+- name: dev setup for nrser/qb
+
+  hosts: localhost
+
+  # pre_tasks:
+  # - name: load dev_setup facts
+  #   tags:
+  #   - always
+  #   dev_setup_facts:
+
+  roles:
+  
+  - role: qb/dev/ref/repo/git
+    full_name: ansible/ansible
+    version: v2.3.2.0-1
+  
+  - role: qb/dev/ref/repo/git
+    full_name: nrser/nrser.env
+    # version: HEAD (implicit)
+    
+  - role: qb/dev/ref/repo/git
+    full_name: beiarea/workstations
+    
+  - role: qb/dev/ref/repo/git
+    full_name: nrser/ansible-nrser.profile
+  
+  tasks:
+  
+  - name: >-
+      Install gems
+    bundler:
+      # chdir: >-
+      #   {{ project_root }}
+      gem_path: ./.bundle

@@ -87,19 +87,36 @@ class QB::Ansible::Cmds::Playbook < ::Cmds
   attr_reader :role_options
   
   
+  # Hash of extra variables that will be JSON encoded and passed to
+  # `ansible-playbook` via the `--extra-vars` CLI option.
+  # 
+  # @return [Hash]
+  #     
+  attr_reader :extra_vars
+  
+  
   # Constructor
   # ======================================================================
   
   # Instantiate a new `QB::Ansible::Playbook`.
-  def initialize  playbook_path: DEFAULT_PLAYBOOK_PATH,
-                  playbook: nil,
-                  role_options: nil,
-                  exe: DEFAULT_EXE,
+  # 
+  # @param [Hash] extra_vars:
+  #   Extra variables that will be JSON encoded and passed to
+  #   `ansible-playbook` via the `--extra-vars` option.
+  #   
+  #   Available as the {#extra_vars} attribute.
+  # 
+  def initialize  chdir: nil,
                   env: QB::Ansible::Env.new,
+                  exe: DEFAULT_EXE,
+                  extra_vars: {},
                   format: :pretty,
-                  chdir: nil,
+                  playbook: nil,
+                  playbook_path: DEFAULT_PLAYBOOK_PATH,
+                  role_options: nil,
                   **other_cmds_opts
     @exe = exe.to_s
+    @extra_vars = extra_vars
     @role_options = role_options
     @playbook = playbook
     
@@ -143,6 +160,11 @@ class QB::Ansible::Cmds::Playbook < ::Cmds
       # TODO  I'm not totally sure why this is here, but I copied it over from
       #       `//exe/qb`...? Get overridden below anyways if
       cmd_options['inventory-file'] = play['hosts']
+    end
+    
+    # Add extra vars if we have any.
+    unless @extra_vars.empty?
+      cmd_options['extra-vars'] = JSON.dump @extra_vars
     end
     
     cmd_options

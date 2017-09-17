@@ -14,3 +14,12 @@
       {{ depth }}
     update: >-
       {{ update }}
+
+- name: >-
+    Add a line in //dev/ref/.gitignore to ignore the `{{ rel_dest }}` clone.
+  lineinfile:
+    dest: >-
+      {{ project_root }}/dev/ref/.gitignore
+    line: >-
+      /{{ rel_dest }}
+    create: true

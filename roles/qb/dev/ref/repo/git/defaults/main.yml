@@ -18,14 +18,15 @@ update: false
 owner: >-
   {{ full_name.split('/')[0] }}
 
+# `name` is a reserved name :/
 repo_name: >-
-  {{ full_path.split('/')[1] }}
+  {{ full_name.split('/')[1] }}
 
 full_name: >-
   {{ owner }}/{{ repo_name }}
 
 rel_dest: >-
-  {{ name }}@{{ version }}
+  {{ repo_name }}@{{ version }}
 
 dest: >-
   {{ project_root }}/dev/ref/{{ rel_dest }}
