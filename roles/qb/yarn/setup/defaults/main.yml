@@ -1,5 +1,5 @@
 ---
-# defaults file for qb.yarn_setup
+# defaults file for qb/yarn/setup
 yarn_setup_version: null
 yarn_setup_state: present
 yarn_setup_global_packages: []

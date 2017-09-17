@@ -1,5 +1,5 @@
 ---
-# meta/qb.yml file for qb.yarn_setup
+# meta/qb.yml file for qb/yarn/setup
 # 
 # qb settings for this role. see README.md for more info.
 #
@@ -9,7 +9,7 @@ description: >-
   Install and configure Yarn package manager (for Node).
 
 # prefix for role variables
-var_prefix: null
+var_prefix: yarn_setup
 
 # how to get a default for `dir` if it's not provided as the only
 # positional argument. if a positional argument is provided it will

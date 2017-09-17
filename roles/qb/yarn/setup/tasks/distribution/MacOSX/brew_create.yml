@@ -46,7 +46,7 @@
 - name: >-
     Commit new formula to {{ yarn_setup_brew_tap }}
   command: >-
-    git commit -m "qb.yarn_setup added {{ yarn_setup_formula_name }} formula"
+    git commit -m "qb/yarn/setup role added {{ yarn_setup_formula_name }} formula"
   args:
     chdir: "{{ yarn_setup_brew_tap_dir.stdout }}"
 

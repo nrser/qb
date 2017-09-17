@@ -1,5 +1,5 @@
 ---
-# tasks file for qb.yarn_setup
+# tasks file for qb/yarn/setup
 
 - name: Manage Yarn installation on MacOSX
   include: "{{ role_path }}/tasks/distribution/{{ ansible_distribution }}/main.yml"

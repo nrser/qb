@@ -1,5 +1,5 @@
 ---
-# meta file for qb.yarn_setup
+# meta file for qb/yarn/setup
 
 allow_duplicates: yes
 
