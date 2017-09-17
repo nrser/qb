@@ -1,8 +1,34 @@
+
+# Requirements
+# =======================================================================
+
+# stdlib
+
+# deps
+
+# package
+require_relative './cli/help'
+require_relative './cli/play'
+require_relative './cli/run'
+
+
+# Requirements
+# =======================================================================
+
 require 'nrser/refinements'
 using NRSER
 
 
+
+# Declarations
+# =======================================================================
+
 module QB; end
+
+
+# Definitions
+# =======================================================================
+
 module QB::CLI
   
   # Eigenclass (Singleton Class)
@@ -102,6 +128,4 @@ module QB::CLI
     
   end # class << self (Eigenclass)
   
-end 
-
-require_relative './cli/play'
+end # module QB::CLI

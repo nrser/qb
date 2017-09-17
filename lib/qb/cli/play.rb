@@ -5,19 +5,25 @@
 require 'qb/ansible/cmds/playbook'
 
 
+# Declarations
+# =======================================================================
+
 module QB; end
 
-# @todo document QB::CLI module.
+
+# Definitions
+# =======================================================================
+
 module QB::CLI 
   
   # Play an Ansible playbook (like `state.yml`) in the QB environment 
   # (sets up path env vars, IO streams, etc.).
   # 
-  # @param [type] arg_name
-  #   @todo Add name param description.
+  # @param [Array<String>] args
+  #   CLI arguments to use.
   # 
-  # @return [return_type]
-  #   @todo Document return value.
+  # @return [Fixnum]
+  #   The `ansible-playbook` command exit code.
   # 
   def self.play args
     if args.empty?
@@ -63,5 +69,3 @@ module QB::CLI
   end # .play
   
 end # module QB::CLI
-
-
