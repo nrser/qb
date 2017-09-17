@@ -1,4 +1,3 @@
-
 # Requirements
 # =======================================================================
 
@@ -17,7 +16,6 @@ require_relative './cli/run'
 
 require 'nrser/refinements'
 using NRSER
-
 
 
 # Declarations
