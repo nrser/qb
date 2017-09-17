@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe QB::Role do
-  include_context "test role paths"
-  
   describe '#var_prefix' do
+    include_context "test role paths"
+    include_context "reset role path"
     
     describe "legacy builtin role (`.` namespaced)" do
       subject { QB::Role.require legacy_name_role_path }

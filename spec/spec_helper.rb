@@ -81,8 +81,15 @@ shared_context "test role paths" do
 end # test role paths
 
 shared_context "reset role path" do
-  before { QB::Role.reset_path! }
-  after { QB::Role.reset_path! }
+  before {
+    QB::Role.reset_path!
+    QB::Role::PATH.unshift TEST_ROLES_DIR
+  }
+  
+  after {
+    QB::Role.reset_path!
+    QB::Role::PATH.unshift TEST_ROLES_DIR
+  }
 end # reset role path
 
 

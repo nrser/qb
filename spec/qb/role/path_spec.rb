@@ -2,9 +2,9 @@ require 'spec_helper'
 
 
 describe QB::Role do
-  include_context "test role paths"
   
   describe "[roles path]" do
+    include_context "test role paths"
     include_context "reset role path"
     
     describe 'QB::Role::PATH' do
