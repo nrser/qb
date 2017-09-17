@@ -18,11 +18,11 @@ update: false
 owner: >-
   {{ full_name.split('/')[0] }}
 
-name: >-
+repo_name: >-
   {{ full_path.split('/')[1] }}
 
 full_name: >-
-  {{ owner }}/{{ name }}
+  {{ owner }}/{{ repo_name }}
 
 rel_dest: >-
   {{ name }}@{{ version }}
