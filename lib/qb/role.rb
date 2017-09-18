@@ -591,7 +591,7 @@ class QB::Role
       if option_meta.key? 'include'
         role_name = option_meta['include']
         role = QB::Role.require role_name
-        role.options Role.get_include_path(role, option_meta, include_path)
+        role.options QB::Role.get_include_path(role, option_meta, include_path)
       else
         QB::Options::Option.new self, option_meta, include_path
       end
