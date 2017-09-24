@@ -8,6 +8,12 @@ RSpec.shared_context :version_everything_dev do
   subject { version }
 end
 
+RSpec.shared_context "Version 0.1.2-dev.3+master.0a1b2c3d" do
+  let(:raw) { '0.1.2-dev.3+master.0a1b2c3d' }
+  let(:version) { QB::Package::Version.from_string raw }
+  subject { version }
+end
+
 
 RSpec.shared_context :version_only_major do
   let(:raw) { '1' }
@@ -35,6 +41,7 @@ end #:version_with_build_info
 
 
 describe QB::Package::Version do
+  # subject { QB::Package::Version }
   
   describe ".new" do
     context "bad args" do
@@ -48,51 +55,52 @@ describe QB::Package::Version do
   end # .new
   
   
-  describe '.from_string' do
+
+  describe QB::Package::Version.method( :from_string ) do
+  # Doesn't work?!
+  # describe 'QB::Package::Version.from_string' do
+  #   refine_subject :method, :from_string
     
     context "dev version with everything" do
-      include_context :version_everything_dev
+      refine_subject :call, '0.1.2-dev.3+master.0a1b2c3d'
       
-      it "has major 0" do
-        expect(subject.major).to be 0
-      end
-      
-      it "has minor 1" do
-        expect(subject.minor).to be 1
-      end
-      
-      it "has patch 2" do
-        expect(subject.patch).to be 2
-      end
-      
-      it "has prerelease ['dev', 3]" do
-        expect(subject.prerelease).to eq ['dev', 3]
-      end
-      
-      it "has build ['master', '0a1b2c3d']" do
-        expect(subject.build).to eq ['master', '0a1b2c3d']
-      end
-      
-      it "has release 0.1.2" do
-        expect(subject.release).to eq "0.1.2"
-      end
+      it_behaves_like QB::Package::Version, and_is_expected: {
+        to: {
+          have_attributes: {
+            major: 0,
+            minor: 1,
+            patch: 2,
+            prerelease: ['dev', 3],
+            level: 'dev',
+            build: ['master', '0a1b2c3d'],
+            release: '0.1.2',
+            semver: '0.1.2-dev.3+master.0a1b2c3d',
+          }
+        }
+      }
     end # version with major, minor, patch, prerelease, build
     
     
     context "version with only major" do
-      include_context :version_only_major
+      refine_subject :call, '1'
       
-      it "has major 1" do
-        expect(subject.major).to be 1
-      end
-      
-      it "has minor 0" do
-        expect(subject.minor).to be 0
-      end
-      
-      it "has patch 0" do
-        expect(subject.patch).to be 0
-      end
+      it_behaves_like QB::Package::Version, and_is_expected: {
+        to: {
+          have_attributes: {
+            major: 1,
+            minor: 0,
+            patch: 0,
+            prerelease: [],
+            prerelease?: false,
+            level: 'release',
+            level?: true,
+            build: [],
+            build?: false,
+            release: '1.0.0',
+            semver: '1.0.0',
+          }
+        }
+      }
     end # "version with only major"
     
     
@@ -103,6 +111,53 @@ describe QB::Package::Version do
         }.to raise_error ArgumentError
       }
     end # gem-style version with 4 release segments
+    
+    
+    context "Release version" do
+      refine_subject :call, '0.1.2'
+      
+      it_behaves_like QB::Package::Version, and_is_expected: {
+        to: {
+          have_attributes: {
+            major: 0,
+            minor: 1,
+            patch: 2,
+            prerelease: [],
+            prerelease?: false,
+            level: 'release',
+            level?: true,
+            build: [],
+            build?: false,
+            release: '0.1.2',
+            semver: '0.1.2',
+          }
+        }
+      }
+    end # Release version
+    
+    
+    context "Build with no prerelease" do
+      refine_subject :call, '0.1.2+master.0a1b2c3d'
+      
+      it_behaves_like QB::Package::Version, and_is_expected: {
+        to: {
+          have_attributes: {
+            major: 0,
+            minor: 1,
+            patch: 2,
+            prerelease: [],
+            prerelease?: false,
+            level: nil,
+            level?: false,
+            build: ['master', '0a1b2c3d'],
+            build?: true,
+            release: '0.1.2',
+            semver: '0.1.2+master.0a1b2c3d',
+          }
+        }
+      }
+    end # Build with no prerelease
+    
     
     
   end # .from_string

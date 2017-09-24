@@ -152,7 +152,7 @@ module QB
       def self.from_string string
         if string.include? '_'
           self.from_docker_tag string
-        elsif string.include? '-'
+        elsif string.include?( '-' ) || string.include?( '+' )
           self.from_npm_version string
         else
           self.from_gem_version Gem::Version.new(string)
@@ -170,7 +170,11 @@ module QB
         @release = [major, minor, patch].join '.'
         
         @level = t.match prerelease[0], {
-          t.is(nil) => ->(_) { nil },
+          t.is(nil) => ->(_) {
+            if build.empty?
+              'release'
+            end
+          },
           
           NAME_SEGMENT => ->(str) { str },
           

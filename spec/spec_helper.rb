@@ -54,6 +54,28 @@ end
 
 
 
+# Subject Helpers
+# =====================================================================
+
+
+# @todo Document refine_subject method.
+# 
+# @param [type] arg_name
+#   @todo Add name param description.
+# 
+# @return [return_type]
+#   @todo Document return value.
+# 
+def refine_subject method_name, *args
+  subject {
+    super_subject = super()
+    new_subject = super_subject.send method_name, *args
+    # raise({super_subject: super_subject, new_subject: new_subject}.inspect)
+    new_subject
+  }
+end # #refine_subject
+
+
 # Shared Contexts
 # =====================================================================
 
@@ -125,4 +147,13 @@ shared_examples "QB::Role::PATH" do |**expectations|
     *expectations.values,
   )
 end # QB::Role::PATH
+
+
+shared_examples QB::Package::Version do |**expectations|
+  include_examples "is expected", merge_expectations(
+    { to: { be_a: QB::Package::Version } },
+    *expectations.values,
+  )
+end # QB::Package::Version
+
 
