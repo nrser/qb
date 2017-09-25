@@ -49,9 +49,24 @@ class QB::Path < Pathname
   # Props
   # ======================================================================
   
+  # The current working directory *relevant* to the path - basically, when
+  # and where the instance was created, which may be on a totally different
+  # system if the instance was loaded from data.
+  # 
+  # TODO  Not totally flushed out yet, could imagine a lot of problems and 
+  #       weirdness, but it seems like we need something like this to make
+  #       instances transportable. Issues with relative paths come to mind...
+  # 
   prop  :cwd,
         type: t.pathname
   
+  # The raw path argument used to instantiate the path object.
+  # 
+  # NOTE  Because we reduce {Pathname} instances to {String} when converting
+  #       to data, there is some lossy-ness. I guess it's similar to how 
+  #       symbols and strings all become strings when run through {JSON}
+  #       dump and load.
+  # 
   prop  :raw,
         type: t.path,
         to_data: :to_s
@@ -68,16 +83,51 @@ class QB::Path < Pathname
         type: t.bool,
         source: :expanded?
   
+  prop  :is_absolute,
+        type: t.bool,
+        source: :absolute?
+  
+  prop  :is_relative,
+        type: t.bool,
+        source: :relative?
+  
+  prop  :is_dir,
+        type: t.bool,
+        source: :directory?
+  
+  prop  :is_file,
+        type: t.bool,
+        source: :file?
+  
+  prop  :is_cwd,
+        type: t.bool,
+        source: :cwd?
   
   # Constructor
   # ======================================================================
   
-  # Instantiate a new `QB::Path`.
-  # def initialize raw:, cwd: Pathname.getwd, **values
-  #   super raw: raw, cwd: cwd, **values
-  #   @path = Pathname.new raw
-  # end # #initialize
-  
+  # @overload initialize path
+  #   Initialize in the same way as you would a {Pathname}. {#cwd} is set to
+  #   the current directory (via {Pathname#getwd}) and the `path` argument is
+  #   assigned to {#raw}.
+  #   
+  #   @param [String | Pathname] path
+  #     Target path.
+  # 
+  # @overload initialize **values
+  #   Initialize by invoking {NRSER::Meta::Props#initialize_props}.
+  #   
+  #   The {#raw} value is passed up to {Pathname#initialize}.
+  #   
+  #   {#cwd} is accepted in `values`, allowing a re-instantiated object to
+  #   "make sense" when the process' current directory may no longer be the 
+  #   one that data was constructed against.
+  #   
+  #   {#cwd} defaults to the current directory (via {Pathname.getwd}) if not
+  #   provided.
+  # 
+  # @param **values see {NRSER::Meta::Props#initialize_props}
+  #   
   def initialize arg
     case arg
     when Hash
@@ -89,6 +139,7 @@ class QB::Path < Pathname
     end
   end # #initialize
   
+  
   # Instance Methods
   # ======================================================================
   
@@ -96,6 +147,11 @@ class QB::Path < Pathname
   #   `true` if 
   def expanded?
     self == expand_path
+  end
+  
+  
+  def cwd?
+    self == cwd
   end
   
 end # class QB::Path

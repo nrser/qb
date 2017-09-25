@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe QB::Path do
+  
   context 'raw: QB::ROOT' do
     subject { QB::Path.new raw: QB::ROOT }
     
@@ -23,11 +24,16 @@ describe QB::Path do
           'raw' => QB::ROOT.to_s,
           'exists' => true,
           'is_expanded' => true,
+          'is_absolute' => true,
+          'is_relative' => false,
+          'is_dir' => true,
+          'is_file' => false,
+          'is_cwd' => (QB::ROOT == Pathname.getwd),
         }
       }
       
     end # #to_data
-    
   end # context raw: QB::ROOT
+  
 end # QB::Repo::Git
 
