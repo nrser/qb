@@ -36,8 +36,9 @@ module QB; end
 # Definitions
 # =======================================================================
 
-
-# @todo document QB::Path class.
+# An extension of {Pathname} that implements the facts we want about paths
+# as {NRSER::Meta::Props}.
+# 
 class QB::Path < Pathname
   
   # Mixins
@@ -155,23 +156,37 @@ class QB::Path < Pathname
   # ======================================================================
   
   # @return [Boolean]
-  #   `true` if 
+  #   `true` if `self` is equal to {#expand_path}.
+  # 
   def expanded?
     self == expand_path
   end
   
   
+  # @return [Boolean]
+  #   `true` if `self` is equal to {#cwd}.
+  # 
   def cwd?
     self == cwd
   end
   
   
+  # Relative path from {#cwd} to `self`, if one exists.
+  # 
+  # @return [Pathname]
+  #   If a relative path from {#cwd} to `self` exists.
+  # 
+  # @return [nil]
+  #   If no relative path from {#cwd} to `self` exists. Can't recall exactly
+  #   how this happens, but I guess it can...
+  # 
   def relative
     begin
       relative_path_from cwd
     rescue ArgumentError => error
     end
   end
+  
   
   # Like {Pathname#realpath} but returns {nil} instead of raising if there
   # isn't one.
