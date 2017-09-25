@@ -10,6 +10,9 @@ describe QB::Path do
         have_attributes: {
           raw: QB::ROOT,
           expanded?: true,
+          relative: (
+            QB::ROOT.relative_path_from Pathname.getwd
+          ),
         }
       }
     }
@@ -29,6 +32,10 @@ describe QB::Path do
           'is_dir' => true,
           'is_file' => false,
           'is_cwd' => (QB::ROOT == Pathname.getwd),
+          'relative' => (
+            QB::ROOT.relative_path_from( Pathname.getwd ).to_s
+          ),
+          'realpath' => QB::ROOT.to_s,
         }
       }
       

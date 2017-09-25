@@ -103,6 +103,17 @@ class QB::Path < Pathname
         type: t.bool,
         source: :cwd?
   
+  prop  :relative,
+        type: t.maybe( t.path ),
+        source: :relative,
+        to_data: :to_s
+  
+  prop  :realpath,
+        type: t.maybe( t.path ),
+        source: :try_realpath,
+        to_data: :to_s
+        
+  
   # Constructor
   # ======================================================================
   
@@ -153,6 +164,31 @@ class QB::Path < Pathname
   def cwd?
     self == cwd
   end
+  
+  
+  def relative
+    begin
+      relative_path_from cwd
+    rescue ArgumentError => error
+    end
+  end
+  
+  # Like {Pathname#realpath} but returns {nil} instead of raising if there
+  # isn't one.
+  # 
+  # @return [nil]
+  #   If there is no real path.
+  # 
+  # @return [Pathname]
+  #   If there is a real path.
+  # 
+  def try_realpath
+    begin
+      realpath
+    rescue SystemCallError => error
+    end
+  end
+  
   
 end # class QB::Path
 
