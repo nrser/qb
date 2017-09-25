@@ -131,6 +131,18 @@ shared_examples "is expected" do |expectations|
 end # is expected
 
 
+shared_examples "expect subject" do |expectations|
+  expectations.each { |state, specs|
+    specs.each { |verb, noun|
+      it {
+        # like: is_expected.to(include(noun))
+        is_expected.send state, self.send(verb, noun)
+      }
+    }
+  }
+end # is expected
+
+
 shared_examples QB::Role do |**expectations|
   include_examples "is expected", merge_expectations(
     { to: { be_a: QB::Role } },
@@ -156,4 +168,11 @@ shared_examples QB::Package::Version do |**expectations|
   )
 end # QB::Package::Version
 
+
+shared_examples QB::Path do |**expectations|
+  include_examples "is expected", merge_expectations(
+    { to: { be_a: QB::Path } },
+    *expectations.values,
+  )
+end # QB::Package::Version
 

@@ -3,7 +3,7 @@ require 'nrser/extras'
 require_relative './qb/errors'
 require_relative './qb/version'
 require_relative './qb/util'
-require_relative './qb/ansible_module'
+require_relative './qb/path'
 
 module QB
   ROOT = (Pathname.new(__FILE__).dirname + '..').expand_path
@@ -40,4 +40,8 @@ require 'qb/role'
 require 'qb/options'
 require_relative './qb/repo'
 require_relative './qb/cli'
+
 require_relative './qb/ansible'
+# Depreciated namespace:
+require_relative './qb/ansible_module'
+
