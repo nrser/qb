@@ -2,21 +2,26 @@ require 'spec_helper'
 
 describe QB::Repo::Git do
   describe ".from_path" do
-    context "QB root" do
+    context "QB::ROOT" do
       
-      let(:git) { QB::Repo::Git.from_path QB::ROOT }
+      subject { QB::Repo::Git.from_path QB::ROOT }
       
-      it {
-        expect(git).to be_a QB::Repo::Git
-      }
+      it_behaves_like QB::Repo::Git
       
-      it "has a user with name and email" do
-        expect(git.user).to be_a QB::Repo::Git::User
-        expect(git.user.name).to be_a String
-        expect(git.user.email).to be_a String
-      end
+      describe "#user" do
+        refine_subject :user
+        
+        it_behaves_like QB::Repo::Git::User, and_is_expected: {
+          to: {
+            have_attributes: {
+              name: `git config user.name`.chomp,
+              email: `git config user.email`.chomp,
+            }
+          }
+        }
+      end # #user
       
-    end # QB root
+    end # QB::ROOT
   end # .from_path
 end # QB::Repo::Git
 

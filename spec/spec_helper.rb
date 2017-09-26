@@ -174,5 +174,22 @@ shared_examples QB::Path do |**expectations|
     { to: { be_a: QB::Path } },
     *expectations.values,
   )
-end # QB::Package::Version
+end # QB::Path
+
+
+shared_examples QB::Repo::Git do |**expectations|
+  include_examples "is expected", merge_expectations(
+    { to: { be_a: QB::Repo::Git } },
+    *expectations.values,
+  )
+end # QB::Repo::Git
+
+
+shared_examples QB::Repo::Git::User do |**expectations|
+  include_examples "is expected", merge_expectations(
+    { to: { be_a: QB::Repo::Git::User } },
+    *expectations.values,
+  )
+end # QB::Repo::Git::User
+
 
