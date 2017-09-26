@@ -59,7 +59,8 @@ class QB::Path < Pathname
   #       instances transportable. Issues with relative paths come to mind...
   # 
   prop  :cwd,
-        type: t.pathname
+        type: t.pathname,
+        to_data: :to_s
   
   # The raw path argument used to instantiate the path object.
   # 
@@ -113,6 +114,10 @@ class QB::Path < Pathname
         type: t.maybe( t.path ),
         source: :try_realpath,
         to_data: :to_s
+  
+  prop  :is_realpath,
+        type: t.bool,
+        source: :realpath?
         
   
   # Constructor
@@ -184,6 +189,7 @@ class QB::Path < Pathname
     begin
       relative_path_from cwd
     rescue ArgumentError => error
+      nil
     end
   end
   
@@ -201,8 +207,21 @@ class QB::Path < Pathname
     begin
       realpath
     rescue SystemCallError => error
+      nil
     end
   end
+  
+  
+  
+  # Is `self` already it's real path?
+  # 
+  # @return [Boolean]
+  #   `true` if `self` and {#try_realpath} are equal.
+  # 
+  def realpath?
+    self == try_realpath
+  end # #realpath?
+  
   
   
 end # class QB::Path

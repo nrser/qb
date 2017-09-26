@@ -13,6 +13,7 @@ describe QB::Path do
           relative: (
             QB::ROOT.relative_path_from Pathname.getwd
           ),
+          realpath?: ( QB::ROOT.realpath == QB::ROOT ),
         }
       }
     }
@@ -35,7 +36,8 @@ describe QB::Path do
           'relative' => (
             QB::ROOT.relative_path_from( Pathname.getwd ).to_s
           ),
-          'realpath' => QB::ROOT.to_s,
+          'realpath' => QB::ROOT.realpath.to_s,
+          'is_realpath' => ( QB::ROOT.realpath == QB::ROOT ),
         }
       }
       
