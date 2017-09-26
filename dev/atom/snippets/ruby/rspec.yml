@@ -1,0 +1,12 @@
+.source.ruby:
+  RSpec "expect subject to be a" Shared Example:
+    prefix: shared-example-expect-subject-to-be-a
+    body: |
+      
+      shared_examples ${1:class} do |**expectations|
+        include_examples "is expected", merge_expectations(
+          { to: { be_a: ${1:class} } },
+          *expectations.values,
+        )
+      end # ${1:class}
+      
