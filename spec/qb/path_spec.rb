@@ -41,6 +41,16 @@ describe QB::Path do
         }
       }
       
+      describe "'git' value" do
+        subject { super()['git'] }
+        
+        include_examples "expect subject", to: {
+          be_a: Hash,
+          include: {
+          }
+        }
+      end # .git
+      
     end # #to_data
   end # context raw: QB::ROOT
   

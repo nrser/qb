@@ -16,6 +16,8 @@ require 'nrser'
 # Package
 # -----------------------------------------------------------------------
 
+require_relative './repo/git'
+
 
 # Refinements
 # =======================================================================
@@ -50,6 +52,12 @@ class QB::Path < Pathname
   # Props
   # ======================================================================
   
+  # Principle path properties
+  # ---------------------------------------------------------------------
+  # 
+  # Values stored as variables on the instance.
+  # 
+  
   # The current working directory *relevant* to the path - basically, when
   # and where the instance was created, which may be on a totally different
   # system if the instance was loaded from data.
@@ -72,6 +80,13 @@ class QB::Path < Pathname
   prop  :raw,
         type: t.path,
         to_data: :to_s
+  
+  
+  # Derived path properties
+  # ---------------------------------------------------------------------
+  # 
+  # On-demand values computed via method calls.
+  # 
   
   prop  :expanded,
         type: t.path,
@@ -118,7 +133,18 @@ class QB::Path < Pathname
   prop  :is_realpath,
         type: t.bool,
         source: :realpath?
-        
+  
+  
+  # Composed properties
+  # ---------------------------------------------------------------------
+  # 
+  # On-demand values that point to other {NRSER::Meta::Props} instances.
+  # 
+  
+  prop  :git,
+        type: QB::Repo::Git,
+        source: :git
+  
   
   # Constructor
   # ======================================================================
@@ -212,7 +238,6 @@ class QB::Path < Pathname
   end
   
   
-  
   # Is `self` already it's real path?
   # 
   # @return [Boolean]
@@ -222,6 +247,22 @@ class QB::Path < Pathname
     self == try_realpath
   end # #realpath?
   
+  
+  # @return [Pathname]
+  #   A regular (non-{QB::Path}) {Pathname} version of `self`.
+  def path
+    Pathname.new self
+  end
+  
+  
+  # Composed Sub-Instances
+  # ---------------------------------------------------------------------
+  
+  # @return [QB::Repo::Git]
+  #   
+  def git
+    @git ||= QB::Repo::Git.from_path path
+  end
   
   
 end # class QB::Path
