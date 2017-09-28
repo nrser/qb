@@ -6,7 +6,21 @@ describe QB::Repo::Git do
       
       subject { QB::Repo::Git.from_path QB::ROOT }
       
-      it_behaves_like QB::Repo::Git
+      it_behaves_like QB::Repo::Git, and_is_expected: {
+        to: {
+          have_attributes: {
+            raw_input_path: QB::ROOT,
+            
+            name: 'qb',
+            owner: 'nrser',
+            full_name: 'nrser/qb',
+            
+            clean?: Dir.chdir( QB::ROOT ) {
+              `git status --porcelain 2>/dev/null`.chomp.empty?
+            },
+          }
+        }
+      }
       
       describe "#user" do
         refine_subject :user
@@ -20,6 +34,33 @@ describe QB::Repo::Git do
           }
         }
       end # #user
+      
+      describe '#to_data' do
+        refine_subject :to_data
+        
+        include_examples "expect subject", to: {
+          be_a: Hash,
+          include: {
+            '__class__' => QB::Repo::Git.name,
+            
+            'name' => 'qb',
+            
+            'owner' => 'nrser',
+            
+            'user' => {
+              '__class__' => QB::Repo::Git::User.name,
+              'name' => `git config user.name`.chomp,
+              'email' => `git config user.email`.chomp,
+            },
+            'origin' => 'git@github.com:nrser/qb.git',
+            
+            'is_clean' => Dir.chdir( QB::ROOT ) {
+              `git status --porcelain 2>/dev/null`.chomp.empty?
+            },
+          }
+        }
+        
+      end # #to_data
       
     end # QB::ROOT
   end # .from_path

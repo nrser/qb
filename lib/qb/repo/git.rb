@@ -220,8 +220,8 @@ class Git < NRSER::Meta::Props::Base
   # Props
   # =====================================================================
   
-  prop :raw_input_path, type: t.maybe(t.union(Pathname, t.str)), default: nil
-  prop :root, type: Pathname
+  prop :raw_input_path, type: t.path, default: nil, to_data: :to_s
+  prop :root, type: t.pathname, to_data: :to_s
   prop :user, type: User
   prop :is_clean, type: t.bool
   prop :head, type: t.maybe(t.str), default: nil
@@ -230,6 +230,10 @@ class Git < NRSER::Meta::Props::Base
   prop :owner, type: t.maybe(t.str), default: nil
   prop :name, type: t.maybe(t.str), default: nil
   prop :github, type: t.maybe(t.hash_), default: nil
+  
+  
+  # Derived Properties
+  # ---------------------------------------------------------------------
   
   prop :head_short, type: t.maybe(t.str), source: :head_short
   prop :full_name, type: t.maybe(t.str), source: :full_name
@@ -251,6 +255,13 @@ class Git < NRSER::Meta::Props::Base
     !github.nil?
   end
   
+  
+  # Reading Repo State
+  # ---------------------------------------------------------------------
+  
+  # @return [Boolean]
+  #   `false` if the repo has any uncommitted changes or untracked files.
+  # 
   def clean?
     is_clean
   end
