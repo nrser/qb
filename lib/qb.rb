@@ -38,10 +38,12 @@ end
 # needs QB::*_ROLES_DIR
 require 'qb/role'
 require 'qb/options'
-require_relative './qb/repo'
-require_relative './qb/cli'
+require 'qb/repo'
+require 'qb/cli'
 
-require_relative './qb/ansible'
+require 'qb/ansible'
 # Depreciated namespace:
-require_relative './qb/ansible_module'
+require 'qb/ansible_module'
+
+require 'qb/package'
 
