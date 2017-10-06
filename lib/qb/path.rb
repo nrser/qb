@@ -204,7 +204,7 @@ class QB::Path < Pathname
   
   # Relative path from {#cwd} to `self`, if one exists.
   # 
-  # @return [Pathname]
+  # @return [QB::Path]
   #   If a relative path from {#cwd} to `self` exists.
   # 
   # @return [nil]
@@ -258,12 +258,27 @@ class QB::Path < Pathname
   # Composed Sub-Instances
   # ---------------------------------------------------------------------
   
+  # {QB::Repo::Git} resource for the Git repo {#path} is in one, or {nil} if
+  # it isn't.
+  # 
   # @return [QB::Repo::Git]
-  #   
+  #   If {#path} is in a Git repo.
+  # 
+  # @return [nil]
+  #   If {#path} is not in a Git repo.
+  # 
   def git
     @git ||= QB::Repo::Git.from_path path
   end
   
+  
+  def gem
+    unless instance_variable_defined? :@gem
+      @gem = QB::Package::Gem.from_root_path path
+    end
+    
+    @gem
+  end
   
 end # class QB::Path
 

@@ -42,7 +42,7 @@ describe QB::Path do
       }
       
       describe "'git' value" do
-        subject { super()['git'] }
+        refine_subject :fetch, 'git'
         
         include_examples "expect subject", to: {
           be_a: Hash,

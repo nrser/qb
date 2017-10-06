@@ -168,7 +168,6 @@ class QB::Package::Version < QB::Util::Resource
   end # .from_docker_tag
   
   
-  
   # Parse string version into an instance. Accept Semver, Ruby Gem and 
   # Docker image tag formats.
   # 
