@@ -56,5 +56,23 @@ describe QB::Path do
     end # #to_data
   end # context raw: QB::ROOT
   
+  context "path that is not in a Git repo" do
+    let( :path ) { Dir.mktmpdir 'qb_not_git_dir' }
+    
+    subject { QB::Path.new raw: path }
+    
+    after { FileUtils.rm_rf path }
+    
+    it_behaves_like QB::Path, and_is_expected: {
+      to: {
+        have_attributes: {
+          git: nil,
+        }
+      }
+    }
+    
+  end # path that is not in a Git repo
+  
+  
 end # QB::Repo::Git
 

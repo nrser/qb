@@ -95,10 +95,23 @@ class Git < NRSER::Meta::Props::Base
   
   # @todo Document from_path method.
   # 
-  # @param [String, Pathname] input_path
-  #   A path that is in the Git repo.
+  # @param [String, Pathname] path
+  #   A path that may be in the Git repo.
+  # 
+  # @param [Boolean] use_github_api:
+  #   When `true` will will contact the GitHub API for information to populate
+  #   the {QB::Repo::Git#github} property for repos that have a GitHub origin
+  #   URL.
+  #   
+  #   Otherwise we will just assume GitHub repos are private since it's the 
+  #   safe guess, resulting in a {QB::Repo::Git#github} value of 
+  #   `{private: true}`.
   # 
   # @return [QB::Repo::Git]
+  #   If `path` is in a Git repo.
+  # 
+  # @return [nil]
+  #   If `path` is not in a Git repo.
   # 
   # @raise [QB::FSStateError]
   #   -   If we can't find any existing directory to look in based on 
@@ -129,9 +142,7 @@ class Git < NRSER::Meta::Props::Base
       root_result = Cmds.capture "git rev-parse --show-toplevel"
       
       unless root_result.ok?
-        raise QB::FSStateError,
-              "Path #{ raw_input_path.inspect } does not appear to be in a " +
-              "Git repo (looked in #{ closest_dir.inspect })."
+        return nil
       end
       
       root = Pathname.new root_result.out.chomp
@@ -215,6 +226,34 @@ class Git < NRSER::Meta::Props::Base
     end # chdir
     
   end # .from_path
+  
+  
+  # Instantiate a {QB::Package::Git} resource for whatever Git repo `path`
+  # is in, raising an error if it's not in one.
+  # 
+  # @param [String, Pathname] path
+  #   A path that is in the Git repo.
+  # 
+  # @param use_github_api: see #from_path
+  # 
+  # @return [QB::Repo::Git]
+  # 
+  # @raise [QB::FSStateError]
+  #   -   If we can't find any existing directory to look in based on 
+  #       `input_path`.
+  #       
+  #   -   If the directory we do find to look in does not seems to be part of
+  #       a Git repo.
+  # 
+  def from_path! path, use_github_api: false
+    from_path( path, use_github_api: use_github_api ).tap { |git|
+      if git.nil?
+        raise QB::FSStateError,
+              "Path #{ raw_input_path.inspect } does not appear to be in a " +
+              "Git repo (looked in #{ closest_dir.inspect })."
+      end
+    }
+  end # #from_path!
   
   
   # Props
