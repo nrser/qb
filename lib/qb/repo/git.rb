@@ -1,17 +1,43 @@
-require 'cmds'
-require 'nrser/refinements/types'
+# Requirements
+# =======================================================================
 
+# Stdlib
+# -----------------------------------------------------------------------
+
+# Deps
+# -----------------------------------------------------------------------
+require 'cmds'
+
+# Project / Package
+# -----------------------------------------------------------------------
+
+
+# Refinements
+# =======================================================================
+
+require 'nrser/refinements'
+using NRSER
+
+require 'nrser/refinements/types'
 using NRSER::Types
 
-module QB 
-module Repo
+
+# Declarations
+# =======================================================================
+
+module QB; end
+module QB::Repo; end
+
+
+# Definitions
+# =======================================================================
 
 # Encapsulate information about a Git repository and expose useful operations as
 # instance methods.
 # 
 # The main entry point is {QB::Repo::Git.from_path}, which creates a 
 # 
-class Git < NRSER::Meta::Props::Base
+class QB::Repo::Git < NRSER::Meta::Props::Base
   GITHUB_SSH_URL_RE = /^git@github\.com\:(?<owner>.*)\/(?<name>.*)\.git$/
   GITHUB_HTTPS_URL_RE = /^https:\/\/github\.com\/(?<owner>.*)\/(?<name>.*)\.git$/
   
@@ -93,7 +119,8 @@ class Git < NRSER::Meta::Props::Base
   # Class Methods
   # =====================================================================
   
-  # @todo Document from_path method.
+  # Instantiate a {QB::Package::Git} resource for whatever Git repo `path`
+  # is in, or return `nil` if `path` is not in a Git repo.
   # 
   # @param [String, Pathname] path
   #   A path that may be in the Git repo.
@@ -116,9 +143,6 @@ class Git < NRSER::Meta::Props::Base
   # @raise [QB::FSStateError]
   #   -   If we can't find any existing directory to look in based on 
   #       `input_path`.
-  #       
-  #   -   If the directory we do find to look in does not seems to be part of
-  #       a Git repo.
   # 
   def self.from_path path, use_github_api: false
     raw_input_path = path
@@ -305,7 +329,4 @@ class Git < NRSER::Meta::Props::Base
     is_clean
   end
   
-end # class Git
-
-end # module Repo
-end # module QB
+end # class QB::Repo::Git
