@@ -411,19 +411,37 @@ class QB::Role
     path = QB::Util.resolve dest
     
     search_dirs = search_path.find_all { |pathname|
-      path.fnmatch? pathname.join('**')
+      path.fnmatch?( pathname / '**' )
     }
     
     case search_dirs.length
     when 0
       # It's not in any of the search directories
       # 
-      # If it has 'roles' as a segment than use what's after that
+      # If it has 'roles' as a segment than use what's after the last occurrence
+      # of that (unless there isn't anything).
       # 
-      split = path.to_s.split('/roles/')
+      segments = path.to_s.split File::SEPARATOR
+      
+      if index = segments.rindex( 'roles' )
+        name_segs = segments[index..-1]
+        
+        unless name_segs.empty?
+          return File.join name_segs
+        end
+      end
+      
+      # Ok, that didn't work... just return the basename I guess...
+      File.basename path
+      
+    when 1
+      
+    else
+      # Multiple matches?!?!?
+      
       
     end
-  end
+  end # #guess_role_name
   
   
   # Instance Attributes
