@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require 'nrser'
+require '{{ qb_gem_info.name }}'
+
+
+require 'nrser/refinements'
+using NRSER
+
+
+# You can add fixtures and/or initialization code here to make experimenting
+# with your gem easier. You can also use a different console, if you like.
+
+# (If you use this, don't forget to add pry to your Gemfile!)
+begin
+  require "pry"
+rescue LoadError => error
+  puts "Failed to load `pry` gem - add it to your Gemfile or edit this file"
+  
+  require "irb"
+  IRB.start
+else
+  Pry.start
+end

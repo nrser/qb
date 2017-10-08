@@ -1,0 +1,28 @@
+---
+# tasks file for qb/gem/bin_stubs
+
+# Figure out where they gonna go...
+
+- name: >-
+    Set destination directory variable `bin_stub_dir`.
+  set_fact:
+    bin_stub_dir: >-
+      {{ item }}
+  with_first_found:
+  - "{{ gem_root | path_join( 'dev', 'bin' ) }}"
+  - "{{ gem_root | path_join( 'bin' ) }}"
+
+- name: >-
+    Render templates to `{{ bin_stub_dir }}`.
+  with_items:
+  - console
+  - rake
+  - rspec
+  template:
+    src: >-
+      {{ item }}
+    dest: >-
+      {{ bin_stub_dir | path_join( item ) }}
+    mode: 0755
+    force: >-
+      {{ force }}
