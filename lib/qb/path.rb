@@ -268,7 +268,11 @@ class QB::Path < Pathname
   #   If {#path} is not in a Git repo.
   # 
   def git
-    @git ||= QB::Repo::Git.from_path path
+    unless instance_variable_defined? :@git
+      @git = QB::Repo::Git.from_path path
+    end
+    
+    @git
   end
   
   

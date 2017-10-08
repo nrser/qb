@@ -94,3 +94,9 @@ class QB::Package < QB::Util::Resource
   
 end # class QB::Package
 
+
+# Post-Processing
+# =======================================================================
+
+require_relative './package/gem'
+

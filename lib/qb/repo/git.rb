@@ -273,8 +273,8 @@ class QB::Repo::Git < NRSER::Meta::Props::Base
     from_path( path, use_github_api: use_github_api ).tap { |git|
       if git.nil?
         raise QB::FSStateError,
-              "Path #{ raw_input_path.inspect } does not appear to be in a " +
-              "Git repo (looked in #{ closest_dir.inspect })."
+              "Path #{ path.inspect } does not appear to be in a " +
+              "Git repo."
       end
     }
   end # #from_path!
