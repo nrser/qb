@@ -278,7 +278,7 @@ class QB::Path < Pathname
   
   def gem
     unless instance_variable_defined? :@gem
-      @gem = QB::Package::Gem.from_root_path path
+      @gem = QB::Package::Gem.from_root_path path, repo: git
     end
     
     @gem

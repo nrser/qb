@@ -92,6 +92,81 @@ class QB::Package < QB::Util::Resource
   prop  :name, type: t.non_empty_str
   
   
+  # @!attribute [r] repo_rel_path
+  #   @todo Doc repo_rel_path property...
+  #   
+  #   @return [PropRubyType]
+  #   
+  prop  :repo_rel_path,
+        type: t.maybe( t.dir_path ),
+        source: :repo_rel_path
+  
+  
+  # Constructor
+  # =====================================================================
+  
+  def initialize repo: NRSER::NO_ARG, **props
+    @repo = repo
+    super **props
+  end # #initialize
+  
+  
+  # Instance Methods
+  # =====================================================================
+  
+  # Repository
+  # ---------------------------------------------------------------------
+  
+  # @todo Document repo method.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def repo
+    if @repo == NRSER::NO_ARG
+      @repo = QB::Repo.from_path path
+    end
+    
+    @repo
+  end # #repo
+  
+  
+  # @return [Boolean]
+  #   `true` if {#root_path} is in a repo type we recognize.
+  # 
+  def in_repo?
+    !!repo
+  end # #in_repo?
+  
+  
+  # Relative path from the {#repo} root to the {#root_path}.
+  # 
+  # Used as the version tag prefix (unless it's `.` - when the repo root is 
+  # the root path).
+  # 
+  # @return [Pathname]
+  #   
+  def repo_rel_path
+    root_path.relative_path_from( repo.root_path ) if in_repo?
+  end
+  
+  
+  # @todo Document versions method.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def versions
+    # method body...
+  end # #versions
+  
+  
 end # class QB::Package
 
 

@@ -100,6 +100,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency "state_mate", '~> 0.0', ">= 0.0.9"
   spec.add_dependency 'parseconfig', '~> 1.0', '>= 1.0.8'
   
+  # Ruby lib wrapping `git` binary system calls for use in {QB::Repo::Git}
+  spec.add_dependency 'git', '~> 1.3.0'
+  
   
   if QB::VERSION.end_with? '.dev'
     commit = `git rev-parse HEAD`.strip

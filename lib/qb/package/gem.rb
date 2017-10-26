@@ -71,9 +71,9 @@ class QB::Package::Gem < QB::Package
     # @raise [QB::FSStateError]
     #   If `path` is not a directory.
     #     
-    def from_root_path path
+    def from_root_path path, repo: NRSER::NO_ARG
       # Values we will use to construct the resource instance.
-      values = {}
+      values = {repo: repo}
       
       # Whatever we were passes is the reference path
       values[:ref_path] = path
@@ -128,8 +128,6 @@ class QB::Package::Gem < QB::Package
         end
       }
     end # #from_root_path!
-    
-    
     
   end # class << self (Eigenclass)
   

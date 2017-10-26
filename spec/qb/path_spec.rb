@@ -49,7 +49,7 @@ describe QB::Path do
           include_examples "expect subject", to: {
             be_a: Hash,
             include: {
-              'root' => QB::ROOT.to_s,
+              'root_path' => QB::ROOT.to_s,
               'name' => 'qb',
             }
           }

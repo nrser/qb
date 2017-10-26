@@ -7,9 +7,11 @@
 # Deps
 # -----------------------------------------------------------------------
 require 'cmds'
+require 'git'
 
 # Project / Package
 # -----------------------------------------------------------------------
+require 'qb/util/resource'
 
 
 # Refinements
@@ -26,7 +28,7 @@ using NRSER::Types
 # =======================================================================
 
 module QB; end
-module QB::Repo; end
+class QB::Repo < QB::Util::Resource; end
 
 
 # Definitions
@@ -37,11 +39,11 @@ module QB::Repo; end
 # 
 # The main entry point is {QB::Repo::Git.from_path}, which creates a 
 # 
-class QB::Repo::Git < NRSER::Meta::Props::Base
+class QB::Repo::Git < QB::Repo
   GITHUB_SSH_URL_RE = /^git@github\.com\:(?<owner>.*)\/(?<name>.*)\.git$/
   GITHUB_HTTPS_URL_RE = /^https:\/\/github\.com\/(?<owner>.*)\/(?<name>.*)\.git$/
   
-  class User < NRSER::Meta::Props::Base
+  class User < QB::Util::Resource
     prop :name, type: t.maybe(t.str), default: nil
     prop :email, type: t.maybe(t.str), default: nil
   end
@@ -145,10 +147,10 @@ class QB::Repo::Git < NRSER::Meta::Props::Base
   #       `input_path`.
   # 
   def self.from_path path, use_github_api: false
-    raw_input_path = path
+    ref_path = path
     
     # Create a Pathname from the input
-    input_path = Pathname.new raw_input_path
+    input_path = Pathname.new ref_path
     
     # input_path may point to a file, or something that doesn't even exist.
     # We want to ascend until we find an existing directory that we can cd into.
@@ -158,7 +160,7 @@ class QB::Repo::Git < NRSER::Meta::Props::Base
     if closest_dir.nil?
       raise QB::FSStateError,
             "Unable to find any existing directory from path " +
-            "#{ raw_input_path.inspect }"
+            "#{ ref_path.inspect }"
     end
     
     # Change into the directory to make shell life easier
@@ -169,7 +171,7 @@ class QB::Repo::Git < NRSER::Meta::Props::Base
         return nil
       end
       
-      root = Pathname.new root_result.out.chomp
+      root_path = Pathname.new root_result.out.chomp
       
       user = User.new **NRSER.map_values(User.props.keys) {|key, _|
         begin
@@ -234,9 +236,9 @@ class QB::Repo::Git < NRSER::Meta::Props::Base
       end
       
       new(
-        raw_input_path: raw_input_path,
+        ref_path: ref_path,
         input_path: input_path,
-        root: root,
+        root_path: root_path,
         user: user,
         is_clean: is_clean,
         head: head,
@@ -283,15 +285,12 @@ class QB::Repo::Git < NRSER::Meta::Props::Base
   # Props
   # =====================================================================
   
-  prop :raw_input_path, type: t.path, default: nil, to_data: :to_s
-  prop :root, type: t.pathname, to_data: :to_s
   prop :user, type: User
   prop :is_clean, type: t.bool
   prop :head, type: t.maybe(t.str), default: nil
   prop :branch, type: t.maybe(t.str), default: nil
   prop :origin, type: t.maybe(t.str), default: nil
   prop :owner, type: t.maybe(t.str), default: nil
-  prop :name, type: t.maybe(t.str), default: nil
   prop :github, type: t.maybe(t.hash_), default: nil
   
   
@@ -318,6 +317,10 @@ class QB::Repo::Git < NRSER::Meta::Props::Base
     !github.nil?
   end
   
+  def api    
+    @api ||= ::Git.open root_path
+  end
+  
   
   # Reading Repo State
   # ---------------------------------------------------------------------
@@ -327,6 +330,11 @@ class QB::Repo::Git < NRSER::Meta::Props::Base
   # 
   def clean?
     is_clean
+  end
+  
+  
+  def tags
+    api.tags.map &:name
   end
   
 end # class QB::Repo::Git

@@ -17,6 +17,9 @@ require 'qb/util/resource'
 # Refinements
 # =======================================================================
 
+require 'nrser/refinements'
+using NRSER
+
 require 'nrser/refinements/types'
 using NRSER::Types
 
@@ -41,6 +44,7 @@ class QB::Package::Version < QB::Util::Resource
   # Mixins
   # =====================================================================
   
+  include Comparable
   include QB::Util::DockerMixin
   
   
@@ -185,6 +189,8 @@ class QB::Package::Version < QB::Util::Resource
       self.from_gem_version Gem::Version.new(string)
     end
   end
+  
+  singleton_class.send :alias_method, :from_s, :from_string
   
   
   # Constructor
@@ -388,6 +394,62 @@ class QB::Package::Version < QB::Util::Resource
   end # #prerelease_version
   
   
+  # @todo Document bump method.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def bump level:
+    case level.to_s
+    
+    when 'dev'
+      props = { prerelease: ['dev'] }
+      
+      case self.level
+      when 'release'
+        merge patch: patch.succ, **props
+      when 'rc'
+        merge **props
+      when 'dev'
+        self
+      end
+    
+    when 'rc'
+      # Bump to next release-candidate version.
+      # 
+      # This is a little tricky because we need to know what the *last* rc
+      # version was, which is not in the version in most cases.
+      # 
+      
+      case self.level
+      when 'release'
+        merge patch: patch.succ, prerelease: ['rc', 0]
+      when 'rc'
+        merge prerelease: ['rc', prerelease[1].succ]
+      when 'dev'
+        raise ArgumentError.squished <<-END
+          Can't bump to next rc version without knowing what rc versions have
+          already been used.
+        END
+      end
+      
+    when 'release', 'patch'
+      
+      case self.level
+      when 'release'
+        # bump forward to next release, M.m.p -> M.m.(p+1)
+        merge patch: patch.succ
+      when 'rc', 'dev'
+        # bump forward to release version for rc or dev
+        release
+      end
+    
+    end
+  end # #bump
+  
   
   # Language Interface
   # =====================================================================
@@ -406,6 +468,11 @@ class QB::Package::Version < QB::Util::Resource
     other.class == self.class &&
     other.to_a == self.to_a 
   end # #==
+  
+  
+  def <=> other
+    to_a <=> other.to_a
+  end
   
   
   # Return array of the version elements in order from greatest to least

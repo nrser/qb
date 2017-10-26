@@ -324,6 +324,32 @@ describe QB::Package::Version do
   end # #==
   
   
+  # <=> (Comparison)
+  # ========================================================================
+  # 
+  describe "<=>" do
+    
+    context "M.m.p versions" do
+      let( :semvers ) {
+        ['0.11.0', '0.1.4', '0.1.41', '0.1.5', '0.1.50']
+      }
+      
+      subject {
+        semvers.
+          map { |semver| QB::Package::Version.from_string semver }.
+          sort.
+          map( &:semver )
+      }
+      
+      it { is_expected.to eq ['0.1.4', '0.1.5', '0.1.41', '0.1.50', '0.11.0'] }
+    end # M.m.p versions
+    
+  end # <=>
+  
+  # ************************************************************************
+  
+  
+  
   describe "Language Integration" do
   # =====================================================================
     describe "Array#uniq" do

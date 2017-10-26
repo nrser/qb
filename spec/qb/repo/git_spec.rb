@@ -9,7 +9,7 @@ describe QB::Repo::Git do
       it_behaves_like QB::Repo::Git, and_is_expected: {
         to: {
           have_attributes: {
-            raw_input_path: QB::ROOT,
+            ref_path: QB::ROOT,
             
             name: 'qb',
             owner: 'nrser',
