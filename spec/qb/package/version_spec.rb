@@ -59,10 +59,10 @@ describe QB::Package::Version do
   describe QB::Package::Version.method( :from_string ) do
   # Doesn't work?!
   # describe 'QB::Package::Version.from_string' do
-  #   refine_subject :method, :from_string
+  #   subject { super().method :from_string }
     
     context "dev version with everything" do
-      refine_subject :call, '0.1.2-dev.3+master.0a1b2c3d'
+      subject { super().call '0.1.2-dev.3+master.0a1b2c3d' }
       
       it_behaves_like QB::Package::Version, and_is_expected: {
         to: {
@@ -82,7 +82,7 @@ describe QB::Package::Version do
     
     
     context "version with only major" do
-      refine_subject :call, '1'
+      subject { super().call '1' }
       
       it_behaves_like QB::Package::Version, and_is_expected: {
         to: {
@@ -114,7 +114,7 @@ describe QB::Package::Version do
     
     
     context "Release version" do
-      refine_subject :call, '0.1.2'
+      subject { super().call '0.1.2' }
       
       it_behaves_like QB::Package::Version, and_is_expected: {
         to: {
@@ -137,7 +137,7 @@ describe QB::Package::Version do
     
     
     context "Build with no prerelease" do
-      refine_subject :call, '0.1.2+master.0a1b2c3d'
+      subject { super().call '0.1.2+master.0a1b2c3d' }
       
       it_behaves_like QB::Package::Version, and_is_expected: {
         to: {

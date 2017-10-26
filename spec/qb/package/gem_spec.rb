@@ -12,10 +12,10 @@ describe "QB::Package::Gem" do
   describe ".gemspec_path" do
   # =====================================================================
     
-    refine_subject :method, :gemspec_path
+    subject { super().method :gemspec_path }
     
     context "QB::ROOT" do
-      refine_subject :call, QB::ROOT
+      subject { super().call QB::ROOT }
       
       it "returns //qb.gemspec" do
         is_expected.to eq( QB::ROOT / 'qb.gemspec' )
@@ -29,37 +29,37 @@ describe "QB::Package::Gem" do
   describe ".from_root_path" do
   # =====================================================================
   
-    refine_subject :method, :from_root_path
+    subject { super().method :from_root_path }
     
     context "QB::ROOT" do
-      refine_subject :call, QB::ROOT
+      subject { super().call QB::ROOT }
       
       it { is_expected.to be_a QB::Package::Gem }
       
       describe "#ref_path" do
-        refine_subject :ref_path
+        subject { super().ref_path }
         it { is_expected.to be QB::ROOT }
       end # #ref_path
       
       describe "#gemspec_path" do
-        refine_subject :gemspec_path
+        subject { super().gemspec_path }
         it { is_expected.to eq( QB::ROOT / 'qb.gemspec' ) }
       end # #gemspec_path
       
       describe "#spec" do
-        refine_subject :spec
+        subject { super().spec }
         it 'should be a Gem::Specification' do
           is_expected.to be_a ::Gem::Specification
         end
       end # #spec
       
       describe "#name" do
-        refine_subject :name
+        subject { super().name }
         it { is_expected.to eq 'qb' }
       end # #name
       
       describe "#version" do
-        refine_subject :version
+        subject { super().version }
         it { is_expected.to be_a QB::Package::Version }
       end # #version
       

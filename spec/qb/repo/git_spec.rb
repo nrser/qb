@@ -23,7 +23,7 @@ describe QB::Repo::Git do
       }
       
       describe "#user" do
-        refine_subject :user
+        subject { super().user }
         
         it_behaves_like QB::Repo::Git::User, and_is_expected: {
           to: {
@@ -36,7 +36,7 @@ describe QB::Repo::Git do
       end # #user
       
       describe '#to_data' do
-        refine_subject :to_data
+        subject { super().to_data }
         
         include_examples "expect subject", to: {
           be_a: Hash,

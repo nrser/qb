@@ -21,7 +21,7 @@ describe QB::Path do
       }
       
       describe '#to_data' do
-        refine_subject :to_data
+        subject { super().to_data }
         
         include_examples "expect subject", to: {
           be_a: Hash,
@@ -44,7 +44,7 @@ describe QB::Path do
         }
         
         describe "'git' value" do
-          refine_subject :fetch, 'git'
+          subject { super().fetch 'git' }
           
           include_examples "expect subject", to: {
             be_a: Hash,
@@ -107,7 +107,7 @@ describe QB::Path do
       }
       
       describe "#git" do
-        refine_subject :git
+        subject { super().git }
         it { is_expected.to be_a QB::Repo::Git }
       end # #git
       
