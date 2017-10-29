@@ -4,6 +4,9 @@
 
 require 'spec_helper'
 
+require 'nrser/refinements'
+using NRSER
+
 require 'qb/package/gem'
 
 describe "QB::Package::Gem" do
@@ -14,13 +17,10 @@ describe "QB::Package::Gem" do
     
     subject { super().method :gemspec_path }
     
-    context "QB::ROOT" do
-      subject { super().call QB::ROOT }
-      
+    called_with QB::ROOT do
       it "returns //qb.gemspec" do
         is_expected.to eq( QB::ROOT / 'qb.gemspec' )
       end
-      
     end # QB::ROOT
     
   end # .gemspec_path
@@ -28,23 +28,28 @@ describe "QB::Package::Gem" do
   
   describe ".from_root_path" do
   # =====================================================================
-  
+    
     subject { super().method :from_root_path }
     
-    context "QB::ROOT" do
-      subject { super().call QB::ROOT }
-      
-      it { is_expected.to be_a QB::Package::Gem }
-      
-      describe "#ref_path" do
-        subject { super().ref_path }
-        it { is_expected.to be QB::ROOT }
-      end # #ref_path
-      
-      describe "#gemspec_path" do
-        subject { super().gemspec_path }
-        it { is_expected.to eq( QB::ROOT / 'qb.gemspec' ) }
-      end # #gemspec_path
+    called_with QB::ROOT do
+      it {
+        is_expected.to \
+          be_a( QB::Package::Gem ).
+          and(
+            have_attributes(
+              ref_path: QB::ROOT,
+              gemspec_path: ( QB::ROOT / 'qb.gemspec' ),
+              name: 'qb',
+              version: be_a( QB::Package::Version ),
+              
+              # Repo
+              in_repo?: true,
+              repo: be_a( QB::Repo ).and( be_a QB::Repo::Git ),
+              repo_rel_path: Pathname.new( '.' ),
+              version_tag_prefix: 'v',
+            )
+          )
+      }
       
       describe "#spec" do
         subject { super().spec }
@@ -53,17 +58,22 @@ describe "QB::Package::Gem" do
         end
       end # #spec
       
-      describe "#name" do
-        subject { super().name }
-        it { is_expected.to eq 'qb' }
-      end # #name
-      
-      describe "#version" do
-        subject { super().version }
-        it { is_expected.to be_a QB::Package::Version }
-      end # #version
-      
     end # QB::ROOT
+    
+    called_with TEST_GEM_ROOT_PATH do
+      it {
+        is_expected.to \
+          be_a( QB::Package::Gem ).
+          and have_attributes \
+            in_repo?: true,
+            repo: (
+              be_a( QB::Repo::Git ).
+              and( have_attributes root_path: QB::ROOT )
+            ),
+            version_tag_prefix: 'test/packages/gems/test_gem/v',
+            version_tag: 'test/packages/gems/test_gem/v0.1.0'
+      }
+    end # called_with( QB::ROOT / 'test' / 'packages' / 'gems' / 'test_gem' )
     
   end # .from_root_path
   

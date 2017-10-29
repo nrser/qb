@@ -22,11 +22,28 @@ require 'nrser/rspex'
 require 'qb'
 
 
+
+# Paths
+# =====================================================================
+
 TEST_ROLES_DIR = QB::ROOT.join 'test', 'roles'
 
+TEST_ROLE_TEMPLATE_DIR = TEST_ROLES_DIR.join 'test_template'
+
+TEST_PACKAGES_DIR = QB::ROOT / 'test' / 'packages'
+
+TEST_GEM_ROOT_PATH = TEST_PACKAGES_DIR / 'gems' / 'test_gem'
+
+
+# Config
+# =====================================================================
+
+# Add the test roles dir to the roles path
 QB::Role::PATH.unshift TEST_ROLES_DIR
 
-TEST_ROLE_TEMPLATE_DIR = TEST_ROLES_DIR.join 'test_template'
+
+# Helper Methods
+# =====================================================================
 
 # @param [String] name
 #   name for the test role.
