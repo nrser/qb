@@ -1,0 +1,8 @@
+---
+# meta file for unsat_qb_version
+
+allow_duplicates: yes
+
+dependencies: []
+# - role: role-name
+
