@@ -41,7 +41,7 @@ module QB::CLI
       return 1
     end
     
-    QB.check_qb_version role
+    role.check_requirements
     
     options = QB::Options.new role, args
     

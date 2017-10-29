@@ -27,12 +27,11 @@ module QB
   end
   
   
-  # Check that the Ansible version is not less than {QB::MIN_ANSIBLE_VERSION}.
+  # @return [Gem::Version]
+  #   the Ansible executable version parsed into a Gem version so we can
+  #   compare it.
   # 
-  # @raise [QB::AnsibleVersionError]
-  #   If the version of Ansible found is less than {QB::MIN_ANSIBLE_VERSION}.
-  # 
-  def self.check_ansible_version
+  def self.ansible_version
     out = Cmds.out! 'ansible --version'
     version_str = out[/ansible\ ([\d\.]+)/, 1]
     
@@ -44,9 +43,17 @@ module QB
       END
     end
     
-    version = Gem::Version.new version_str
-    
-    if version < QB::MIN_ANSIBLE_VERSION
+    Gem::Version.new version_str
+  end # .ansible_version
+  
+  
+  # Check that the Ansible version is not less than {QB::MIN_ANSIBLE_VERSION}.
+  # 
+  # @raise [QB::AnsibleVersionError]
+  #   If the version of Ansible found is less than {QB::MIN_ANSIBLE_VERSION}.
+  # 
+  def self.check_ansible_version
+    if ansible_version < QB::MIN_ANSIBLE_VERSION
       raise QB::AnsibleVersionError, NRSER.squish(
         <<-END
           QB #{ QB::VERSION } requires Ansible #{ QB::MIN_ANSIBLE_VERSION },
@@ -55,25 +62,6 @@ module QB
       )
     end
   end # .check_ansible_version
-  
-  
-  # If `role` has a {QB::Role#qb_requirement} raise an error if this version of
-  # QB doesn't satisfy it.
-  # 
-  # @raise [QB::QBVersionError]
-  #   If this version of QB doesn't satisfy the role's requirements.
-  # 
-  def self.check_qb_version role
-    unless  role.qb_requirement.nil? ||
-            role.qb_requirement.satisfied_by?(QB.gem_version)    
-      raise QB::QBVersionError, NRSER.squish(
-        <<-END
-          Role #{ role } requires QB #{ role.qb_requirement }, using QB
-          #{ QB.gem_version } from #{ QB::ROOT }.
-        END
-      )
-    end
-  end # .check_qb_version
   
   
 end # module QB

@@ -871,20 +871,53 @@ class QB::Role
   end
   
   
-  # Get the {Gem::Requirement} parse of the `qb_requirement` key in
-  # {#meta} (if it is defined), which specifies the required version of 
-  # `qb` for the role.
+  # Parsed tree structure of version requirements of the role from the 
+  # `requirements` value in the QB meta data.
   # 
-  # @return [Gem::Requirement, nil]
-  #   The requirement if `required_qb_version` key is in {#meta}, else `nil`.
+  # @return [Hash]
+  #   Tree where the leaves are {Gem::Requirement}.
   # 
-  def qb_requirement
-    if  meta['requirements'] &&
-        meta['requirements']['gems'] &&
-        meta['requirements']['gems']['qb']
-      Gem::Requirement.new meta['requirements']['gems']['qb']
+  def requirements
+    @requirements ||= NRSER.map_leaves(
+      meta_or 'requirements', {'gems' => {}}
+    ) { |key_path, req_str|
+      Gem::Requirement.new req_str
+    }
+  end # #requirements
+  
+  
+  # Check the role's requirements.
+  # 
+  # @return [nil]
+  # 
+  # @raise [QB::AnsibleVersionError]
+  #   If the version of Ansible found does not satisfy the role's requirements.
+  # 
+  # @raise [QB::QBVersionError]
+  #   If the the version of QB we're running does not satisfy the role's 
+  #   requirements.
+  # 
+  def check_requirements
+    if ansible_req = requirements['ansible']
+      unless ansible_req.satisfied_by? QB.ansible_version
+        raise QB::AnsibleVersionError.squished <<-END
+          QB #{ QB::VERSION } requires Ansible #{ ansible_req },
+          found version #{ QB.ansible_version  } at #{ `which ansible` }
+        END
+      end
     end
-  end
+    
+    if qb_req = requirements.dig( 'gems', 'qb' )
+      unless qb_req.satisfied_by? QB.gem_version
+        raise QB::QBVersionError.squished <<-END
+          Role #{ self } requires QB #{ qb_req },
+          using QB #{ QB.gem_version } from #{ QB::ROOT }.
+        END
+      end
+    end
+    
+    nil
+  end # #check_requirements
   
   
   # Language Inter-Op
