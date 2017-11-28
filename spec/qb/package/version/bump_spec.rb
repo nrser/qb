@@ -56,7 +56,26 @@ describe "QB::Package::Version#bump" do
       subject { super().curry[:rc] }
       
       context "from dev" do
-        it { expect { subject.call '0.1.2-dev' }.to raise_error ArgumentError }
+        
+        context_where string: '0.1.2-dev' do
+          context "`existing_versions` option not provided" do
+            it {
+              expect { subject.call string }.to raise_error ArgumentError
+            }
+          end
+          
+          context_where existing_versions: nil do
+            it {
+              expect {
+                subject.call string, existing_versions: existing_versions
+              }.to raise_error ArgumentError
+            }
+          end # existing_versions: nil
+          
+        end # string: '0.1.2-dev'
+        
+        
+
       end # from dev
       
       context "from rc" do
