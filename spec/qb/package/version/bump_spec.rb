@@ -7,8 +7,8 @@ require 'spec_helper'
 describe "QB::Package::Version#bump" do
   context "level:" do
     subject {
-      ->( level, string ) {
-        QB::Package::Version.from_s( string ).bump level: level
+      ->( level, string, **options ) {
+        QB::Package::Version.from_s( string ).bump level: level, **options
       }
     }
     
@@ -55,28 +55,50 @@ describe "QB::Package::Version#bump" do
     describe "to release-candidate (rc)" do
       subject { super().curry[:rc] }
       
-      context "from dev" do
-        
+      context "from dev" do        
         context_where string: '0.1.2-dev' do
-          context "`existing_versions` option not provided" do
-            it {
-              expect { subject.call string }.to raise_error ArgumentError
-            }
-          end
-          
-          context_where existing_versions: nil do
-            it {
-              expect {
-                subject.call string, existing_versions: existing_versions
-              }.to raise_error ArgumentError
-            }
-          end # existing_versions: nil
-          
-        end # string: '0.1.2-dev'
-        
-        
+          describe_group "Failures" do
+            context "`existing_versions` option not provided" do
+              it {
+                expect { subject.call string }.to raise_error ArgumentError
+              }
+            end
+            
+            context_where existing_versions: nil do
+              it {
+                expect {
+                  subject.call string, existing_versions: existing_versions
+                }.to raise_error ArgumentError
+              }
+            end # existing_versions: nil
+          end # Group "failures" Description
 
+          
+          describe_group "Successes" do
+            subject {
+              super().call string, existing_versions: existing_versions
+            }
+            
+            context_where existing_versions: '0.1.2-rc.3' do              
+              it_behaves_like QB::Package::Version, and_is_expected: {
+                to: {
+                  have_attributes: {
+                    major: 0,
+                    minor: 1,
+                    patch: 2,
+                    prerelease: ['rc', 4],
+                    level: 'rc',
+                    build: [],
+                    release: '0.1.2',
+                    semver: '0.1.2-rc.4',
+                  }
+                }
+              }
+            end # existing_versions: '0.1.2-rc.3'
+          end # Group "Successes" Description
+        end # string: '0.1.2-dev'
       end # from dev
+      
       
       context "from rc" do
         called_with "0.1.2-rc.0" do

@@ -497,7 +497,24 @@ class QB::Package::Version < QB::Util::Resource
           Can't bump to next rc version without knowing what rc versions have
           already been used.
         END
+      elsif existing_versions.is_a? String
+        existing_versions = self.class.extract existing_versions
       end
+      
+      last_existing_rc = existing_versions.
+        select { |version|
+          version.rc? && version.release == release
+        }.
+        sort.
+        last
+      
+      rc_number = if last_existing_rc.nil?
+        0
+      else
+        last_existing_rc.prerelease[1].succ
+      end
+      
+      merge prerelease: ['rc', rc_number]
     end
   end # #bump_rc
   
