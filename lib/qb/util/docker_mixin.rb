@@ -4,13 +4,41 @@ module QB
 module Util
 
 # Mixin to help working with Docker.
-module DockerMixin 
+module DockerMixin
+  
+  # Character limit for Docker image tags.
+  # 
+  # @return [Fixnum]
+  # 
   DOCKER_TAG_MAX_CHARACTERS = 128
+  
 
-  # Regexp to validate strings as Docker tags.
+  # Regexp to validate strings as Docker tags:
+  # 
+  # 1.  Must start with an ASCII alpha-numeric - `A-Z`, `a-z`, `0-9`.
+  #     
+  # 2.  The rest of the characters can be:
+  #     
+  #     1.  `A-Z`
+  #     2.  `a-z`
+  #     3.  `_`
+  #     4.  `.`
+  #     5.  `-`
+  #     
+  #     Note that it *can not* include `+`, so [Semver][] strings with
+  #     build info after the `+` are not legal.
+  #         
+  # 3.  Must be {QB::Util::DockerMixin::DOCKER_TAG_MAX_CHARACTERS} in length
+  #     or less.
+  # 
+  # [Semver]: https://semver.org/
+  # 
+  # @return [Regexp]
+  # 
   DOCKER_TAG_VALID_RE = \
     /\A[A-Za-z0-9_][A-Za-z0-9_\.\-]{0,#{ DOCKER_TAG_MAX_CHARACTERS - 1}}\z/.
     freeze
+  
   
   # Class methods to extend the receiver with when {QB::Util::DockerMixin}
   # is included.

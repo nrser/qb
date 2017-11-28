@@ -76,6 +76,36 @@ describe "QB::Package::Version#bump" do
       end # from release
       
     end # to release-candidate (rc)
+    
+    
+    # to release
+    # =====================================================================
+    # 
+    # describe "to release" do
+    #   subject { super().curry[:release] }
+    #   
+    #   context "from dev" do
+    #     it { expect { subject.call '0.1.2-dev' }.to raise_error ArgumentError }
+    #   end # from dev
+    #   
+    #   context "from rc" do
+    #     called_with "0.1.2-rc.0" do
+    #       it "should bump 'forward' to next rc version 0.1.2-rc.1" do
+    #         expect( subject.semver ).to eq '0.1.2-rc.1'
+    #       end
+    #     end
+    #   end # from rc
+    #   
+    #   context "from release" do
+    #     called_with "0.1.2" do
+    #       it "should bump patch and set rc to 0: 0.1.3-rc.0" do
+    #         expect( subject.semver ).to eq '0.1.3-rc.0'
+    #       end
+    #     end
+    #   end # from release
+    #   
+    # end # "to release"
+    
   
   end # to level
   

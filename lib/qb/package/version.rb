@@ -56,6 +56,36 @@ class QB::Package::Version < QB::Util::Resource
   MIXED_SEGMENT = t.union NUMBER_SEGMENT, NAME_SEGMENT
   
   
+  # Reasonably simple regular expression to extract things that might be 
+  # versions from strings.
+  # 
+  # Intended for use on reasonably short strings like `git tag` output or
+  # what-not... probably not well suited for sifting through mountains of
+  # text.
+  # 
+  # Structure:
+  # 
+  # 1.  The major version number, matched by a digit `1-9` followed by any
+  #     number of digits.
+  # 2.  A separator to the next segment, which is:
+  #     1.  `.` separating to the minor version number
+  #     2.  `-` separating to the prerelease
+  #     3.  `+` separating to the build
+  # 3.  One or more of `a-z`, `A-Z`, `0-9`, `.`, `-`, `_`, `+`
+  # 4.  Ends with one of those that is *not* `.`, `_` or `+`, so `a-z`, `A-Z`,
+  #     `0-9`.
+  # 
+  # This will match *many* strings that are not versions, but it should not
+  # miss any that are. It cold obviously be refined and improve to reduce 
+  # false positives at the cost of additional complexity, but I wanted to 
+  # start simple and complicate it as needed.
+  # 
+  # @return [Regexp]
+  # 
+  POSSIBLE_VERSION_RE = \
+    /(?:0|[1-9]\d*)[\.\-\+][a-zA-Z0-9\.\-\_\+]*[a-zA-Z0-9\-]+/
+  
+  
   # Props
   # =====================================================================
 
@@ -93,9 +123,13 @@ class QB::Package::Version < QB::Util::Resource
   # Utilities
   # ---------------------------------------------------------------------
   
+  # Time formatted to be stuck in a version segment per [Semver][] spec.
+  # We also strip out '-' to avoid possible parsing weirdness.
+  # 
+  # [Semver]: https://semver.org/
+  # 
   # @return [String]
-  #   Time formatted to be stuck in a version segment per Semver spec.
-  #   We also strip out '-' to avoid possible parsing weirdness.
+  # 
   def self.to_time_segment time
     time.utc.iso8601.gsub /[^0-9A-Za-z]/, ''
   end
@@ -134,6 +168,7 @@ class QB::Package::Version < QB::Util::Resource
         prerelease: prerelease_segments,
         build: []
   end
+  
   
   def self.from_npm_version version
     stmt = NRSER.squish <<-END
@@ -191,6 +226,25 @@ class QB::Package::Version < QB::Util::Resource
   end
   
   singleton_class.send :alias_method, :from_s, :from_string
+  
+  
+  # Extract version number from a string.
+  # 
+  # @param [String] string
+  #   String containing versions.
+  # 
+  # @return [Array<QB::Package::Version]
+  #   Any versions extracted from the string.
+  # 
+  def self.extract string
+    string.scan( POSSIBLE_VERSION_RE ).map { |possible_version_string|
+      begin
+        from_string possible_version_string
+      rescue
+        nil
+      end
+    }.compact
+  end # .extract
   
   
   # Constructor
@@ -394,6 +448,80 @@ class QB::Package::Version < QB::Util::Resource
   end # #prerelease_version
   
   
+  # Bumping
+  # ---------------------------------------------------------------------
+  
+  
+  # @todo Document bump_dev method.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def bump_to_dev
+    props = { prerelease: ['dev'] }
+    
+    case self.level
+    when 'release'
+      merge patch: patch.succ, **props
+    when 'rc'
+      merge **props
+    when 'dev'
+      self
+    end
+  end # #bump_dev
+  
+  
+  # Bump to next release-candidate version.
+  # 
+  # This is a little tricky because we need to know what the *last* rc
+  # version was, which is not in the version in most cases.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def bump_to_rc existing_versions: nil
+    case self.level
+    when 'release'
+      merge patch: patch.succ, prerelease: ['rc', 0]
+    when 'rc'
+      merge prerelease: ['rc', prerelease[1].succ]
+    when 'dev'
+      if existing_versions.nil?
+        raise ArgumentError.squished <<-END
+          Can't bump to next rc version without knowing what rc versions have
+          already been used.
+        END
+      end
+    end
+  end # #bump_rc
+  
+  
+  # @todo Document bump_to_release method.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def bump_to_release
+    case self.level
+    when 'release'
+      # bump forward to next release, M.m.p -> M.m.(p+1)
+      merge patch: patch.succ
+    when 'rc', 'dev'
+      # bump forward to release version for rc or dev
+      release
+    end
+  end # #bump_to_release
+  
+  
   # @todo Document bump method.
   # 
   # @param [type] arg_name
@@ -402,51 +530,12 @@ class QB::Package::Version < QB::Util::Resource
   # @return [return_type]
   #   @todo Document return value.
   # 
-  def bump level:
-    case level.to_s
-    
-    when 'dev'
-      props = { prerelease: ['dev'] }
-      
-      case self.level
-      when 'release'
-        merge patch: patch.succ, **props
-      when 'rc'
-        merge **props
-      when 'dev'
-        self
-      end
-    
-    when 'rc'
-      # Bump to next release-candidate version.
-      # 
-      # This is a little tricky because we need to know what the *last* rc
-      # version was, which is not in the version in most cases.
-      # 
-      
-      case self.level
-      when 'release'
-        merge patch: patch.succ, prerelease: ['rc', 0]
-      when 'rc'
-        merge prerelease: ['rc', prerelease[1].succ]
-      when 'dev'
-        raise ArgumentError.squished <<-END
-          Can't bump to next rc version without knowing what rc versions have
-          already been used.
-        END
-      end
-      
-    when 'release', 'patch'
-      
-      case self.level
-      when 'release'
-        # bump forward to next release, M.m.p -> M.m.(p+1)
-        merge patch: patch.succ
-      when 'rc', 'dev'
-        # bump forward to release version for rc or dev
-        release
-      end
-    
+  def bump level:, **options
+    method_name = "bump_to_#{ level }"
+    if options.empty?
+      public_send method_name
+    else
+      public_send method_name, **options
     end
   end # #bump
   
