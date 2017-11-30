@@ -95,6 +95,39 @@ describe "QB::Package::Version#bump" do
                 }
               }
             end # existing_versions: '0.1.2-rc.3'
+            
+            context_where(
+              existing_versions: [
+                '0.1.1-rc.0',
+                '0.1.1-rc.1',
+                '0.1.1',
+                '0.1.2-rc.0',
+              ].join( "\n" )
+            ) do
+              it_behaves_like QB::Package::Version, and_is_expected: {
+                to: {
+                  have_attributes: {
+                    semver: '0.1.2-rc.1',
+                  }
+                }
+              }
+            end # existing_versions: '0.1.2-rc.3'
+            
+            context_where(
+              existing_versions: [
+                '0.1.1-rc.0',
+                '0.1.1-rc.1',
+                '0.1.1',
+              ].join( "\n" )
+            ) do
+              it_behaves_like QB::Package::Version, and_is_expected: {
+                to: {
+                  have_attributes: {
+                    semver: '0.1.2-rc.0',
+                  }
+                }
+              }
+            end # existing_versions: '0.1.2-rc.3'
           end # Group "Successes" Description
         end # string: '0.1.2-dev'
       end # from dev
