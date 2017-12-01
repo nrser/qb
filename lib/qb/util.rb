@@ -1,3 +1,4 @@
+require_relative './util/logging'
 require_relative './util/stdio'
 require_relative './util/interop'
 require_relative './util/bundler'
@@ -22,10 +23,6 @@ module QB
       return false if input_words.empty?
       
       full_string_words = words full_string
-      
-      QB.debug "HERE",
-        input_words: input_words,
-        full_string_words: full_string_words
       
       full_string_words.each_with_index {|word, start_index|
         # compute the end index in full_string_words

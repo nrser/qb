@@ -101,6 +101,11 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'parseconfig', '~> 1.0', '>= 1.0.8'
   spec.add_dependency "octokit", "~> 4.0"
   
+  # Much better logging
+  spec.add_dependency 'semantic_logger', '~> 4.2'
+  # With much more awesome printing!
+  spec.add_dependency 'awesome_print', '~> 1.8'
+  
   # Ruby lib wrapping `git` binary system calls for use in {QB::Repo::Git}
   spec.add_dependency 'git', '~> 1.3.0'
   
