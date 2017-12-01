@@ -121,6 +121,13 @@ class QB::Repo::Git < QB::Repo
   # Class Methods
   # =====================================================================
   
+  # Factories
+  # ---------------------------------------------------------------------
+  # 
+  # Class methods that instantiate an instance of {QB::Repo::Git}, specializing
+  # it as a subclass when appropriate.
+  # 
+  
   # Instantiate a {QB::Package::Git} resource for whatever Git repo `path`
   # is in, or return `nil` if `path` is not in a Git repo.
   # 
@@ -233,6 +240,20 @@ class QB::Repo::Git < QB::Repo
           github = github.to_h
         end
         
+        return QB::Repo::Git::GitHub.new(
+          ref_path: ref_path,
+          input_path: input_path,
+          root_path: root_path,
+          user: user,
+          is_clean: is_clean,
+          head: head,
+          branch: branch,
+          origin: origin,
+          owner: owner,
+          name: name,
+          github: github,
+        )
+        
       end
       
       new(
@@ -338,3 +359,5 @@ class QB::Repo::Git < QB::Repo
   end
   
 end # class QB::Repo::Git
+
+require 'qb/repo/git/github'

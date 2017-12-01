@@ -47,3 +47,4 @@ require 'qb/ansible_module'
 
 require 'qb/package'
 
+require 'qb/github'
