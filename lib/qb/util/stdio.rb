@@ -68,6 +68,8 @@ module QB::Util::STDIO
   # their output to it, which is in turn printed to the console `qb` is running
   # in.
   class Service
+    include SemanticLogger::Loggable
+    
     def initialize name
       @name = name
       @thread = nil
@@ -81,11 +83,21 @@ module QB::Util::STDIO
       
       @path = SOCKET_DIR.join "#{ name }.#{ SecureRandom.uuid }.sock"
       
-      @debug_header = "#{ name }@#{ @path.to_s }"
+      self.logger = SemanticLogger[
+        [
+          "#{ self.class.name } {",
+          "  name: #{ name }",
+          "  path: #{ @path.to_s }",
+          "}"
+        ].join( "\n" )
+      ]
+      
+      logger.debug "Initialized"
     end
     
     def debug *args
-      QB.debug "#{ @debug_header }", *args
+      # logger.debug "#{ @debug_header }", args
+      logger.debug *args
     end
     
     def open!
@@ -100,6 +112,7 @@ module QB::Util::STDIO
       end
       
       @thread = Thread.new do
+        Thread.current.name = @name
         debug "thread started."
         
         @server = UNIXServer.new @path.to_s
@@ -113,7 +126,7 @@ module QB::Util::STDIO
       
       # set the env key so children can find the socket path
       ENV[@env_key] = @path.to_s
-      debug "set env var #{ @env_key }=#{ ENV[@env_key] }"
+      debug "set env var", @env_key => ENV[@env_key]
       
       debug "service open."
     end # open
