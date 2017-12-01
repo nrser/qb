@@ -1,0 +1,15 @@
+---
+# tasks file for git_repo_issues
+
+- name: >-
+    Get path facts for `qb_dir={{ qb_dir }}`
+  path_facts:
+    path: >-
+      {{ qb_dir }}
+  register: path_facts
+
+- debug:
+    msg:
+      number: "{{ number }}"
+      path_facts: "{{ path_facts }}"
+      issue: "{{ path_facts | qb_send( 'issue', number ) }}"

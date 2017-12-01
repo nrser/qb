@@ -214,13 +214,9 @@ class QB::Repo::Git < QB::Repo
       name = nil
       github = nil
       
-      if origin && match = (
-            GITHUB_SSH_URL_RE.match(origin) ||
-            GITHUB_HTTPS_URL_RE.match(origin)
-          )
+      if origin && QB::Repo::Git::GitHub.url?( origin )
         
-        owner = match['owner']
-        name = match['name']
+        repo_id = QB::Repo::Git::GitHub.parse_url origin
         
         if use_github_api
           github = OpenStruct.new
@@ -249,8 +245,9 @@ class QB::Repo::Git < QB::Repo
           head: head,
           branch: branch,
           origin: origin,
-          owner: owner,
-          name: name,
+          repo_id: repo_id,
+          owner: repo_id.owner,
+          name: repo_id.name,
           github: github,
         )
         
@@ -359,5 +356,9 @@ class QB::Repo::Git < QB::Repo
   end
   
 end # class QB::Repo::Git
+
+
+# Post-Processing
+# =======================================================================
 
 require 'qb/repo/git/github'
