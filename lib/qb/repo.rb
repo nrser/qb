@@ -134,4 +134,4 @@ end # class QB::Repo
 # Post-Processing
 # =======================================================================
 
-require_relative './repo/git'
+require 'qb/repo/git'

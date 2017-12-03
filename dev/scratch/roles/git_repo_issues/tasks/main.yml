@@ -12,4 +12,4 @@
     msg:
       number: "{{ number }}"
       path_facts: "{{ path_facts }}"
-      issue: "{{ path_facts | qb_send( 'issue', number ) }}"
+      issue: "{{ path_facts.git | qb_send( 'issue', number ) }}"

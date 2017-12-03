@@ -305,11 +305,11 @@ class QB::Repo::Git < QB::Repo
   
   prop :user, type: User
   prop :is_clean, type: t.bool
-  prop :head, type: t.maybe(t.str), default: nil
-  prop :branch, type: t.maybe(t.str), default: nil
-  prop :origin, type: t.maybe(t.str), default: nil
-  prop :owner, type: t.maybe(t.str), default: nil
-  prop :github, type: t.maybe(t.hash_), default: nil
+  prop :head, type: t.maybe(t.str)
+  prop :branch, type: t.maybe(t.str)
+  prop :origin, type: t.maybe(t.str)
+  prop :owner, type: t.maybe(t.str)
+  prop :github, type: t.maybe(t.hash_)
   
   
   # Derived Properties

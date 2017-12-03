@@ -6,6 +6,8 @@ module QB
 module Util 
 
 module Interop
+  include SemanticLogger::Loggable
+  
   class << self
     
     # @todo Document receive method.
@@ -16,11 +18,16 @@ module Interop
     # @return [return_type]
     #   @todo Document return value.
     # 
-    def receive      
+    def receive
+      logger.debug "Starting #receive..."
+      
       # method body
       yaml = $stdin.read
       
       payload = YAML.load yaml
+      
+      logger.debug "Parsed",
+        payload: payload
       
       data = payload.fetch 'data'
       method = payload.fetch 'method'
@@ -28,8 +35,9 @@ module Interop
       kwds = payload['kwds'] || {}
       args << kwds.symbolize_keys unless kwds.empty?
       
-      obj = if data.is_a?(Hash) && data.key?(NRSER::Meta::Props::CLASS_KEY)
-        NRSER::Meta::Props.from_data data
+      obj = if  data.is_a?( Hash ) &&
+                data.key?( NRSER::Meta::Props::DEFAULT_CLASS_KEY )
+        NRSER::Meta::Props.UNSAFE_load_instance_from_data data
       else
         data
       end

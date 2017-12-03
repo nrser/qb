@@ -5,6 +5,7 @@ from ansible.errors import AnsibleError
 
 import subprocess
 import yaml
+import os
 from ansible.parsing.yaml.dumper import AnsibleDumper
 
 def qb_send(data, method, *args, **kwds):
@@ -21,6 +22,8 @@ def qb_send(data, method, *args, **kwds):
     
     input = yaml.dump(payload, Dumper=AnsibleDumper)
     
+    # raise AnsibleError("HERE! %s" % (os.environ['QB_STDIO_ERR']))
+    
     ruby_code = '''
         # init bundler in dev env
         if ENV['QB_DEV_ENV']
@@ -32,7 +35,19 @@ def qb_send(data, method, *args, **kwds):
             require 'bundler/setup'
         end
         
+        require 'thread'
+        
+        Thread.current.name = "qb_send"
+        
         require 'qb'
+        
+        if ENV['QB_STDIO_ERR']
+          $stderr = UNIXSocket.new ENV['QB_STDIO_ERR']
+          
+          QB::Util::Logging.setup
+          
+          QB.debug "Connected to QB stderr stream at #{ ENV['QB_STDIO_ERR'] } #{ $stderr.path }."
+        end
         
         QB::Util::Interop.receive
     '''
@@ -42,6 +57,7 @@ def qb_send(data, method, *args, **kwds):
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        env=os.environ,
     )
     
     out, err = process.communicate(input)

@@ -41,7 +41,7 @@ describe QB::Repo::Git do
         include_examples "expect subject", to: {
           be_a: Hash,
           include: {
-            '__class__' => QB::Repo::Git.name,
+            '__class__' => QB::Repo::Git::GitHub.name,
             
             'name' => 'qb',
             

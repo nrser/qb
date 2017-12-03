@@ -92,7 +92,7 @@ module QB::Util::STDIO
         ].join( "\n" )
       ]
       
-      logger.debug "Initialized"
+      logger.trace "Initialized"
     end
     
     def debug *args
@@ -101,7 +101,7 @@ module QB::Util::STDIO
     end
     
     def open!
-      debug "opening..."
+      logger.trace "opening..."
       
       # make sure env var is not already set (basically just prevents you from
       # accidentally opening two instances with the same name)
@@ -113,7 +113,7 @@ module QB::Util::STDIO
       
       @thread = Thread.new do
         Thread.current.name = @name
-        debug "thread started."
+        logger.trace "thread started."
         
         @server = UNIXServer.new @path.to_s
         
@@ -126,9 +126,9 @@ module QB::Util::STDIO
       
       # set the env key so children can find the socket path
       ENV[@env_key] = @path.to_s
-      debug "set env var", @env_key => ENV[@env_key]
+      logger.trace "set env var", @env_key => ENV[@env_key]
       
-      debug "service open."
+      logger.trace "service open."
     end # open
     
     def close!
@@ -136,7 +136,7 @@ module QB::Util::STDIO
       # 
       # TODO not sure how correct this is...
       # 
-      debug "closing..."
+      logger.trace "closing..."
       
       @socket.close unless @socket.nil?
       @socket = nil
@@ -145,7 +145,7 @@ module QB::Util::STDIO
       FileUtils.rm(@path) if @path.exist?
       @thread.kill unless @thread.nil?
       
-      debug "closed."
+      logger.trace "closed."
     end
   end # Service
   
@@ -159,7 +159,10 @@ module QB::Util::STDIO
     
     def work_in_thread
       while (line = @socket.gets) do
-        debug "#{ @name } received: #{ line.inspect }"
+        logger.trace "received line",
+          line: line,
+          dest: @dest
+        
         @dest.puts line
       end
     end

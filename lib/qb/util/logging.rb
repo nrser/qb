@@ -171,11 +171,15 @@ module QB::Util::Logging
   # @return [return_type]
   #   @todo Document return value.
   # 
-  def self.setup level: :info
+  def self.setup level: nil
+    if level.nil? && ENV['QB_LOG_LEVEL']
+      level = ENV['QB_LOG_LEVEL'].to_sym
+    end
+    
     SemanticLogger.default_level = level
     
     @appender ||= SemanticLogger.add_appender(
-      io: $stdout,
+      io: $stderr,
       formatter: Formatters::Color.new,
     )
     

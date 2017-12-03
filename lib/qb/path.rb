@@ -16,7 +16,7 @@ require 'nrser'
 # Package
 # -----------------------------------------------------------------------
 
-require_relative './repo/git'
+require 'qb/repo/git'
 
 
 # Refinements
