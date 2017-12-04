@@ -403,25 +403,37 @@ class QB::Role
   end
   
   
-  # @todo This was gonna be something at some point, but didn't get done.
+  # Do our best to figure out a role name from a path (that might not exist).
   # 
-  def self.guess_role_name dest
-    raise "TODO: Not implemented!!!"
+  # We needs this for when we're creating a role.
+  # 
+  # @param [String | Pathname] path
+  #   
+  # 
+  # @return [String]
+  # 
+  def self.default_role_name path
+    resolved_path = QB::Util.resolve path
     
-    path = QB::Util.resolve dest
-    
-    search_dirs = search_path.find_all { |pathname|
-      path.fnmatch?( pathname / '**' )
+    # Find the first directory in the search path that contains the path,
+    # if any do.
+    # 
+    # It *could* be in more than one in funky situations like overlapping 
+    # search paths or link silliness, but that doesn't matter - we consider 
+    # the first place we find it to be the relevant once, since the search
+    # path is most-important-first.
+    # 
+    search_dir = search_path.find { |pathname|
+      resolved_path.fnmatch? ( pathname / '**' ).to_s
     }
     
-    case search_dirs.length
-    when 0
+    if search_dir.nil?
       # It's not in any of the search directories
       # 
       # If it has 'roles' as a segment than use what's after the last occurrence
       # of that (unless there isn't anything).
       # 
-      segments = path.to_s.split File::SEPARATOR
+      segments = resolved_path.to_s.split File::SEPARATOR
       
       if index = segments.rindex( 'roles' )
         name_segs = segments[index..-1]
@@ -432,16 +444,15 @@ class QB::Role
       end
       
       # Ok, that didn't work... just return the basename I guess...
-      File.basename path
-      
-    when 1
-      
-    else
-      # Multiple matches?!?!?
-      
+      return File.basename resolved_path
       
     end
-  end # #guess_role_name
+    
+    # it's in the search path, return the relative path from the containing
+    # search dir to the resolved path (string version of it).
+    resolved_path.relative_path_from( search_dir ).to_s
+
+  end # #default_role_name
   
   
   # Instance Attributes
