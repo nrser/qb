@@ -8,59 +8,34 @@ import yaml
 import os
 from ansible.parsing.yaml.dumper import AnsibleDumper
 
-def qb_send(data, method, *args, **kwds):
+
+QB_ROOT = os.path.realpath(
+    os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), # /plugins/filter_plugins
+        '..', # /plugins
+        '..', # /
+    )
+)
+
+INTEROP_RECEIVE_EXE = os.path.join( QB_ROOT, 'exe', '.qb_interop_receive' )
+
+
+def send_to_interop( payload ):
     '''
-    Load data as an object in ruby and send it a message (call a method).
+    Send a payload to QB Ruby code via a subprocess.
     '''
     
-    payload = {
-        'data': data,
-        'method': method,
-        'args': args,
-        'kwds': kwds,
-    }
-    
-    input = yaml.dump(payload, Dumper=AnsibleDumper)
-    
-    # raise AnsibleError("HERE! %s" % (os.environ['QB_STDIO_ERR']))
-    
-    ruby_code = '''
-        # init bundler in dev env
-        if ENV['QB_DEV_ENV']
-            ENV.each {|k, v|
-                if k.start_with? 'QB_DEV_ENV_'
-                    ENV[k.sub('QB_DEV_ENV_', '')] = v
-                end
-            }
-            require 'bundler/setup'
-        end
-        
-        require 'thread'
-        
-        Thread.current.name = "qb_send"
-        
-        require 'qb'
-        
-        if ENV['QB_STDIO_ERR']
-          $stderr = UNIXSocket.new ENV['QB_STDIO_ERR']
-          
-          QB::Util::Logging.setup
-          
-          QB.debug "Connected to QB stderr stream at #{ ENV['QB_STDIO_ERR'] } #{ $stderr.path }."
-        end
-        
-        QB::Util::Interop.receive
-    '''
+    input = yaml.dump( payload, Dumper=AnsibleDumper )
     
     process = subprocess.Popen(
-        ['/usr/bin/env', 'ruby', '-e', ruby_code],
+        [ INTEROP_RECEIVE_EXE ],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         env=os.environ,
     )
     
-    out, err = process.communicate(input)
+    out, err = process.communicate( input )
     
     if process.returncode != 0:
         raise AnsibleError('''
@@ -80,16 +55,43 @@ def qb_send(data, method, *args, **kwds):
         ''' % out)
     
     return result
-    
 
-class FilterModule(object):
+
+def qb_send( data, method, *args, **kwds ):
+    '''
+    Load data as an object in ruby and send it a message (call a method).
+    '''
+    
+    return send_to_interop({
+        'data': data,
+        'method': method,
+        'args': args,
+        'kwds': kwds,
+    })
+
+
+def qb_send_const( name, method, *args, **kwds ):
+    '''
+    Send a message (call a method) to a Ruby constant by name.
+    '''
+    
+    return send_to_interop({
+        'const': name,
+        'method': method,
+        'args': args,
+        'kwds': kwds,
+    })
+
+
+class FilterModule( object ):
     '''
     Ruby interop filters.
     '''
 
-    def filters(self):
+    def filters( self ):
         return {
-            'qb_send': qb_send,
+            'qb_send':          qb_send,
+            'qb_send_const':    qb_send_const,
         }
     # filters()
 # FilterModule

@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+
+# This script is the entry point for the Ansible "Ruby Interop" filter plugins
+# that execute QB Ruby code via a sub-process to do shitty RPC.
+# 
+# @todo
+#   Should prob eventually be merged into `//exe/qb` under a command, but
+#   not gonna right now. At least it's not a string in the Python file anymore.
+# 
+
+# init bundler in dev env
+if ENV['QB_DEV_ENV']
+    ENV.each {|k, v|
+        if k.start_with? 'QB_DEV_ENV_'
+            ENV[k.sub('QB_DEV_ENV_', '')] = v
+        end
+    }
+    require 'bundler/setup'
+end
+
+# Set the thread name so that logs make sense.
+require 'thread'
+Thread.current.name = "qb_interop_receive"
+
+require 'qb'
+
+# Connect to the master QB process for logging to CLI STDOUT (if it's there,
+# which it should be in this case).
+if ENV['QB_STDIO_ERR']
+  $stderr = UNIXSocket.new ENV['QB_STDIO_ERR']
+  
+  QB::Util::Logging.setup
+  
+  QB.debug "Connected to QB stderr stream at #{ ENV['QB_STDIO_ERR'] } #{ $stderr.path }."
+end
+
+# Kick off the interop. Payload will be read from STDIN and results written to
+# STDOUT (both YAML at the moment).
+QB::Util::Interop.receive
