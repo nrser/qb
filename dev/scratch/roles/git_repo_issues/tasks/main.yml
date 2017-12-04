@@ -10,6 +10,6 @@
 
 - debug:
     msg:
-      number: "{{ number }}"
-      path_facts: "{{ path_facts }}"
-      issue: "{{ path_facts.git | qb_send( 'issue', number ) }}"
+      # number: "{{ number }}"
+      # path_facts: "{{ path_facts }}"
+      issue: "{{ (path_facts.git | qb_send( 'issue', number ))['title'] }}"

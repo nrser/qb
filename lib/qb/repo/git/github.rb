@@ -15,6 +15,12 @@ require 'qb/repo/git'
 # Refinements
 # =======================================================================
 
+require 'nrser/refinements'
+using NRSER
+
+require 'nrser/refinements/types'
+using NRSER::Types
+
 
 # Definitions
 # =======================================================================
@@ -122,7 +128,7 @@ class QB::Repo::Git::GitHub < QB::Repo::Git
   
   
   def issue number
-    QB::GitHub::API.client.issue repo_id.path, number
+    QB::GitHub::API.client.issue( repo_id.path, number ).to_h.stringify_keys
   end
   
   
