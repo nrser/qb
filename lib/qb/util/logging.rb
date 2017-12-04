@@ -172,8 +172,12 @@ module QB::Util::Logging
   #   @todo Document return value.
   # 
   def self.setup level: nil
-    if level.nil? && ENV['QB_LOG_LEVEL']
-      level = ENV['QB_LOG_LEVEL'].to_sym
+    if level.nil?
+      if ENV['QB_LOG_LEVEL']
+        level = ENV['QB_LOG_LEVEL'].to_sym
+      else
+        level = :info
+      end
     end
     
     SemanticLogger.default_level = level
