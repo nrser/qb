@@ -436,7 +436,7 @@ class QB::Role
       segments = resolved_path.to_s.split File::SEPARATOR
       
       if index = segments.rindex( 'roles' )
-        name_segs = segments[index..-1]
+        name_segs = segments[( index + 1 )..( -1 )]
         
         unless name_segs.empty?
           return File.join name_segs

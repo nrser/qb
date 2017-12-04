@@ -2,8 +2,12 @@
 role_dest: "{{ qb_dir }}"
 role_force: false
 
-# can't be named `role_name` 'cause Ansible sets that?
-role_role_name: "{{ role_dest | basename }}"
+# NOTE can't be named `role_name` 'cause Ansible sets that?
+# 
+# Call `QB::Role.default_role_name role_dest` to get the default name
+# 
+role_role_name: >-
+  {{ 'QB::Role' | qb_send_const( 'default_role_name', role_dest ) }}
 
 role_defaults: true
 role_files: false

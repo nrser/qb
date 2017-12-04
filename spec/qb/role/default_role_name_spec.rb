@@ -22,6 +22,13 @@ describe_class QB::Role do
         }
     end # Group "path in a role search dir" Description
     
+    describe_group "outside a role search dir but has 'roles' in path" do
+      it_behaves_like :a_function,
+        mapping: {
+          [ ( QB::ROOT / 'tmp/roles/blah/la/la' ).to_s ] => 'blah/la/la',
+        }
+    end # Group "path in a role search dir" Description
+    
   end # Method default_role_name Description
   
 end # Class QB::Role Description
