@@ -30,13 +30,13 @@ class Stream < QB::Ansible::Module
     }
     
     [:format, :env_mode].each { |key|
-      opts[key] = @args[key].to_sym if @args.key?(key.to_s)
+      opts[key] = @args[key.to_s].to_sym if @args.key?(key.to_s)
     }
     
     cmd = Cmds.new(template, **opts)
     
     if @args['log']
-      info "STREAMING #{ cmd.prepare.inspect }"
+      info "STREAMING\n\n#{ cmd.prepare }\n\n"
     end
     
     cmd.stream!
