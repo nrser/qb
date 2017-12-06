@@ -1,0 +1,21 @@
+---
+# tasks file for qb/test/rspec/spec/issue
+
+- set_fact:
+    issue: >-
+      {{ git_root.git | qb_send( 'issue', issue_number ) }}
+
+- set_fact:
+    branch_name: >-
+      issue_{{ issue.number }}_{ issue.title_filename }}
+
+- set_fact:
+    dir_name: >-
+      {{ issue.number }}_{{ issue.title_tilename }}
+    spec_file_name: >-
+      issue_{{ issue.number }}_spec.rb
+
+- template:
+    src: issue_spec.rb.j2
+    dest: >-
+      {{ rspec_spec_dir | path_join( 'issues', dir_name,  spec_file_name ) }}

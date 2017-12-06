@@ -128,7 +128,8 @@ class QB::Repo::Git::GitHub < QB::Repo::Git
   
   
   def issue number
-    QB::GitHub::API.client.issue( repo_id.path, number ).to_h.stringify_keys
+    # QB::GitHub::API.client.issue( repo_id.path, number ).to_h.stringify_keys
+    QB::GitHub::Issue.find_by repo_id: repo_id, number: number
   end
   
   
