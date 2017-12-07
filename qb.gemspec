@@ -97,7 +97,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "yard"
   spec.add_development_dependency "pry"
   
-  spec.add_dependency "cmds", '~> 0.0', ">= 0.2.2"
+  spec.add_dependency "cmds", '~> 0.0', ">= 0.2.3"
   spec.add_dependency "nrser", '~> 0.0', ">= 0.0.28"
   spec.add_dependency "nrser-extras", '~> 0.0', ">= 0.0.3"
   spec.add_dependency "state_mate", '~> 0.0', ">= 0.0.9"
