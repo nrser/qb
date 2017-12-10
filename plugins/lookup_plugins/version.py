@@ -36,6 +36,11 @@ import qb.interop
 class LookupModule(LookupBase):
 
     def run(self, terms, variables=None, **kwargs):
+        '''
+        WARNING!!!  Lookup plugins need to return a *list*. Unclear why... but
+                    you return a single value as [value].
+        '''
+        
         path = os.path.join(*terms)
         
         if not os.path.isabs(path):
@@ -60,4 +65,5 @@ class LookupModule(LookupBase):
                 raw,
             )
             
-            return version
+            # WARNING!!! **must** be a list:
+            return [version]
