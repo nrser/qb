@@ -4,7 +4,7 @@ module QB
   
   GEM_NAME = 'qb'
   
-  VERSION = "0.3.11"
+  VERSION = "0.3.12.dev"
   
   MIN_ANSIBLE_VERSION = Gem::Version.new '2.1.2'
   
