@@ -126,6 +126,14 @@ def qb_version_parse(version_string):
     return version
 
 
+def qb_read_version(file_path):
+    '''Read a QB::Package::Version from a file.
+    '''
+    
+    with open(file_path, 'r') as file:
+        return qb_version_parse(file.read())
+    
+
 class FilterModule(object):
     ''' version manipulation filters '''
 
@@ -134,6 +142,7 @@ class FilterModule(object):
             'semver_inc': semver_inc,
             'semver_parse': semver_parse,
             'qb_version_parse': qb_version_parse,
+            'qb_read_version': qb_read_version,
         }
     # filters()
 # FilterModule
