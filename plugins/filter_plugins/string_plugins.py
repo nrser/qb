@@ -71,13 +71,13 @@ def camel_case(string):
 def cap_camel_case(string):
     '''convert a string to camel case with a leading capital.
     
-    >>> upper_camel_case("git_submodule_update")
+    >>> cap_camel_case("git_submodule_update")
     'GitSubmoduleUpdate'
     
-    >>> upper_camel_case("git-submodule-update")
+    >>> cap_camel_case("git-submodule-update")
     'GitSubmoduleUpdate'
     
-    >>> upper_camel_case("qb.do_something")
+    >>> cap_camel_case("qb.do_something")
     'QbDoSomething'
     '''
     return cap(camel_case(string))
