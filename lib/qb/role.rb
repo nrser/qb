@@ -219,10 +219,12 @@ class QB::Role
         search_dir.directory?
       }.
       map {|search_dir|
-        Pathname.glob(search_dir.join '**', 'meta', 'qb.yml').
-          map {|meta_path|
-            [meta_path.dirname.dirname, search_dir: search_dir] 
-          }
+        ['', '.yml', '.yaml'].flat_map { |ext|
+          Pathname.glob(search_dir.join '**', 'meta', "qb#{ ext }").
+            map {|meta_path|
+              [meta_path.dirname.dirname, search_dir: search_dir] 
+            }
+        }
       }.
       flatten(1).
       map {|args|
