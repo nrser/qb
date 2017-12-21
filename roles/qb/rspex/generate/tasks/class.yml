@@ -1,0 +1,22 @@
+---
+
+- name: >-
+    Set `dest` for `class={{ class }}` relative to 
+    `spec_abs_dir={{ spec_abs_dir }}`
+  set_fact:
+    dest: >-
+      {{ spec_abs_dir | path_join( (class | to_filepath) + '_spec.rb' ) }}
+
+- name: >-
+    Make sure the destination directory `{{ dest | dirname }}` exists
+  file:
+    dest: >-
+      {{ dest | dirname }}
+    state: directory
+
+- name: >-
+    Render spec file template
+  template:
+    src: class_spec.rb.j2
+    dest: >-
+      {{ dest }}

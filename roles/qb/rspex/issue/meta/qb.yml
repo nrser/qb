@@ -1,5 +1,5 @@
 ---
-# meta/qb.yml file for qb/test/rspec/spec/issue
+# meta/qb.yml file for qb/rspex/issue
 # 
 # qb settings for this role. see README.md for more info.
 #
@@ -40,7 +40,7 @@ var_prefix: null
 #     -   starting at the current directory and climbing up to parent 
 #         directories, use the first one that contains FILENAME. error
 #         if none is found.
-default_dir: null
+default_dir: git_root
 
 # If `true`, QB will ensure the default dir exists before starting the play.
 # 
@@ -59,9 +59,11 @@ save_options: true
 # options to pass to ansible-playbook
 ansible_options: {}
 
-options: []
+options:
 # - name: example
 #   description: an example of a variable.
 #   required: false
 #   type: boolean # boolean (default) | string
 #   short: e
+
+- name: 

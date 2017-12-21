@@ -1,0 +1,9 @@
+---
+# tasks file for qb/rspex/generate
+
+- include_tasks: >-
+    {{ role_path }}/tasks/helpers.yml
+
+- when: class
+  include_tasks: >-
+    {{ role_path }}/tasks/class.yml

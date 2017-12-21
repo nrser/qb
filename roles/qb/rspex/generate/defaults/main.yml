@@ -1,0 +1,10 @@
+---
+# defaults file for qb/rspex/generate
+
+gem_root: >-
+  {{ qb_dir }}
+
+spec_dir: spec
+
+spec_abs_dir: >-
+  {{ gem_root | path_resolve( spec_dir ) }}

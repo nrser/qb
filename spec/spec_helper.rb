@@ -21,8 +21,15 @@ require 'nrser/rspex'
 # -----------------------------------------------------------------------
 require 'qb'
 
-require 'support/rspec_ext'
+require 'support/ext'
+require 'support/shared'
 
+
+# Refinements
+# =======================================================================
+
+require 'nrser/refinements'
+using NRSER
 
 
 # Paths
@@ -36,11 +43,19 @@ TEST_ROLE_TEMPLATE_DIR = TEST_ROLES_DIR / 'test_template'
 
 TEST_PACKAGES_DIR = TEST_DIR / 'packages'
 
-TEST_GEM_ROOT_PATH = TEST_PACKAGES_DIR / 'gems' / 'test_gem'
+TEST_GEMS_DIR = TEST_PACKAGES_DIR / 'gems'
+
+TEST_GEM_ROOT_PATH = TEST_GEMS_DIR / 'test_gem'
 
 TEMP_DIR = QB::ROOT / 'tmp'
 
 TEMP_ROLES_DIR = TEMP_DIR / 'roles'
+FileUtils.mkdir_p TEMP_ROLES_DIR
+
+TEMP_PACKAGES_DIR = TEMP_DIR / 'packages'
+
+TEMP_GEMS_DIR = TEMP_PACKAGES_DIR / 'gems'
+FileUtils.mkdir_p TEMP_GEMS_DIR
 
 # Config
 # =====================================================================
@@ -48,6 +63,12 @@ TEMP_ROLES_DIR = TEMP_DIR / 'roles'
 # Add the test roles dir to the roles path
 QB::Role::PATH.unshift TEST_ROLES_DIR
 
+
+RSpec.configure do |config|
+  # Switch to stream commands running roles so you can see their output
+  config.add_setting :stream_role_cmds, 
+    default: ENV.fetch( 'STREAM_ROLE_CMDS', false ).truthy?
+end
 
 # Helper Methods
 # =====================================================================
@@ -82,52 +103,3 @@ def test_role name, merge = [], &block
   QB::Role.new dest
 end
 
-
-require 'support/shared_contexts'
-
-
-# Shared Examples
-# =====================================================================
-
-shared_examples QB::Role do |**expectations|
-  include_examples "expect subject",
-    { to: { be_a: QB::Role } },
-    *expectations.values
-end # QB::Role
-
-
-shared_examples "QB::Role::PATH" do |**expectations|
-  subject { QB::Role::PATH }
-  
-  include_examples "expect subject",
-    { to: { be_a: Array } },
-    *expectations.values
-end # QB::Role::PATH
-
-
-shared_examples QB::Package::Version do |**expectations|
-  include_examples "expect subject",
-    { to: { be_a: QB::Package::Version } },
-    *expectations.values
-end # QB::Package::Version
-
-
-shared_examples QB::Path do |**expectations|
-  include_examples "expect subject",
-    { to: { be_a: QB::Path } },
-    *expectations.values
-end # QB::Path
-
-
-shared_examples QB::Repo::Git do |**expectations|
-  include_examples "expect subject",
-    { to: { be_a: QB::Repo::Git } },
-    *expectations.values
-end # QB::Repo::Git
-
-
-shared_examples QB::Repo::Git::User do |**expectations|
-  include_examples "expect subject",
-    { to: { be_a: QB::Repo::Git::User } },
-    *expectations.values
-end # QB::Repo::Git::User
