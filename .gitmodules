@@ -4,8 +4,8 @@
 [submodule "roles/nrser.rbenv_gem"]
 	path = roles/nrser.rbenv_gem
 	url = git@github.com:nrser/ansible-nrser.rbenv_gem.git
-[submodule "roles/qb.gitignore/files/gitignore"]
-	path = roles/qb.gitignore/files/gitignore
+[submodule "roles/qb/git/ignore/files/gitignore"]
+	path = roles/qb/git/ignore/files/gitignore
 	url = git@github.com:nrser/gitignore.git
 [submodule "roles/nrser.rb"]
 	path = roles/nrser.rb
