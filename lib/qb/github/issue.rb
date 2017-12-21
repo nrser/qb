@@ -52,6 +52,20 @@ class QB::GitHub::Issue < QB::GitHub::Resource
   def self.find_by repo_id:, number:
     new QB::GitHub::API.client.issue( repo_id.path, number )
   end # .find
+
+  
+  
+  # @todo Document list method.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def self.list arg_name
+    # method body
+  end # .list
   
   
   
