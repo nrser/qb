@@ -10,7 +10,7 @@
   - Ruby
   - Gem
   include_role:
-    name: qb.gitignore
+    name: qb/git/ignore
   vars:
     gitignore_name: >-
       {{ item }}

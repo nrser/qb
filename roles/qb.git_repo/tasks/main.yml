@@ -21,7 +21,7 @@
     Tell Git to ignore OSX artifacts 
   when: ansible_distribution == "MacOSX"
   include_role:
-    name: qb.gitignore
+    name: qb/git/ignore
   vars:
     gitignore_name: Global/macOS
     gitignore_dest: >-
@@ -30,7 +30,7 @@
 - name: >-
     Tell Git to ignore QB artifacts
   include_role:
-    name: qb.gitignore
+    name: qb/git/ignore
   vars:
     gitignore_name: QB
     gitignore_dest: >-
@@ -43,7 +43,7 @@
   loop_control:
     loop_var: name
   include_role:
-    name: qb.gitignore
+    name: qb/git/ignore
   vars:
     gitignore_name: >-
       {{ name }}

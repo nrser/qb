@@ -74,7 +74,7 @@ I'll start with examples:
     
     We could just have it replace with the last one and the user would need to provide all the rubies it needs to be installed for when adding it, which honestly seems like the way to go, which would put it in category (1).
 
-3.  `qb.gitignore`
+3.  `qb/git/ignore`
     
     Would be keyed on the `name` option.
 

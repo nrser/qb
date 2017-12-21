@@ -18,6 +18,11 @@ puts JSON.pretty_generate({
     find_up: '.gitignore',
   },
   
+  # TODO  added this to preserve prefix from when role was named 
+  #       `qb.gitignore`, might want to change once we sort all that out.
+  #     
+  var_prefix: 'gitignore',
+  
   vars: [
     {
       name: "name",
