@@ -28,7 +28,7 @@ module QB::CLI
   # 
   def self.run args
     role_arg = args.shift
-    QB.debug "role arg", role_arg
+    QB.debug "role arg" => role_arg
     
     begin
       role = QB::Role.require role_arg
@@ -45,11 +45,11 @@ module QB::CLI
     
     options = QB::Options.new role, args
     
-    QB.debug "role options set on cli", options.role_options.select {|k, o|
-      !o.value.nil?
-    }
+    QB.debug "Role options set on cli",
+      role: options.role_options.reject { |k, o| o.value.nil? }
     
-    QB.debug "qb options", options.qb
+    QB.debug "QB options", options.qb.dup
+    QB.debug "Ansible options", options.ansible.dup
     
     cwd = Dir.getwd
     
