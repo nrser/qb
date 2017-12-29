@@ -717,10 +717,11 @@ class QB::Role
       lines << meta['description']
       lines << ''
     end
-    lines << 'usage:'
+    lines << 'Usage:'
+    lines << ''
     lines << "  #{ usage }"
     lines << ''
-    lines << 'options:'
+    lines << ''
     
     lines.join("\n")
   end

@@ -103,6 +103,8 @@ module QB
       
       QB.debug "including #{ role.name } as #{ new_include_path.join('-') }"
       
+      opts.separator "Options for included #{ role.name } role:"
+      
       add opts, options, role, new_include_path
     end
     
@@ -353,6 +355,8 @@ module QB
         
         opts.banner = @role.banner
         
+        opts.separator "Common options:"
+        
         opts.on(
           '-H',
           '--HOSTS=HOSTS',
@@ -456,6 +460,8 @@ module QB
           
           @qb['ask'] = value
         end
+        
+        opts.separator "Role options:"
         
         self.class.add opts, @role_options, @role
         
