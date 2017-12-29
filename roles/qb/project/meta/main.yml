@@ -1,5 +1,5 @@
 ---
-# meta file for qb.project
+# meta file for qb/project
 
 dependencies:
 - role: qb.git_repo

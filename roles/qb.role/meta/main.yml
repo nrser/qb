@@ -2,5 +2,5 @@
 # meta file for qb.role
 
 dependencies:
-- role: qb.project
+- role: qb/project
   when: role_project

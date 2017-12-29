@@ -79,7 +79,7 @@ options:
   type: boolean
   short: p
 
-- include: qb.project
+- include: qb/project
   as: false
 
 - name: force

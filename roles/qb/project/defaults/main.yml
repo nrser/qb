@@ -1,5 +1,5 @@
 ---
-# defaults file for qb.project
+# defaults file for qb/project
 project_dest: "{{ qb_dir }}"
 project_owner: "{{ ansible_env.GITHUB_USER }}"
 project_name: "{{ project_dest | realpath | basename }}"

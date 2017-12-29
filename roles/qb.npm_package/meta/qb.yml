@@ -20,7 +20,7 @@ vars:
 #   type: boolean # boolean (default) | string
 #   short: e
 - name: force
-  description: force stuff (npm init, qb.gitigore, qb.project).
+  description: force stuff (npm init, qb/git/ignore, qb/project).
   type: boolean
   short: f
   save: false
@@ -65,8 +65,8 @@ vars:
   type: string
 
 - name: project
-  description: include qb.project role.
+  description: include qb/project role.
   type: boolean
   short: p
 
-- include: qb.project
+- include: qb/project

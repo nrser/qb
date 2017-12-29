@@ -2,7 +2,7 @@
 qb.gem:
   constant: QB
   license: MIT
-qb.project:
+qb/project:
   dev-bin: false
 qb.install_gem:
   rubies: global

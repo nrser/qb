@@ -17,9 +17,9 @@
 
 - when: gem_is_project
   name: >-
-    Include `qb.project` role.
+    Include `qb/project` role.
   include_role:
-    name: qb.project
+    name: qb/project
   vars:
     project_name: >-
       {{ gem_name }}

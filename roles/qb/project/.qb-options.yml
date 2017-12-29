@@ -1,4 +1,4 @@
 ---
-qb.role:
+role/qb:
   templates: true
   files: true
