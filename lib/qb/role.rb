@@ -793,8 +793,9 @@ class QB::Role
   # 
   def default_dir cwd, options
     QB.debug "get_default_dir",
-      role: self,
-      meta: self.meta,
+      role: self.instance_variables.map_values { |k, v|
+        self.instance_variable_get k
+      },
       cwd: cwd,
       options: options
     
@@ -803,9 +804,21 @@ class QB::Role
     case value
     when nil
       # there is no get_dir info in meta/qb.yml, can't get the dir
-      raise QB::UserInputError.dedented <<-END
-        unable to infer default directory: no '#{ key }' key in 'meta/qb.yml'
-        for role #{ self }
+      raise QB::UserInputError.new binding.erb <<-END
+        No default directory for role <%= self.name %>
+        
+        Role <%= self.name %> does not provide a default target directory
+        (used to populate the `qb_dir` Ansible variable).
+        
+        You must provide one via the CLI like
+        
+            qb run <%= self.name %> DIRECTORY
+        
+        or, if you are the developer of the <%= self.name %> role, set a 
+        non-null value for the '<%= key %>' key in
+        
+            <%= self.meta_path %>
+        
       END
     
     when false
