@@ -1,8 +1,18 @@
 # Requirements
 # =====================================================================
 
+# StdLib
+require 'pathname'
+
 # package
 require 'qb/ansible/cmds/playbook'
+
+
+# Refinements
+# =======================================================================
+
+require 'nrser/refinements'
+using NRSER
 
 
 # Declarations
@@ -25,8 +35,31 @@ module QB::CLI
   #   The `ansible-playbook` command exit code.
   # 
   def self.setup args = []
-    project_root = NRSER.git_root '.'
-    playbook_path = project_root / 'dev' / 'setup.qb.yml'
+    # Figure out project root and setup playbook path
+    case args[0]
+    when String, Pathname
+      # The playbook path has been provided, use that to find the project root
+      playbook_path = QB::Util.resolve args[0]
+      project_root = NRSER.git_root playbook_path
+      
+    when nil
+      # Figure the project root out from the current directory, then
+      # form the playbook path from that
+      project_root = NRSER.git_root '.'
+      playbook_path = project_root / 'dev' / 'setup.qb.yml'
+    
+    else
+      raise TypeError.new binding.erb <<-END
+        First entry of `args` must be nil, String or Pathname, found:
+        
+            <%= args[0].pretty_inspect %>
+        
+        args:
+        
+            <%= args.pretty_inspect %>
+        
+      END
+    end
     
     unless playbook_path.file?
       raise "Can't find QB setup playbook at `#{ playbook_path.to_s }`"

@@ -45,12 +45,7 @@ def main args
   when 'run'
     QB::CLI.run args.rest
   when 'setup'
-    state_args = args.rest
-    
-    case state_args[0]
-    when nil
-      QB::CLI.setup
-    end
+    QB::CLI.setup args.rest
   else
     # default to `run` on the full args
     QB::CLI.run args
