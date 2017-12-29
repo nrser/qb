@@ -145,7 +145,8 @@
 # modules
 # =======
   
-- include: module.yml 
+- include_tasks: >-
+    {{ role_path }}/tasks/module.yml 
   with_items: "{{ role_modules }}"
   loop_control:
     loop_var: role_module
@@ -160,7 +161,7 @@
 - when: role_filter_plugins|length > 0
   name: >-
     Generate filter plugin files.
-  include: >-
+  include_tasks: >-
     {{ role_path }}/tasks/plugins/filter_plugins.yml
   
 
