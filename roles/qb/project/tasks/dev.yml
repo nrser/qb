@@ -32,16 +32,22 @@
 
 # setup
 # ============================================================================
-#
-# Add `//dev/setup.qb.yml` to setup the project development environment via
-# `qb setup` (or executing `setup.qb.yml`)
-#
 
 - when: project_setup
   name: >-
-    Create `//dev/setup.qb.yml`
-  template:
-    src: setup.qb.yml.j2
-    dest: "{{ project_dev_dir }}/setup.qb.yml"
-    force: "{{ project_force }}"
+    Add `//dev/setup.qb.yml` to setup the project development environment via
+    `qb setup` (or executing `setup.qb.yml`)
+  block:
+  - name: Create `//dev/setup.qb.yml`
+    template:
+      src: setup.qb.yml.j2
+      dest: >-
+        {{ project_dev_dir }}/setup.qb.yml
+      force: >-
+        {{ project_force }}
   
+  - name: Make `//dev/setup.qb.yml` executable
+    file:
+      dest: >-
+        {{ project_dev_dir }}/setup.qb.yml
+      mode: 0755
