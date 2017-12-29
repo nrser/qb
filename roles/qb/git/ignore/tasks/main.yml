@@ -45,3 +45,11 @@
       #
       # END {{ gitignore_tag }}
       {{ '#' * 78 }}
+
+# - state:
+#     gitignore:
+#       # like /Users/nrser/dev/gh/nrser/qb/.gitignore:Ruby.gitignore
+#       key: >-
+#         {{ gitignore_dest }}:{{ gitignore_tag }}
+#       set: >-
+#         {{ gitignore_content }}
