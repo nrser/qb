@@ -158,8 +158,6 @@ module QB::Util::Logging
   end # module Formatters
   
   
-
-  
   # Module (Class) Methods
   # =====================================================================
   
@@ -208,8 +206,3 @@ module QB::Util::Logging
   
   
 end # module QB::Util::Logging
-
-
-
-# Post-Processing
-# =======================================================================
