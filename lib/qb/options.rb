@@ -10,6 +10,12 @@ using NRSER
 
 module QB
   class Options
+    # Mixins
+    # ========================================================================
+    
+    include SemanticLogger::Loggable
+    
+    
     # constants
     # =======================================================================
     
@@ -477,37 +483,52 @@ module QB
       opt_parser.parse! @argv
     end # parse!
     
-    # pull options that start with
-    #
-    # 1.  `--ANSIBLE_`
-    # 1.  `--ANSIBLE-`
-    # 2.  `---`
-    # 
-    # out of `@argv` and stick them in `@ansible`.
-    def parse_ansible!
-      @ansible = @role.default_ansible_options.clone
+    
+    protected
+    # ========================================================================
       
-      reg_exs = [
-        /\A\-\-ANSIBLE[\-\_]/,
-        /\A\-\-\-/,
-      ]
-      
-      @argv.reject! {|shellword|
-        if re = reg_exs.find {|re| re =~ shellword}
-          name = shellword.sub re, ''
-          
-          value = true
-          
-          if name.include? '='
-            name, value = name.split('=', 2)
+      # Pull options that start with
+      #
+      # 1.  `--ANSIBLE_`
+      # 1.  `--ANSIBLE-`
+      # 2.  `---`
+      # 
+      # out of `@argv` and stick them in `@ansible`.
+      # 
+      # @return [nil]
+      #   **Mutates** `@argv`.
+      # 
+      def parse_ansible!
+        logger.debug "Parsing Ansible options...",
+          argv: @argv.dup
+        
+        @ansible = @role.default_ansible_options.clone
+        
+        reg_exs = [
+          /\A\-\-ANSIBLE[\-\_]/,
+          /\A\-\-\-/,
+        ]
+        
+        @argv.reject! {|shellword|
+          if re = reg_exs.find {|re| re =~ shellword}
+            name = shellword.sub re, ''
+            
+            value = true
+            
+            if name.include? '='
+              name, value = name.split('=', 2)
+            end
+            
+            @ansible[name] = value
+            
+            true
           end
-          
-          @ansible[name] = value
-          
-          true
-        end
-      }
-    end # #parse_ansible!
+        }
+        
+        nil
+      end # #parse_ansible!
+      
+    # end protected
     
   end # Options
 end # QB
