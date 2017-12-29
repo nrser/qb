@@ -1,14 +1,13 @@
+#!/usr/bin/env qb setup
 ---
-# playbook to setup the dev env for this repo
-- name: dev setup for nrser/qb
+- name: Setup development environment for nrser/qb project
 
   hosts: localhost
 
-  # pre_tasks:
-  # - name: load dev_setup facts
-  #   tags:
-  #   - always
-  #   dev_setup_facts:
+  # Any tasks the need to run *before* the roles.
+  pre_tasks:
+    
+  # /pre_tasks
 
   roles:
   
@@ -26,11 +25,21 @@
   - role: qb/dev/ref/repo/git
     full_name: nrser/ansible-nrser.profile
   
+  - role: qb/dev/ref/repo/git
+    full_name: nrser/ansible-nrser.profile
+  
+  - role: qb/dev/ref/repo/git
+    full_name: erikhuda/thor
+    version: v0.20.0
+  
+  # /roles
+  
   tasks:
   
-  - name: >-
-      Install gems
-    bundler:
-      # chdir: >-
-      #   {{ project_root }}
-      gem_path: ./.bundle
+    - name: Install gems
+      bundler:
+        gem_path: ./.bundle
+  
+  # /tasks
+
+# / play
