@@ -45,32 +45,17 @@ module QB
   include SemanticLogger::Loggable
   
   
+  # Support for the old custom debug logging, now sent to {SemanticLogger}.
+  # 
   def self.debug *args
     if args[0].is_a? String
       logger.debug *args
     else
+      # De-array if there's only one arg
+      args = args[0] if args.length == 1
+      # And send the args to SM as the payload
       logger.debug payload: args
     end
-    
-    # return unless ENV['QB_DEBUG'] && args.length > 0
-    # 
-    # header = 'DEBUG'
-    # 
-    # if args[0].is_a? String
-    #   header += " " + args.shift
-    # end
-    # 
-    # dumpObj = case args.length
-    # when 0
-    #   header
-    # when 1
-    #   {header => args[0]}
-    # else
-    #   {header => args}
-    # end
-    # 
-    # # $stderr.puts("DEBUG " + format(msg, values))
-    # $stderr.puts dumpObj.pretty_inspect
   end
     
 end
