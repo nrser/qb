@@ -1,7 +1,9 @@
 ---
 default_dir:
   exe: qb/get_dir
-  
+
+var_prefix: project
+
 vars:
 - name: dest
   description: destination directory.
