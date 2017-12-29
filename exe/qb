@@ -35,25 +35,32 @@ def main args
   
   QB.check_ansible_version
   
-  logger.debug "Switch arg" => args[0]
+  logger.debug "Main switch arg" => args[0]
   
-  status = case args[0]
+  method_name, method_args = case args[0]
   when nil, '-h', '--help', 'help'
-    QB::CLI.help
+    [:help, []]
   when 'play'
-    QB::CLI.play args.rest
+    [:play, args.rest]
   when 'run'
-    QB::CLI.run args.rest
+    [:run, args.rest]
   when 'setup'
-    QB::CLI.setup args.rest
+    [:setup, args.rest]
   else
     # default to `run` on the full args
-    QB::CLI.run args
+    [:run, args]
   end
   
-  logger.debug "Exit status", status
+  logger.debug "Calling QB::CLI.#{ method_name }",
+    method_args: method_args
   
-  # exit status
+  status = begin
+    QB::CLI.public_send method_name, method_args
+  rescue Exception => error
+    raise error
+  end
+  
+  logger.debug "QB::CLI.#{ method_name } returned, exiting.", status: status
   exit status
 end
 
