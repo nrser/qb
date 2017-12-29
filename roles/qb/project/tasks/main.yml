@@ -12,7 +12,8 @@
 # dev
 # ===
 
-- include: dev.yml
+- include_tasks: >-
+    {{ role_path }}/tasks/dev.yml
   when: project_dev
 
 # tmp
