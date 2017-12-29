@@ -26,9 +26,6 @@
     full_name: nrser/ansible-nrser.profile
   
   - role: qb/dev/ref/repo/git
-    full_name: nrser/ansible-nrser.profile
-  
-  - role: qb/dev/ref/repo/git
     full_name: erikhuda/thor
     version: v0.20.0
   
