@@ -24,7 +24,7 @@ module QB::CLI
   #   Error exit status - we don't want `qb ... && ...` to move on to the 
   #   second command when we end up falling back to `help`.
   # 
-  def self.help
+  def self.help args = []
     metadata = if QB.gemspec.metadata && !QB.gemspec.metadata.empty?
       "metadata:\n" + QB.gemspec.metadata.map {|key, value|
         "  #{ key }: #{ value }"
