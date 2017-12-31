@@ -23,6 +23,11 @@ class Stream < QB::Ansible::Module
             "Must supply `template` or `cmd` argument."
     end
     
+    if @args['creates'] && File.exists?( @args['creates'] )
+      debug "File #{ @args['creates'] } exists, skipping"
+      return nil
+    end
+    
     opts = {}
     
     [:args, :kwds, :input, :assert, :env, :chdir].each { |key|
