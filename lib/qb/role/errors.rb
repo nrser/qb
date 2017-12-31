@@ -1,3 +1,13 @@
+# Refinements
+# =======================================================================
+
+require 'nrser/refinements'
+using NRSER
+
+
+# Definitions
+# =======================================================================
+
 module QB
   class Role
     # raised by `.require` when no roles match input
@@ -19,16 +29,14 @@ module QB
         @input = input
         @matches = matches
         
-        super <<-END
-multiple roles match input #{ @input.inspect }:\
-
-#{
-  @matches.map { |role|
-    "-   #{ role.to_s } (#{ role.path.to_s })"
-  }.join("\n")
-}
-
-END
+        super binding.erb <<-END
+          multiple roles match input <%= @input.inspect %>:
+          
+          <% @matches.map do |role| %>
+            -   <%= role.to_s %> (<%= role.path.to_s %>)
+          <% end %>
+          
+        END
       end
     end
     
