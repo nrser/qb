@@ -16,7 +16,7 @@ module QB
     include SemanticLogger::Loggable
     
     
-    # constants
+    # Constants
     # =======================================================================
     
     QB_DEFAULTS = {
