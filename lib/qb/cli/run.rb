@@ -55,7 +55,7 @@ module QB::CLI
     
     dir = nil
     
-    if role.uses_default_dir?
+    if role.has_dir_arg?
       # get the target dir
       dir = case args.length
       when 0

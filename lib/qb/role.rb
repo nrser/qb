@@ -9,7 +9,10 @@ require 'cmds'
 # deps
 
 # package
-require_relative './role/errors'
+require 'qb/role/errors'
+require 'qb/role/default_dir'
+
+
 
 
 # Refinements
@@ -28,6 +31,12 @@ module QB; end
 # Contains info on a QB role.
 # 
 class QB::Role
+  
+  # Mixins
+  # ============================================================================
+  
+  include SemanticLogger::Loggable
+  
   
   # Constants
   # =====================================================================
@@ -697,7 +706,7 @@ class QB::Role
       parts << '[OPTIONS]'
     end
     
-    if uses_default_dir?
+    if has_dir_arg?
       parts << 'DIRECTORY'
     end
     
@@ -779,115 +788,14 @@ class QB::Role
   end
   
   
+  # Test if the {QB::Role} uses a directory argument (that gets assigned to
+  # the `qb_dir` variable in Ansible).
+  # 
   # @return [Boolean]
-  #   @todo Document return value.
   # 
-  def uses_default_dir?
+  def has_dir_arg?
     meta['default_dir'] != false
-  end # #uses_default_dir?
-  
-  
-  # gets the default `qb_dir` value, raising an error if the role doesn't
-  # define how to get one or there is a problem getting it.
-  # 
-  # 
-  def default_dir cwd, options
-    QB.debug "get_default_dir",
-      role: self.instance_variables.map_values { |k, v|
-        self.instance_variable_get k
-      },
-      cwd: cwd,
-      options: options
-    
-    key = 'default_dir'
-    value = self.meta[key]
-    case value
-    when nil
-      # there is no get_dir info in meta/qb.yml, can't get the dir
-      raise QB::UserInputError.new binding.erb <<-END
-        No default directory for role <%= self.name %>
-        
-        Role <%= self.name %> does not provide a default target directory
-        (used to populate the `qb_dir` Ansible variable).
-        
-        You must provide one via the CLI like
-        
-            qb run <%= self.name %> DIRECTORY
-        
-        or, if you are the developer of the <%= self.name %> role, set a 
-        non-null value for the '<%= key %>' key in
-        
-            <%= self.meta_path %>
-        
-      END
-    
-    when false
-      # this method should not get called when the value is false (an entire
-      # section is skipped in exe/qb when `default_dir = false`)
-      raise QB::StateError.squished <<-END
-        role does not use default directory (meta/qb.yml:default_dir = false)
-      END
-    
-    when 'git_root'
-      QB.debug "returning the git root relative to cwd"
-      NRSER.git_root cwd
-    
-    when 'cwd'
-      QB.debug "returning current working directory"
-      cwd
-      
-    when Hash
-      QB.debug "qb meta option is a Hash"
-      
-      unless value.length == 1
-        raise "#{ meta_path.to_s }:default_dir invalid: #{ value.inspect }"
-      end
-      
-      hash_key, hash_value = value.first
-      
-      case hash_key
-      when 'exe'
-        exe_path = hash_value
-        
-        # supply the options to the exe so it can make work off those values
-        # if it wants.
-        exe_input_data = Hash[
-          options.map {|option|
-            [option.cli_option_name, option.value]
-          }
-        ]
-        
-        unless exe_path.start_with?('~') || exe_path.start_with?('/')
-          exe_path = File.join(self.path, exe_path)
-          debug 'exe path is relative, basing off role dir', exe_path: exe_path
-        end
-        
-        debug "found 'exe' key, calling", exe_path: exe_path,
-                                          exe_input_data: exe_input_data
-        
-        Cmds.chomp! exe_path do
-          JSON.dump exe_input_data
-        end
-        
-      when 'find_up'
-        filename = hash_value
-        
-        unless filename.is_a? String
-          raise "find_up filename must be string, found #{ filename.inspect }"
-        end
-        
-        QB.debug "found 'find_up', looking for file named #{ filename }"
-        
-        QB::Util.find_up filename
-        
-      else
-        raise QB::Role::MetadataError.squised <<-END
-          bad key: #{ hash_key } in #{ self.meta_path.to_s }:default_dir
-        END
-        
-      end
-    end
-  end # default_dir
+  end # #has_dir_arg?
   
   
   # @return [Hash<String, *>]
