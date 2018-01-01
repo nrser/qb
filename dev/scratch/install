@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# 
+# Install the prerequisties and the QB gem (macOS-only at the moment)
+# 
+
+set -e
+
+RUBY_VERSION="2.3.4"
+
+if ! type "brew" > /dev/null; then
+  echo "Installing Homebrew..."
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+else
+  echo "✔ Homebrew present."
+fi
+
+if ! type "rbenv" > /dev/null; then
+  echo "Installing rbenv..."
+  brew install rbenv
+else
+  echo "✔ rbenv present."
+fi
+
+if ! type "ruby-build" > /dev/null; then
+  echo "Installing ruby-build (plus deps)..."
+  brew install openssl libyaml libffi ruby-build
+else
+  echo "✔ ruby-build present."
+fi
+
+rbenv install -s "${RUBY_VERSION}"
