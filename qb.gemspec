@@ -94,7 +94,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.10"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.7.0"
-  spec.add_development_dependency "yard"
+  spec.add_development_dependency "yard", '~> 0.9.12'
   spec.add_development_dependency "pry"
   
   spec.add_dependency "cmds", '~> 0.0', ">= 0.2.4"
