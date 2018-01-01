@@ -171,7 +171,7 @@ class QB::Role
               qb run <%= self.name %> DIRECTORY
           
           or, if you are the developer of the <%= self.name %> role, set a 
-          non-null value for the '<%= key %>' key in
+          non-null value for the 'default_dir' key in
           
               <%= self.meta_path %>
           
