@@ -1,7 +1,7 @@
 
 describe_class QB::Role do
   
-  describe_method :default_role_name do
+  describe_method :default_name_for do
     
     include_context "reset role path"
     

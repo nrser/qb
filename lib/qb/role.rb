@@ -1,18 +1,24 @@
-
 # Requirements
 # =======================================================================
 
 # stdlib
+# ----------------------------------------------------------------------------
+
 require 'yaml'
 require 'cmds'
 
+
 # deps
+# ----------------------------------------------------------------------------
+
 
 # package
+# ----------------------------------------------------------------------------
+
+# Breakouts
 require 'qb/role/errors'
+require 'qb/role/name'
 require 'qb/role/default_dir'
-
-
 
 
 # Refinements
@@ -414,58 +420,6 @@ class QB::Role
   end
   
   
-  # Do our best to figure out a role name from a path (that might not exist).
-  # 
-  # We needs this for when we're creating a role.
-  # 
-  # @param [String | Pathname] path
-  #   
-  # 
-  # @return [String]
-  # 
-  def self.default_role_name path
-    resolved_path = QB::Util.resolve path
-    
-    # Find the first directory in the search path that contains the path,
-    # if any do.
-    # 
-    # It *could* be in more than one in funky situations like overlapping 
-    # search paths or link silliness, but that doesn't matter - we consider 
-    # the first place we find it to be the relevant once, since the search
-    # path is most-important-first.
-    # 
-    search_dir = search_path.find { |pathname|
-      resolved_path.fnmatch? ( pathname / '**' ).to_s
-    }
-    
-    if search_dir.nil?
-      # It's not in any of the search directories
-      # 
-      # If it has 'roles' as a segment than use what's after the last occurrence
-      # of that (unless there isn't anything).
-      # 
-      segments = resolved_path.to_s.split File::SEPARATOR
-      
-      if index = segments.rindex( 'roles' )
-        name_segs = segments[( index + 1 )..( -1 )]
-        
-        unless name_segs.empty?
-          return File.join name_segs
-        end
-      end
-      
-      # Ok, that didn't work... just return the basename I guess...
-      return File.basename resolved_path
-      
-    end
-    
-    # it's in the search path, return the relative path from the containing
-    # search dir to the resolved path (string version of it).
-    resolved_path.relative_path_from( search_dir ).to_s
-
-  end # #default_role_name
-  
-  
   # Instance Attributes
   # =======================================================================
   
@@ -544,22 +498,6 @@ class QB::Role
   
   # Instance Methods
   # =====================================================================
-  
-  def namespace
-    *namespace_segments, last = @name.split File::Separator
-    
-    namespace_segments << last.split('.').first if last.include?('.')
-     
-    if namespace_segments.empty?
-      nil
-    else
-      File.join *namespace_segments
-    end
-  end
-  
-  def namespaceless
-    File.basename(@name).split('.', 2).last
-  end
   
   def options_key
     @display_path.to_s
