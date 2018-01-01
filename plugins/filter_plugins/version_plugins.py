@@ -34,7 +34,18 @@ def semver_inc(version, level = None, preid = None):
     
         semver --increment <level> [--preid <preid>] <version>
     
+    
+    This does **not** do what you probably want... `preid` is ignored:
+    
+    >>> semver_inc('1.0.0', 'patch', preid = 'dev')
+    '1.0.1'
+    
     >>> semver_inc('1.0.0', 'minor', preid = 'dev')
+    '1.1.0'
+    
+    The only way to get the `preid` appended is to increment the prerelease:
+    
+    >>> semver_inc('1.0.0', 'prerelease', preid = 'dev')
     '1.0.1-dev.0'
     
     '''
