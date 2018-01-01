@@ -62,7 +62,6 @@ def cap(string):
     'DoSomething'
     '''
     return string[0].upper() + string[1:]
-    
 
 
 def camel_case(string):
@@ -80,8 +79,8 @@ def camel_case(string):
     >>> camel_case("qb.DoSomething")
     'qbDoSomething'
     '''
-    w = words(string)
-    return w[0] + "".join(cap(s) for s in w[1:])
+    words = qb.strings.words(string)
+    return words[0] + "".join(cap(s) for s in words[1:])
 
 
 def cap_camel_case(string):
