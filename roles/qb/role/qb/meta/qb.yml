@@ -11,5 +11,5 @@ var_prefix: null
 default_dir: null
 
 options:  
-- include: qb.role
+- include: qb/role
   as: false

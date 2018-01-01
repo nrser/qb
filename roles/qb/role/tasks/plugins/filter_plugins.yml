@@ -20,19 +20,19 @@
 
 - when: role_filter_plugins_default
   name: >-
-    Create default `filter_plugins/{{ role_role_name }}_plugins.py`
-  include: >-
+    Create default `filter_plugins/{{ role_namespaceless }}_plugins.py`
+  include_tasks: >-
     {{ role_path }}/tasks/plugins/_filter_plugin.yml
   vars:
     name: >-
-      {{ role_role_name }}
+      {{ role_namespaceless }}
 
 - when: not role_filter_plugins_default
   name: >-
-    Create each of filter plugins sepcified in `role_filter_plugins`.
+    Create each of filter plugins specified in `role_filter_plugins`.
   with_items: >-
     {{ role_filter_plugins }}
   loop_control:
     loop_var: name
-  include: >-
+  include_tasks: >-
     {{ role_path }}/tasks/plugins/_filter_plugin.yml

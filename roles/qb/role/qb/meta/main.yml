@@ -4,4 +4,4 @@
 allow_duplicates: yes
 
 dependencies: 
-- role: qb.role
+- role: qb/role

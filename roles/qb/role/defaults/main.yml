@@ -7,7 +7,10 @@ role_force: false
 # Call `QB::Role.default_role_name role_dest` to get the default name
 # 
 role_role_name: >-
-  {{ 'QB::Role' | qb_send_const( 'default_role_name', role_dest ) }}
+  {{ 'QB::Role' | qb_send_const( 'default_name_for', role_dest ) }}
+
+role_namespaceless: >-
+  {{ 'QB::Role' | qb_send_const( 'namespaceless_for', role_role_name ) }}
 
 role_defaults: true
 role_files: false
