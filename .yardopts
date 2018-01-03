@@ -1,5 +1,7 @@
---markup markdown
+--output-dir=./doc/site
+--markup=markdown
 lib/**/*.rb
 dev/packages/gems/nrser/lib/**/*.rb
 -
 README.md
+doc/*.md

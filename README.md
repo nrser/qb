@@ -1,48 +1,54 @@
-# qb #
+QB
+==============================================================================
 
-qb is all about projects. named after everyone's favorite projects.
+QB is all about projects. Named after everyone's favorite projects.
 
-## meta/qb.yml ##
+QB works by running [Ansible][] plays. So you can think about it as "quarterback" if you happen to be from the corner of the world where that makes any sense.
 
-if this file exists in a role `qb` sees it will make that role available.
+You generally want to read these docs at
 
-the contents of this file allow you to configure how `qb` uses the role.
+<http://www.rubydoc.info/gems/qb/>
 
-### null values ###
+where the links are more likely to work.
 
-values set to `null` are treated like they're not there at all. to tell QB
-*not* to do something assign `false`.
+Or, if you're working from a local clone, by booting the [yard][] server via
 
-### var_prefix ###
+    bundle exec yard server
 
-declare prefix to be added to variable names from the command line for
-use in the role.
+and opening
 
-because all variables are pretty much global in ansible, you really want to prefix all your variables names to try and achieve uniqueness. the way i've been doing that is to prefix them with the 'namespaceless' part of the role name.
+<http://localhost:8808>
 
-for example, if you have a role named `qb.project`, the 'namespace' would be `qb` and the 'namespaceless' part would be `project`. it has been my convention to then name the role variables `project_*`, like `project_owner`, `project_name`, etc..
 
-`var_prefix` therefore defaults to the 'namespaceless' part of the role name, so that a call like
+<!-- References & Further Reading: -->
 
-    qb qb.project --owner=nrser --name=blah
+[Ansible]: https://www.ansible.com/
+[yard]: https://yardoc.org/
 
-will pass variables
 
-    project_owner: "nrser"
-    project_name: "blah"
+Quickies
+------------------------------------------------------------------------------
 
-to the `qb.project` role.
+1.  Status: **UNSTABLE**
+    
+    A bit past experimental, but still actively exploring API and features. Any and every thing subject to breaking changes until we hit `1.0`. Generally trying to bump the minor version with larger changes, but not paying a huge amount of attention to it. Being used personally and in projects and organizations I work with.
 
-however, this setting allows you to specify an alternative prefix. 
+2.  Compatibility: **OSX/macOS-only**
+    
+    Though it would probably run fine on Linux, if not other \*nix as well.
 
-if this is set to `null` the default will be used.
+3.  Installation
+    
+    Head over to {file:doc/getting_started.md Getting Started}.
 
-### default_dir ###
+4.  More Info
+    
+    There is some semblance of an {file:doc/intro.md Introduction} available to get indignant about.
 
-every invocation of `qb` must have a directory it's targeting where it will place a `.qb-options.yml` if applicable. this directory is passed to the role as the `dir` option
 
-this is often the project's root folder, and can sometimes be assembled from the values of other parameters.
+<!-- References & Further Reading: -->
 
-### vars ###
+[Homebrew]: https://brew.sh/
 
-TODO
+[Ansible Installation]: http://docs.ansible.com/ansible/latest/intro_installation.html
+

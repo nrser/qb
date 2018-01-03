@@ -50,64 +50,8 @@ class QB::Role
   # QB metadata (in `<role_path>/meta/qb.yml` or returned by a 
   # `<role_path>/meta/qb` executable).
   # 
-  # The strategy value can be:
-  # 
-  # -   `nil` - No strategy for figuring out a default directory. A
-  #     {QB::UserInputError} will be raised.
-  #     
-  #     Corresponds to the `default_dir` key being missing in the role
-  #     QB metadata or having a value of `null`.
-  #     
-  # -   `false` - Role does not use a directory argument, and this method
-  #     should have never been called in the first place because 
-  #     {QB::Role#has_dir_arg?} should have returned `false`.
-  #     
-  #     Raises a {QB::StateError}.
-  # 
-  # -   `'git_root'` - Use the root of the Git repo for the working directory
-  #     the CLI command was executed in.
-  #     
-  #     Raises an error if that directory is not in a Git repo.
-  # 
-  # -   `'cwd'` - Use the working directory the CLI command was executed in.
-  #     
-  #     This is expected to pretty much always succeed.
-  # 
-  # -   `{'exe' => <path:String>}` - Run the executable at `path` and use the
-  #     output, which should be a single string directory path (we do chomp
-  #     what we get back).
-  #     
-  #     The exe is fed a `JSON` dump of the role options at the time via 
-  #     `STDIN`, so it can dynamically determine the directory based on those 
-  #     if it wants.
-  #     
-  #     If `path` is relative, it's assumed to be relative to the 
-  #     *role directory*, **NOT** the working directory.
-  #     
-  #     Raises errors when things go wrong.
-  #     
-  # -   `{'find_up' => <rel_path:String>}` - Walk up the directory hierarchy
-  #     from the CLI working directory looking for the first place that 
-  #     `rel_path` exists.
-  #     
-  #     This is used to do things like find the `Gemfile`, nearest
-  #     `.gitignore`, etc.:
-  #     
-  #         default_dir:
-  #           find_up: Gemfile
-  #         
-  #         default_dir:
-  #           find_up: .gitignore
-  #     
-  #     `rel_path` can be deep too:
-  #     
-  #         - find_up: dev/bin/console
-  # 
-  # -   `Array` - A list of strategies to try; first to succeed wins:
-  #     
-  #         default_dir:
-  #         -   find_up: Gemfile
-  #         -   git_root
+  # See the {file:doc/qb_roles/metadata/default_dir.md default_dir} 
+  # documentation for details on the accepted strategy values.
   # 
   # @param [String | Pathname] cwd:
   #   The working directory the CLI command was run in.
@@ -121,8 +65,8 @@ class QB::Role
   #   The directory to target.
   # 
   # @raise
-  #   When we can't determine a directory due to role meta settings or system
-  #   state.
+  #   When we can't determine a directory due to role meta settings or target 
+  #   system state.
   # 
   def default_dir cwd, options
     logger.debug "CALLING default_dir",
@@ -150,8 +94,10 @@ class QB::Role
     # sequence, returning the first to succeed, and raising if they all fail.
     # 
     # @param [nil | false | String | Hash | Array] strategy
-    #   Instruction for how to determine the directory value. See notes in
-    #   {QB::Role#default_dir}.
+    #   Instruction for how to determine the directory value.
+    #   
+    #   See the {file:doc/qb_roles.md#default_dir default_dir} for a details
+    #   on recognized values.
     # 
     # @return [return_type]
     #   @todo Document return value.
@@ -235,12 +181,37 @@ class QB::Role
           QB.debug "found 'find_up', looking for file named #{ filename }"
           
           QB::Util.find_up filename
+        
+        when 'from_role'
+          # Get the value from another role, presumably one this role includes
+          
+          default_dir_for \
+            value: QB::Role.require( hash_value ).meta['default_dir'],
+            cwd: cwd,
+            options: options
           
         else
-          raise QB::Role::MetadataError.squised <<-END
-            bad key: #{ hash_key } in #{ self.meta_path.to_s }:default_dir
+          raise QB::Role::MetadataError.new binding.erb <<-END
+            Bad key <%= hash_key.inspect %> in 'default_dir' value
+            
+            Metadata for role <%= name %> read from
+            
+                <%= self.meta_path.to_s %>
+            
+            contains an invalid default directory strategy
+            
+                <%= value.pretty_inspect %>
+            
+            The key <%= hash_key.inspect %> does not correspond to a recognized 
+            form.
+            
+            Valid forms are:
+            
+            1.  {exe:         FILEPATH}
+            2.  {file_up:     FILEPATH}
+            3.  {from_role:   ROLE}
+            
           END
-          
         end
       
       when Array
