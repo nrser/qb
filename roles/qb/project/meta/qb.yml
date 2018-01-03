@@ -36,7 +36,7 @@ vars:
   type: boolean
 
 - name: scratch
-  description: create a /scratch directory
+  description: create a /dev/scratch directory
   type: boolean
 
 - name: tmp
