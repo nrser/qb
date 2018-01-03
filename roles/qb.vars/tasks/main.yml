@@ -1,6 +1,15 @@
 ---
 # tasks file for qb.vars
 
-- name: vars
+- when: vars_output is defined
+  local_action:
+    module: copy
+    content: >-
+      {{ vars | to_nice_yaml }}
+    dest: >-
+      {{ vars_output }}
+  
+- when: vars_output is not defined
+  name: vars
   debug:
     msg: "{{ vars }}"

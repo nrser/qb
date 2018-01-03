@@ -11,11 +11,12 @@ var_prefix: null
 default_dir: null
 
 # set to false to not save options in .qb-options.yml files
-save_options: true
+save_options: false
 
-options: []
-# - name: example
-#   description: an example of a variable.
-#   required: false
-#   type: boolean # boolean (default) | string
-#   short: e
+options:
+- name: output
+  description: >-
+    Dump to a file instead of using `debug` module.
+  required: false
+  type: path
+  short: o
