@@ -53,6 +53,16 @@ class QB::Ansible::Env
   attr_reader :lookup_plugins
   
   
+  # `ANSIBLE_CONFIG_<name>=<value>` ENV var values.
+  # 
+  # @see http://docs.ansible.com/ansible/latest/intro_configuration.html
+  # 
+  # @return [Hash<(String | Symbol), String]
+  #     
+  attr_reader :config
+  
+  
+  
   # Constructor
   # ======================================================================
   
@@ -76,6 +86,8 @@ class QB::Ansible::Env
     @lookup_plugins = [
       QB::ROOT.join('plugins', 'lookup_plugins'),
     ]
+    
+    @config = {}
   end # #initialize
   
   
@@ -91,18 +103,24 @@ class QB::Ansible::Env
   #   @todo Document return value.
   # 
   def to_h
-    [
+    hash = [
       :roles_path,
       :library,
       :filter_plugins,
       :lookup_plugins
     ].map { |name|
-      value = self.send(name)
+      value = self.send name
       
       value = value.join(':') if value.is_a?(Array)
       
       [self.class.to_var_name(name), value]
     }.to_h
+    
+    config.each { |name, value|
+      hash[ self.class.to_var_name( "CONFIG_#{ name }" ) ] = value.to_s
+    }
+    
+    hash
   end # #to_h
   
   
