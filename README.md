@@ -26,6 +26,7 @@ and opening
 [yard]: https://yardoc.org/
 
 
+------------------------------------------------------------------------------
 Quickies
 ------------------------------------------------------------------------------
 
@@ -52,3 +53,12 @@ Quickies
 
 [Ansible Installation]: http://docs.ansible.com/ansible/latest/intro_installation.html
 
+
+------------------------------------------------------------------------------
+Help!
+------------------------------------------------------------------------------
+
+Common Issues:
+
+1.  `qb run` Command Issues
+    1.  {file:doc/common_issues/qb_run/slow_gather_facts.md "Gathering Facts" is *really slow* (FQDN lookup problem)}
