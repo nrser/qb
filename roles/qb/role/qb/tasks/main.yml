@@ -9,6 +9,8 @@
 - name: create meta/qb.yml
   template:
     src: qb.yml.j2
-    dest: "{{ role_dest }}/meta/qb.yml"
-    force: false
+    dest: >-
+      {{ role_dest }}/meta/qb.yml
+    force: >-
+      {{ role_force }}
   
