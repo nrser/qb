@@ -1,0 +1,8 @@
+---
+# meta file for roles/noop
+
+allow_duplicates: yes
+
+dependencies: []
+# - role: role-name
+
