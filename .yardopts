@@ -4,4 +4,4 @@ lib/**/*.rb
 dev/packages/gems/nrser/lib/**/*.rb
 -
 README.md
-doc/*.md
+doc/**/*.md
