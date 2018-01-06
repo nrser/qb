@@ -1,0 +1,12 @@
+---
+# tasks file for qb/ruby/bundler
+
+- name: >-
+    Do basic setup
+  include_tasks: >-
+    {{ role_path }}/tasks/setup.yml
+
+- name: >-
+    Ensure `gem` declaration states
+  include_tasks: >-
+    {{ role_path }}/tasks/gems.yml

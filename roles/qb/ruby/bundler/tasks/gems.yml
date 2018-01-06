@@ -1,0 +1,12 @@
+
+- with_dict: >-
+    {{ bundle_gems }}
+  lineinfile:
+    dest: >-
+      {{ bundle_gemfile }}
+    line: >-
+      {{ item | bundle_gem_line }}
+    state: >-
+      {{ item.value.state }}
+    regexp: >-
+      ^gem '{{ item.key }}'

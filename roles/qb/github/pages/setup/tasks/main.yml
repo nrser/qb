@@ -1,0 +1,10 @@
+---
+# tasks file for qb/github/pages/setup
+
+- include_role:
+    name: qb/ruby/bundler
+  vars:
+    bundle_gems:
+      github-pages:
+        state: present
+        group: jekyll_plugins

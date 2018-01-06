@@ -1,0 +1,28 @@
+---
+# tasks file for qb/ruby/yard
+
+- debug: var=args
+#
+# - include_role:
+#     name: qb/ruby/dependency
+#   vars:
+#     _args:
+#       gems:
+#         yard: '~> 0.9.12'
+#
+# - include_role:
+#     name: qb/call
+#   vars:
+#     role: qb/ruby/dependency
+#     args:
+#       gems:
+#         yard: '~> 0.9.12'
+#
+# - when: args.github_flavored_markdown
+#   include_role:
+#     name: qb/ruby/dependency
+#   vars:
+#     _args:
+#       gems:
+#         redcarpet: present
+#         github-markup: present

@@ -1,0 +1,13 @@
+##
+#
+##
+
+- name: >-
+    Run `bundle init` in {{ bundle_gemfile | dirname }}
+  stream:
+    cmd: bundle init
+    chdir: >-
+      {{ bundle_gemfile | dirname }}
+    creates: >-
+      {{ bundle_gemfile }}
+  

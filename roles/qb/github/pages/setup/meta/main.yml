@@ -1,0 +1,8 @@
+---
+# meta file for qb/github/pages/setup
+
+allow_duplicates: yes
+
+dependencies: []
+# - role: role-name
+

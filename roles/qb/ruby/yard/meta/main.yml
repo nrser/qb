@@ -1,0 +1,8 @@
+---
+# meta file for qb/ruby/yard
+
+allow_duplicates: yes
+
+dependencies: []
+# - role: qb/__init__
+#   qb_role_name: qb/ruby/yard
