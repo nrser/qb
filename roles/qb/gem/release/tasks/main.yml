@@ -25,12 +25,10 @@
       {{ gem_root | path_join( 'dev', 'hooks', 'pre-release' ) }}
   register: gem_pre_release_script_stat
 
-- debug: var=gem_pre_release_script_stat
-
 
 # NOTE  Contrary to how it might seems in the [docs][1],
 #       the `stat` object seems to *only* have the `exists` property if the
-#       path does not exist (set to `false`), necessitating we 
+#       path does not exist (set to `false`), necessitating we
 # 
 # [1]: http://docs.ansible.com/ansible/latest/stat_module.html
 # 
@@ -60,7 +58,7 @@
       end
       
       # The gem *may already be loaded*, which would break the standard gemspec
-      # approach because the `require` will be a no-op, resulting in the 
+      # approach because the `require` will be a no-op, resulting in the
       # already loaded version number being used instead of the one in the
       # file.
       # 
@@ -114,7 +112,7 @@
 
 - when: gem_current_version != gem_release_version
   name: >-
-    Change version in `{{ gem_version_path }}` from current 
+    Change version in `{{ gem_version_path }}` from current
     `{{ gem_current_version }}` to `{{ gem_release_version }}`.
   block:
   - name: >-
