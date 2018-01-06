@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'pp'
+
 require "bundler/setup"
 require 'qb'
 
@@ -8,7 +10,7 @@ using NRSER
 
 # Make sure we're not pointing to any local dev gems
 path_sources = Bundler.definition.locked_gems.sources.select { |source|
-  source.is_a?( Bundler::Source::Path ) && source.is_a_path?
+  source.is_a?( Bundler::Source::Path )
 }
 
 unless path_sources.empty?
