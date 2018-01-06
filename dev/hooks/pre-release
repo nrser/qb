@@ -10,7 +10,7 @@ using NRSER
 
 # Make sure we're not pointing to any local dev gems
 path_sources = Bundler.definition.locked_gems.sources.select { |source|
-  source.is_a?( Bundler::Source::Path )
+  source.is_a?( Bundler::Source::Path ) && source.path != Pathname.new( '.' )
 }
 
 unless path_sources.empty?
