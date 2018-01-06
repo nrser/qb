@@ -1,0 +1,8 @@
+---
+# meta file for role_args/unisolated
+
+allow_duplicates: no
+
+dependencies: []
+# - role: role-name
+

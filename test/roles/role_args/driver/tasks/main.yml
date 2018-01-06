@@ -1,0 +1,16 @@
+---
+# tasks file for role_args/driver
+
+# Driver to (hopefully) show issues with standard "un-isolated" parameterized 
+# role resuse and how they can be addressed through isolating the variables
+# by depending on the new `qb/__init__` role.
+
+- include_role:
+    name: unisolated
+    private: true
+  vars:
+    common_name: non_default_value
+
+- include_role:
+    name: unisolated
+    private: true

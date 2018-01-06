@@ -1,0 +1,4 @@
+---
+# tasks file for role_args/unisolated
+
+- debug: var=common_name

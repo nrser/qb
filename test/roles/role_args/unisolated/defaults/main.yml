@@ -1,0 +1,4 @@
+---
+# defaults file for role_args/unisolated
+
+common_name: unisolated_default_value

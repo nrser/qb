@@ -1,0 +1,92 @@
+---
+# tasks file for qb/call
+
+- when: qb_call_args_stack is not defined
+  name: >-
+    Define empty `qb_call_args_stack`
+  set_fact:
+    qb_call_args_stack: []
+
+- debug:
+    msg:
+      role: >-
+        {{ role }}
+      args: >-
+        {{ args }}
+      qb_call_args_stack: >-
+        {{ qb_call_args_stack }}
+
+- name: >-
+    Set up variables
+  set_fact:
+    qb_call_role_path: >-
+      ./roles/{{ role }}
+    
+    qb_call_role_name: >-
+      {{ role }}
+
+- name: >-
+    Load the default args
+  include_vars:
+    file: >-
+      {{ qb_call_role_path | path_join( 'defaults', 'args.yml' ) }}
+    name: qb_call_default_args
+
+- debug: var=qb_call_default_args
+    
+- name: >-
+    Merge current args into defaults to create new internal args and push
+    to stack
+  set_fact:
+    qb_call_args_stack: >-
+      {{ qb_call_args_stack + [ qb_call_default_args | combine( args ) ] }}
+
+- name: >-
+    Set the global args variable
+  set_fact:
+    args: >-
+      {{ qb_call_args_stack | last }}
+    _args: >-
+      {{ qb_call_args_stack | last }}
+
+- debug:
+    msg:
+      role: >-
+        {{ role }}
+      args: >-
+        {{ args }}
+      _args: >-
+        {{ _args }}
+      qb_call_args_stack: >-
+        {{ qb_call_args_stack }}
+
+- name: >-
+    Include the role
+  include_role:
+    name: >-
+      {{ qb_call_role_name }}
+
+- name: >-
+    Pop the args back off the stack
+  set_fact:
+    qb_call_args_stack: >-
+      {{ qb_call_args_stack | slice( (qb_call_args_stack | length) - 1 ) }}
+
+- name: >-
+    Set the global args back to what it was when we entered
+  set_fact:
+    args: >-
+      {{ qb_call_args_stack | last }}
+    _args: >-
+      {{ qb_call_args_stack | last }}
+
+- debug:
+    msg:
+      role: >-
+        {{ role }}
+      args: >-
+        {{ args }}
+      _args: >-
+        {{ _args }}
+      qb_call_args_stack: >-
+        {{ qb_call_args_stack }}
