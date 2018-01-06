@@ -22,3 +22,7 @@
 [submodule "dev/gems/nrser"]
 	path = dev/packages/gems/nrser
 	url = git@github.com:nrser/nrser-ruby.git
+[submodule "packages/python/ansible"]
+	path = packages/python/ansible
+	url = git@github.com:nrser/ansible.git
+	branch = devel
