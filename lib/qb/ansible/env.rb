@@ -125,3 +125,5 @@ class QB::Ansible::Env
   
   
 end # class QB::Ansible::Env
+
+require 'qb/ansible/env/devel'

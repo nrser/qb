@@ -14,7 +14,7 @@ module QB; end
 # Definitions
 # =======================================================================
 
-module QB::CLI 
+module QB::CLI
   
   # Run a QB role.
   # 
@@ -22,7 +22,7 @@ module QB::CLI
   #   CLI args to work with.
   # 
   # @return [Fixnum]
-  #   Exit status code from `ansible-playbook` command, unless we invoked 
+  #   Exit status code from `ansible-playbook` command, unless we invoked
   #   help or error'd out in another way before the run (in which case `1`
   #   is returned).
   # 
@@ -198,9 +198,38 @@ module QB::CLI
       ],
       'roles' => [
         'nrser.blockinfile',
-        playbook_role
       ],
     }
+    
+    if role.meta['call_role']
+      logger.debug "Calling role through qb/call..."
+      
+      play['tasks'] = [
+        {
+          'include_role' => {
+            'name' => 'qb/call',
+          },
+          'vars' => {
+            'role' => role.name,
+            'args' => set_options.map { |option|
+              [option.var_name, option.value]
+            }.to_h,
+          }
+        }
+      ]
+      
+      env = QB::Ansible::Env::Devel.new
+      exe = [
+        "python2",
+        (QB::Ansible::Env::Devel::ANSIBLE_HOME / 'bin' / 'ansible-playbook')
+      ].join " "
+      
+    else
+      play['roles'] << playbook_role
+      env = QB::Ansible::Env.new
+      exe = "ansible-playbook"
+      
+    end
     
     if options.qb['user']
       play['become'] = true
@@ -209,9 +238,7 @@ module QB::CLI
     
     playbook = [play]
     
-    QB.debug "playbook", playbook
-    
-    env = QB::Ansible::Env.new
+    logger.debug "playbook", playbook
     
     # stick the role path in front to make sure we get **that** role
     env.roles_path.unshift role.path.expand_path.dirname
@@ -220,7 +247,8 @@ module QB::CLI
       env: env,
       playbook: playbook,
       role_options: options,
-      chdir: (File.exists?('./ansible/ansible.cfg') ? './ansible' : nil)
+      chdir: (File.exists?('./ansible/ansible.cfg') ? './ansible' : nil),
+      exe: exe
     
     # print
     # =====
@@ -287,5 +315,3 @@ module QB::CLI
   end # .run
   
 end # module QB::CLI
-
-

@@ -30,6 +30,8 @@ module QB; end
 
 module QB::CLI
   
+  include SemanticLogger::Loggable
+  
   # Eigenclass (Singleton Class)
   # ========================================================================
   # 
@@ -114,7 +116,7 @@ module QB::CLI
       ask name: option.name,
           description: option.description,
           default: default
-          # type: 
+          # type:
     end
     
     

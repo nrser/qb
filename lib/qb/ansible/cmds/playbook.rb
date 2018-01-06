@@ -26,8 +26,8 @@ class QB::Ansible::Cmds::Playbook < ::Cmds
   # shell path resolution do it's thing.
   DEFAULT_EXE = 'ansible-playbook'
   
-  TEMPLATE = <<-END    
-    <%= exe %>
+  TEMPLATE = <<-END
+    <%== exe %>
     
     <%= cmd_options %>
     
@@ -134,7 +134,7 @@ class QB::Ansible::Cmds::Playbook < ::Cmds
   
   
   # Instance Methods
-  # ======================================================================  
+  # ======================================================================
   
   # @return [Hash<String => Object>]
   #   Hash of CLI options for `ansible-playbook` based off {#role_options}
@@ -241,4 +241,3 @@ class QB::Ansible::Cmds::Playbook < ::Cmds
   # end protected
   
 end # class QB::Ansible::Playbook
-
