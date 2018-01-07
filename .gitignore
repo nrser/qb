@@ -1,7 +1,11 @@
-/dev/repos
-/dev/ref/tmp
-/dev/roles/tmp
-/tmp
+# Project
+# ============================================================================
+
+/tmp/
+
+
+# Ignore Files
+# ============================================================================
 
 ##############################################################################
 # BEGIN Global/macOS.gitignore
@@ -38,6 +42,20 @@ Temporary Items
 ##############################################################################
 # BEGIN Ruby.gitignore
 #
+# General Git ignore file for Ruby, including support for:
+# 
+# -   Bundler
+# -   RDoc and Yard
+# -   RBEnv and RVM
+# -   DotEnv (optional)
+# 
+# Additional support is available in separate ignore files:
+# 
+# -   Gem.gitignore (for gem source directories)
+# -   Rails.gitignore
+# -   RubyMotion.gitignore
+# 
+
 /*.gem
 *.rbc
 /.config
@@ -50,21 +68,8 @@ Temporary Items
 /test/version_tmp/
 /tmp/
 
-## Specific to RubyMotion:
-.dat*
-.repl_history
-build/
-*.bridgesupport
-build-iPhoneOS/
-build-iPhoneSimulator/
-
-## Specific to RubyMotion (use of CocoaPods):
-#
-# We recommend against adding the Pods directory to your .gitignore. However
-# you should judge for yourself, the pros and cons are mentioned at:
-# https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
-#
-# vendor/Pods/
+# Used by dotenv library to load environment variables.
+# .env
 
 ## Documentation cache and generated files:
 /.yardoc/
@@ -77,11 +82,7 @@ build-iPhoneSimulator/
 /vendor/bundle
 /lib/bundler/man/
 
-# for a library or gem, you might want to ignore these files since the code is
-# intended to run in multiple environments; otherwise, check them in:
-# Gemfile.lock
-# .ruby-version
-# .ruby-gemset
+# for a library or gem, add `Gem.gitignore`
 
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
 .rvmrc
@@ -100,8 +101,15 @@ build-iPhoneSimulator/
 ##############################################################################
 
 ##############################################################################
-# BEGIN Python.gitignore
+# BEGIN Python.gitingore
 #
+# General Git ignore file for Python
+# 
+# Packaging and distribution patterns have been moved out to
+# 
+#     //Python/Packaging.gitignore
+# 
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -109,24 +117,6 @@ __pycache__/
 
 # C extensions
 *.so
-
-# Distribution / packaging
-.Python
-# env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-# lib/ (needed for ruby gem)
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -146,7 +136,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
-*,cover
+*.cover
 .hypothesis/
 
 # Translations
@@ -155,7 +145,16 @@ coverage.xml
 
 # Django stuff:
 *.log
+.static_storage/
+.media/
 local_settings.py
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
 
 # Sphinx documentation
 docs/_build/
@@ -163,13 +162,41 @@ docs/_build/
 # PyBuilder
 target/
 
-#Ipython Notebook
+# Jupyter Notebook
 .ipynb_checkpoints
 
 # pyenv
 .python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
 #
-# END Python.gitignore
+# END Python.gitingore
 ##############################################################################
 
 ##############################################################################
@@ -224,3 +251,4 @@ jspm_packages
 #
 # END QB.gitingore
 ##############################################################################
+
