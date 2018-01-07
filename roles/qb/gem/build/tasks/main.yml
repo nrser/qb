@@ -45,16 +45,15 @@
 
 - name: >-
     Build gem from {{ gem_root_facts.gem.gemspec_path }}
-  command: >-
-    gem build {{ gem_root_facts.gem.gemspec_path | basename | quote }}
-  args:
+  stream:
+    cmd: gem build {{ gem_root_facts.gem.gemspec_path | basename | quote }}
     chdir: >-
       {{ gem_root }}
 
 
 - when: gem_root != gem_build_dest
   name: >-
-    Move new `{{ gem_build_filename }}` file to `{{ gem_build_dest }}`
+    Move new `{{ gem_build_filename }}` file to `{{ gem_build_path }}`
   command: >-
     mv {{ gem_build_filename | quote }} {{ gem_build_path | quote }}
   args:
