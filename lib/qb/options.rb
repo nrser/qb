@@ -20,13 +20,13 @@ module QB
     # =======================================================================
     
     QB_DEFAULTS = {
-      'hosts' => ['localhost'],
+      'hosts' => ['localhost'].freeze,
       'facts' => true,
-      'print' => ['cmd'],
+      'print' => [].freeze,
       'verbose' => false,
       'run' => true,
       'ask' => false,
-    }
+    }.freeze
     
     # appended on the end of an `opts.on` call to create a newline after
     # the option (making the help output a bit easier to read)
@@ -210,7 +210,7 @@ module QB
                     end
                   }
                 }
-              else 
+              else
                 raise QB::Role::MetadataError,
                   "bad type for option #{ option.meta_name }: #{ option.meta['type'].inspect }"
               end
@@ -284,7 +284,7 @@ module QB
           options[option.cli_name] = option
         end
       end # each var
-    end # add 
+    end # add
     
     # destructively removes options from `@argv` and populates ansible, role,
     # and qb option hashes.
