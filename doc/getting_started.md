@@ -82,3 +82,5 @@ Usage
 -----------------------------------------------------------------------------
 
 Yeah TODO someday maybe.
+
+For now just go read about {file:doc/qb_roles.md QB Roles}, that's the important part.
