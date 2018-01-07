@@ -7,7 +7,7 @@
 ##############################################################################
 
 # description of the role to show in it's help output.
-description: null
+description: Build an installable `.gem` file from a source directory.
 
 # Gemspec-style requirements. Right now only `gems:qb` is used, but plan to
 # generalize in the future.
@@ -16,7 +16,7 @@ requirements:
     qb: ~> 0.3.0
 
 # prefix for role variables
-var_prefix: build_gem
+var_prefix: gem_build
 
 # Closest gemspec climbing down tree from working dir
 default_dir:
@@ -29,14 +29,14 @@ mkdir: false
 default_user: null
 
 # set to false to not save options in .qb-options.yml files
-save_options: true
+save_options: false
 
 # options to pass to ansible-playbook
 ansible_options: {}
 
-options: []
-# - name: example
-#   description: an example of a variable.
-#   required: false
-#   type: boolean # boolean (default) | string
-#   short: e
+options:
+- name: dest
+  description: Destination directory for the `.gem` file
+  required: false
+  type: path
+  short: d
