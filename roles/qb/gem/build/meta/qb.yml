@@ -1,0 +1,42 @@
+---
+##############################################################################
+# QB metadata for `qb/gem/build` role
+# 
+# qb settings for this role. see README.md for more info.
+#
+##############################################################################
+
+# description of the role to show in it's help output.
+description: null
+
+# Gemspec-style requirements. Right now only `gems:qb` is used, but plan to
+# generalize in the future.
+requirements:
+  gems:
+    qb: ~> 0.3.0
+
+# prefix for role variables
+var_prefix: build_gem
+
+# Closest gemspec climbing down tree from working dir
+default_dir:
+  find_up: '*.gemspec'
+
+# Have QB ensure DIRECTORY exists before starting the play.
+mkdir: false
+
+# default user to become for play
+default_user: null
+
+# set to false to not save options in .qb-options.yml files
+save_options: true
+
+# options to pass to ansible-playbook
+ansible_options: {}
+
+options: []
+# - name: example
+#   description: an example of a variable.
+#   required: false
+#   type: boolean # boolean (default) | string
+#   short: e
