@@ -160,6 +160,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep  %r{^#{ spec.bindir }/[^\.]},
                                         &File.method( :basename )
   
+  # Where that source be, standard `//lib` directory
   spec.require_paths = ["lib"]
   
   
@@ -169,13 +170,23 @@ Gem::Specification.new do |spec|
   # Development Dependencies
   # ----------------------------------------------------------------------------
 
-  spec.add_development_dependency "bundler", "~> 1.10"
-  spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "rspec", "~> 3.7.0"
-  spec.add_development_dependency "yard", '~> 0.9.12'
-  spec.add_development_dependency "redcarpet"
-  spec.add_development_dependency "github-markup"
-  spec.add_development_dependency "pry"
+  spec.add_development_dependency "bundler",        '~> 1.16', '>= 1.16.1'
+  spec.add_development_dependency "rake",           '~> 10.4'
+  
+  # Testing with `rspec`
+  spec.add_development_dependency "rspec",          '~> 3.7'
+  
+  # Doc site generation with `yard`
+  spec.add_development_dependency "yard",           '~> 0.9.12'
+  
+  # These, along with `//.yardopts` config, are *supposed to* result in
+  # rendering markdown files and doc comments using
+  # GitHub-Flavored Markdown (GFM), though I'm not sure if it's totally working
+  spec.add_development_dependency "redcarpet",      '~> 3.4'
+  spec.add_development_dependency "github-markup",  '~> 1.6'
+  
+  # Nicer REPL experience
+  spec.add_development_dependency "pry",            '~> 0.10.4'
   
   
   # Runtime Dependencies
@@ -199,7 +210,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'awesome_print',    '~> 1.8'
   
   # Ruby lib wrapping `git` binary system calls for use in {QB::Repo::Git}
-  spec.add_dependency 'git', '~> 1.3.0'
+  spec.add_dependency 'git',              '~> 1.3'
   
   
   # Development-Only Extra Metadata
