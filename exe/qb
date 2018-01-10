@@ -1,5 +1,18 @@
 #!/usr/bin/env ruby
 
+
+# Requirements
+# =======================================================================
+
+# Stdlib
+# -----------------------------------------------------------------------
+
+# Deps
+# -----------------------------------------------------------------------
+
+# Project / Package
+# -----------------------------------------------------------------------
+
 require 'pathname'
 require 'pp'
 require 'yaml'
@@ -7,30 +20,26 @@ require 'json'
 require 'fileutils'
 require 'thread'
 
+require 'nrser'
 require 'cmds'
 
 require 'qb'
 
-require 'nrser/refinements'
+
+# Refinements
+# =======================================================================
+
 using NRSER
 
 
-DEBUG_ARGS = ['-D', '--DEBUG']
-
-
-def set_debug! args
-  if DEBUG_ARGS.any? {|arg| args.include? arg}
-    QB::Util::Logging.setup level: :debug
-    DEBUG_ARGS.each {|arg| args.delete arg}
-  end
-end
-
+# Definitions
+# =======================================================================
 
 def main args
   Thread.current.name = 'main'
   logger = SemanticLogger['qb/exe/qb#main']
   
-  set_debug! args
+  QB::CLI.set_debug! args
   logger.debug args: args
   
   QB.check_ansible_version
@@ -64,5 +73,8 @@ def main args
   exit status
 end
 
+
+# Execution
+# ============================================================================
 
 main(ARGV) # if __FILE__ == $0 # doesn't work with gem stub or something?
