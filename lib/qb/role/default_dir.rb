@@ -1,8 +1,8 @@
 ##
-# {QB::Role} methods for finding the default directory for 
+# {QB::Role} methods for finding the default directory for
 # running a role when one is not provided in the CLI.
 # 
-# Broken out from the main `//lib/qb/role.rb` file because it was starting to 
+# Broken out from the main `//lib/qb/role.rb` file because it was starting to
 # get long and unwieldy.
 # 
 ##
@@ -17,6 +17,7 @@ require 'pathname'
 
 # Deps
 # -----------------------------------------------------------------------
+require 'nrser'
 
 # Project / Package
 # -----------------------------------------------------------------------
@@ -25,7 +26,6 @@ require 'pathname'
 # Refinements
 # =======================================================================
 
-require 'nrser/refinements'
 using NRSER
 
 
@@ -46,11 +46,11 @@ class QB::Role
   # Gets the default `qb_dir` value, raising an error if the role doesn't
   # define how to get one or there is a problem getting it.
   # 
-  # It uses a "strategy" value found at the 'default_dir' key in the role's 
-  # QB metadata (in `<role_path>/meta/qb.yml` or returned by a 
+  # It uses a "strategy" value found at the 'default_dir' key in the role's
+  # QB metadata (in `<role_path>/meta/qb.yml` or returned by a
   # `<role_path>/meta/qb` executable).
   # 
-  # See the {file:doc/qb_roles/metadata/default_dir.md default_dir} 
+  # See the {file:doc/qb_roles/metadata/default_dir.md default_dir}
   # documentation for details on the accepted strategy values.
   # 
   # @param [String | Pathname] cwd:
@@ -65,7 +65,7 @@ class QB::Role
   #   The directory to target.
   # 
   # @raise
-  #   When we can't determine a directory due to role meta settings or target 
+  #   When we can't determine a directory due to role meta settings or target
   #   system state.
   # 
   def default_dir cwd, options
@@ -77,7 +77,7 @@ class QB::Role
       options: options
     
     default_dir_for(
-      value: self.meta['default_dir'],
+      strategy: self.meta['default_dir'],
       cwd: cwd,
       options: options
     ).to_pn
@@ -102,8 +102,8 @@ class QB::Role
     # @return [return_type]
     #   @todo Document return value.
     # 
-    def default_dir_for value:, cwd:, options:
-      case value
+    def default_dir_for strategy:, cwd:, options:
+      case strategy
       when nil
         # there is no get_dir info in meta/qb.yml, can't get the dir
         raise QB::UserInputError.new binding.erb <<-END
@@ -116,7 +116,7 @@ class QB::Role
           
               qb run <%= self.name %> DIRECTORY
           
-          or, if you are the developer of the <%= self.name %> role, set a 
+          or, if you are the developer of the <%= self.name %> role, set a
           non-null value for the 'default_dir' key in
           
               <%= self.meta_path %>
@@ -124,8 +124,8 @@ class QB::Role
         END
       
       when false
-        # this method should not get called when the value is false (an entire
-        # section is skipped in exe/qb when `default_dir = false`)
+        # this method should not get called when the strategy is `false` (an
+        # entire section is skipped in exe/qb when `default_dir = false`)
         raise QB::StateError.squished <<-END
           role does not use default directory (meta/qb.yml:default_dir = false)
         END
@@ -141,11 +141,11 @@ class QB::Role
       when Hash
         logger.debug "qb meta option is a Hash"
         
-        unless value.length == 1
-          raise "#{ meta_path.to_s }:default_dir invalid: #{ value.inspect }"
+        unless strategy.length == 1
+          raise "#{ meta_path.to_s }:default_dir invalid: #{ strategy.inspect }"
         end
         
-        hash_key, hash_value = value.first
+        hash_key, hash_value = strategy.first
         
         case hash_key
         when 'exe'
@@ -172,21 +172,21 @@ class QB::Role
           end
           
         when 'find_up'
-          filename = hash_value
+          rel_path = hash_value
           
-          unless filename.is_a? String
-            raise "find_up filename must be string, found #{ filename.inspect }"
+          unless rel_path.is_a? String
+            raise "find_up relative path or glob must be string, found #{ rel_path.inspect }"
           end
           
-          QB.debug "found 'find_up', looking for file named #{ filename }"
+          logger.debug "found 'find_up' strategy", rel_path: rel_path
           
-          QB::Util.find_up filename
+          cwd.to_pn.find_up! rel_path
         
         when 'from_role'
           # Get the value from another role, presumably one this role includes
           
           default_dir_for \
-            value: QB::Role.require( hash_value ).meta['default_dir'],
+            strategy: QB::Role.require( hash_value ).meta['default_dir'],
             cwd: cwd,
             options: options
           
@@ -200,9 +200,9 @@ class QB::Role
             
             contains an invalid default directory strategy
             
-                <%= value.pretty_inspect %>
+                <%= strategy.pretty_inspect %>
             
-            The key <%= hash_key.inspect %> does not correspond to a recognized 
+            The key <%= hash_key.inspect %> does not correspond to a recognized
             form.
             
             Valid forms are:
@@ -215,15 +215,15 @@ class QB::Role
         end
       
       when Array
-        value.try_find do |candidate|
-          default_dir_for value: candidate, cwd: cwd, options: options
+        strategy.try_find do |candidate|
+          default_dir_for strategy: candidate, cwd: cwd, options: options
         end
       
       else
         raise QB::Role::MetadataError.new binding.erb <<-END
-          bad default_dir value: <%= value %>
+          bad default_dir strategy: <%= strategy %>
         END
-      end # case value
+      end # case strategy
     end # .default_dir_for
     
   # end protected
