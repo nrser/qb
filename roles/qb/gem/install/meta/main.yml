@@ -3,10 +3,15 @@
 allow_duplicates: yes
 
 dependencies:
-- role: qb.build_gem
+- role: qb/gem/build
 
 - role: nrser.rbenv_gem
-  rbenv_gem_rubies: "{{ install_gem_rubies }}"
-  rbenv_gem_name: "{{ build_gem_name }}"
-  rbenv_gem_source: "{{ build_gem_path }}"
+  rbenv_gem_rubies: >-
+    {{ gem_install_rubies }}
+  rbenv_gem_name: >-
+    {{ gem_root_facts.gem.name }}
+  # Ugh... this is named "source" because that's what it's called in Ansible's
+  # `gem` module, but it's *not* the source directory, it's the `.gem` file
+  rbenv_gem_source: >-
+    {{ gem_build_path }}
   rbenv_gem_state: present

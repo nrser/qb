@@ -1,5 +1,8 @@
 ---
-default_dir: cwd
+default_dir:
+  find_up: '*.gemspec'
+  parent_dir:
+    $where:
 
 save_options: false
   
