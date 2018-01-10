@@ -34,7 +34,7 @@ class QB::Package < QB::Util::Resource; end
 # Definitions
 # =======================================================================
 
-# An attempt to unify NPM and Gem version schemes to a reasonable extend, 
+# An attempt to unify NPM and Gem version schemes to a reasonable extend,
 # and hopefully cover whatever else the cat may drag in.
 # 
 # Intended to be immutable for practical purposes.
@@ -56,7 +56,7 @@ class QB::Package::Version < QB::Util::Resource
   MIXED_SEGMENT = t.union NUMBER_SEGMENT, NAME_SEGMENT
   
   
-  # Reasonably simple regular expression to extract things that might be 
+  # Reasonably simple regular expression to extract things that might be
   # versions from strings.
   # 
   # Intended for use on reasonably short strings like `git tag` output or
@@ -76,8 +76,8 @@ class QB::Package::Version < QB::Util::Resource
   #     `0-9`.
   # 
   # This will match *many* strings that are not versions, but it should not
-  # miss any that are. It cold obviously be refined and improve to reduce 
-  # false positives at the cost of additional complexity, but I wanted to 
+  # miss any that are. It cold obviously be refined and improve to reduce
+  # false positives at the cost of additional complexity, but I wanted to
   # start simple and complicate it as needed.
   # 
   # @return [Regexp]
@@ -123,6 +123,11 @@ class QB::Package::Version < QB::Util::Resource
   # Utilities
   # ---------------------------------------------------------------------
   
+  def self.from object
+    QB::Package::Version::From.object object
+  end
+  
+  
   # Time formatted to be stuck in a version segment per [Semver][] spec.
   # We also strip out '-' to avoid possible parsing weirdness.
   # 
@@ -133,99 +138,6 @@ class QB::Package::Version < QB::Util::Resource
   def self.to_time_segment time
     time.utc.iso8601.gsub /[^0-9A-Za-z]/, ''
   end
-  
-  
-  # Instance Builders
-  # ---------------------------------------------------------------------
-  
-  # Create a Version instance from a {Gem::Version}.
-  # 
-  # @param [Gem::Version] version
-  # 
-  # @return [QB::Package::Version]
-  # 
-  def self.from_gem_version version
-    # release segments are everything before a string
-    release_segments = version.segments.take_while { |seg|
-      !seg.is_a?(String)
-    }
-    
-    # We don't support > 3 release segments to make life somewhat
-    # reasonable. Yeah, I think I've seen projects do it. We'll cross that
-    # bridge if and when we get to it.
-    if release_segments.length > 3
-      raise ArgumentError,
-            "We don't handle releases with more than 3 segments " +
-            "(found #{ release_segments.inspect } in #{ version })"
-    end
-    
-    prerelease_segments = version.segments[release_segments.length..-1]
-    
-    new raw: version.to_s,
-        major: release_segments[0] || 0,
-        minor: release_segments[1] || 0,
-        patch: release_segments[2] || 0,
-        prerelease: prerelease_segments,
-        build: []
-  end
-  
-  
-  def self.from_npm_version version
-    stmt = NRSER.squish <<-END
-      var Semver = require('semver');
-      
-      console.log(
-        JSON.stringify(
-          Semver(#{ JSON.dump version })
-        )
-      );
-    END
-    
-    parse = JSON.load Cmds.new(
-      "node --eval %s", args: [stmt], chdir: QB::ROOT
-    ).out!
-    
-    new raw: version,
-        major: parse['major'],
-        minor: parse['minor'],
-        patch: parse['patch'],
-        prerelease: parse['prerelease'],
-        build: parse['build']
-  end
-  
-  
-  # Parse Docker image tag version into a string. Reverse of 
-  # {QB::Package::Version#docker_tag}.
-  # 
-  # @param [String] version
-  #   String version to parse.
-  # 
-  # @return [QB::Package::Version]
-  # 
-  def self.from_docker_tag version
-    from_string(version.gsub('_', '+')).merge raw: version
-  end # .from_docker_tag
-  
-  
-  # Parse string version into an instance. Accept Semver, Ruby Gem and 
-  # Docker image tag formats.
-  # 
-  # @param [String]
-  #   String version to parse.
-  # 
-  # @return [QB::Package::Version]
-  # 
-  def self.from_string string
-    if string.include? '_'
-      self.from_docker_tag string
-    elsif string.include?( '-' ) || string.include?( '+' )
-      self.from_npm_version string
-    else
-      self.from_gem_version Gem::Version.new(string)
-    end
-  end
-  
-  singleton_class.send :alias_method, :from_s, :from_string
   
   
   # Extract version number from a string.
@@ -239,7 +151,7 @@ class QB::Package::Version < QB::Util::Resource
   def self.extract string
     string.scan( POSSIBLE_VERSION_RE ).map { |possible_version_string|
       begin
-        from_string possible_version_string
+        from possible_version_string
       rescue
         nil
       end
@@ -285,7 +197,7 @@ class QB::Package::Version < QB::Util::Resource
   
   
   # @return [Boolean]
-  #   True if any prerelease segments are present (stuff after '-' in 
+  #   True if any prerelease segments are present (stuff after '-' in
   #   SemVer / "NPM" format, or the first string segment and anything
   #   following it in "Gem" format). Tests if {@prerelease} is not
   #   empty.
@@ -299,8 +211,8 @@ class QB::Package::Version < QB::Util::Resource
   #   True if any build segments are present (stuff after '+' character
   #   in SemVer / "NPM" format). Tests if {@build} is empty.
   #   
-  #   As of writing, we don't have a way to convey build segments in 
-  #  "Gem" version format, so this will always be false when loading a 
+  #   As of writing, we don't have a way to convey build segments in
+  #  "Gem" version format, so this will always be false when loading a
   #   Gem version.
   # 
   def build?
@@ -333,7 +245,7 @@ class QB::Package::Version < QB::Util::Resource
   
   
   # @return [Boolean]
-  #   True if this version is a dev prerelease (first prerelease element 
+  #   True if this version is a dev prerelease (first prerelease element
   #   is 'dev').
   # 
   def dev?
@@ -403,7 +315,7 @@ class QB::Package::Version < QB::Util::Resource
   # Related Versions
   # ---------------------------------------------------------------------
   # 
-  # Functions that construct new version instances based on the current 
+  # Functions that construct new version instances based on the current
   # one as well as additional information provided.
   # 
   
@@ -412,7 +324,7 @@ class QB::Package::Version < QB::Util::Resource
   #   *is* a release version already, still returns a new instance.
   # 
   def release_version
-    self.class.from_string release
+    self.class.from release
   end # #release_version
   
   
@@ -448,115 +360,6 @@ class QB::Package::Version < QB::Util::Resource
   end # #prerelease_version
   
   
-  # Bumping
-  # ---------------------------------------------------------------------
-  
-  
-  # @todo Document bump_dev method.
-  # 
-  # @param [type] arg_name
-  #   @todo Add name param description.
-  # 
-  # @return [return_type]
-  #   @todo Document return value.
-  # 
-  def bump_to_dev
-    props = { prerelease: ['dev'] }
-    
-    case self.level
-    when 'release'
-      merge patch: patch.succ, **props
-    when 'rc'
-      merge **props
-    when 'dev'
-      self
-    end
-  end # #bump_dev
-  
-  
-  # Bump to next release-candidate version.
-  # 
-  # This is a little tricky because we need to know what the *last* rc
-  # version was, which is not in the version in most cases.
-  # 
-  # @param [type] arg_name
-  #   @todo Add name param description.
-  # 
-  # @return [return_type]
-  #   @todo Document return value.
-  # 
-  def bump_to_rc existing_versions: nil
-    case self.level
-    when 'release'
-      merge patch: patch.succ, prerelease: ['rc', 0]
-    when 'rc'
-      merge prerelease: ['rc', prerelease[1].succ]
-    when 'dev'
-      if existing_versions.nil?
-        raise ArgumentError.squished <<-END
-          Can't bump to next rc version without knowing what rc versions have
-          already been used.
-        END
-      elsif existing_versions.is_a? String
-        existing_versions = self.class.extract existing_versions
-      end
-      
-      last_existing_rc = existing_versions.
-        select { |version|
-          version.rc? && version.release == release
-        }.
-        sort.
-        last
-      
-      rc_number = if last_existing_rc.nil?
-        0
-      else
-        last_existing_rc.prerelease[1].succ
-      end
-      
-      merge prerelease: ['rc', rc_number]
-    end
-  end # #bump_rc
-  
-  
-  # @todo Document bump_to_release method.
-  # 
-  # @param [type] arg_name
-  #   @todo Add name param description.
-  # 
-  # @return [return_type]
-  #   @todo Document return value.
-  # 
-  def bump_to_release
-    case self.level
-    when 'release'
-      # bump forward to next release, M.m.p -> M.m.(p+1)
-      merge patch: patch.succ
-    when 'rc', 'dev'
-      # bump forward to release version for rc or dev
-      release
-    end
-  end # #bump_to_release
-  
-  
-  # @todo Document bump method.
-  # 
-  # @param [type] arg_name
-  #   @todo Add name param description.
-  # 
-  # @return [return_type]
-  #   @todo Document return value.
-  # 
-  def bump level:, **options
-    method_name = "bump_to_#{ level }"
-    if options.empty?
-      public_send method_name
-    else
-      public_send method_name, **options
-    end
-  end # #bump
-  
-  
   # Language Interface
   # =====================================================================
   
@@ -572,7 +375,7 @@ class QB::Package::Version < QB::Util::Resource
   # 
   def == other
     other.class == self.class &&
-    other.to_a == self.to_a 
+    other.to_a == self.to_a
   end # #==
   
   
@@ -585,19 +388,17 @@ class QB::Package::Version < QB::Util::Resource
   # precedence.
   # 
   # This is considered the representative structure for the object's data,
-  # from which all other values are dependently derived, and is used in 
+  # from which all other values are dependently derived, and is used in
   # {#==}, {#hash} and {#eql?}.
   # 
   # @example
   #   
-  #   version = QB::Package::Version.from_string(
-  #     "0.1.2-rc.10+master.0ab1c3d"
-  #   )
+  #   version = QB::Package::Version.from "0.1.2-rc.10+master.0ab1c3d"
   #   
   #   version.to_a
   #   # => [0, 1, 2, ['rc', 10], ['master', '0ab1c3d']]
   #   
-  #   QB::Package::Version.from_string('1').to_a
+  #   QB::Package::Version.from( '1' ).to_a
   #   # => [1, nil, nil, [], []]
   # 
   # @return [Array]
@@ -628,3 +429,10 @@ class QB::Package::Version < QB::Util::Resource
   end
   
 end # class QB::Package::Version
+
+
+# Post-Processing
+# =======================================================================
+
+require 'qb/package/version/leveled'
+require 'qb/package/version/from'

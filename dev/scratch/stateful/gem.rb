@@ -78,7 +78,7 @@ class QB::Package::Gem < QB::Package
       # Whatever we were passes is the reference path
       values[:ref_path] = path
       
-      # Cast to {Pathname} if it's not already and expand it to create the 
+      # Cast to {Pathname} if it's not already and expand it to create the
       # root path
       values[:root_path] = path.to_pn.expand_path
       
@@ -98,8 +98,7 @@ class QB::Package::Gem < QB::Package
       values[:name] = values[:spec].name
       
       # Get the version from the spec
-      values[:version] = QB::Package::Version.from_gem_version \
-        values[:spec].version
+      values[:version] = QB::Package::Version.from values[:spec].version
       
       # Construct the resource instance and return it.
       new **values
@@ -169,11 +168,11 @@ class QB::Package::Gem < QB::Package
         QB::Package::Gem.from_root_path
       end
       
-      def internal_write path, 
+      def internal_write path,
     end
     
     route(
-      dependencies: 
+      dependencies:
     )
   end
   
@@ -188,4 +187,3 @@ QB::Package::Gem::State.merge(
     }
   }
 )
-

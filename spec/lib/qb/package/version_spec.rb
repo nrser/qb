@@ -4,27 +4,27 @@ require 'spec_helper'
 
 RSpec.shared_context :version_everything_dev do
   let(:raw) { '0.1.2-dev.3+master.0a1b2c3d' }
-  let(:version) { QB::Package::Version.from_string raw }
+  let(:version) { QB::Package::Version.from raw }
   subject { version }
 end
 
 RSpec.shared_context "Version 0.1.2-dev.3+master.0a1b2c3d" do
   let(:raw) { '0.1.2-dev.3+master.0a1b2c3d' }
-  let(:version) { QB::Package::Version.from_string raw }
+  let(:version) { QB::Package::Version.from raw }
   subject { version }
 end
 
 
 RSpec.shared_context :version_only_major do
   let(:raw) { '1' }
-  let(:version) { QB::Package::Version.from_string raw }
+  let(:version) { QB::Package::Version.from raw }
   subject { version }
 end # version with only major
 
 
 RSpec.shared_context :version_gem_style do
   let(:raw) { '0.1.2.dev.3' }
-  let(:version) { QB::Package::Version.from_string raw }
+  let(:version) { QB::Package::Version.from raw }
   subject { version }
 end #:version_gem_style
 
@@ -35,7 +35,7 @@ end #:version_gem_style
 
 RSpec.shared_context :version_with_build_info do
   let(:raw) { '0.1.2-dev.0+master.aaabbbc.20170101T000000Z' }
-  let(:version) { QB::Package::Version.from_string raw }
+  let(:version) { QB::Package::Version.from raw }
   subject { version }
 end #:version_with_build_info
 
@@ -56,10 +56,10 @@ describe QB::Package::Version do
   
   
 
-  describe QB::Package::Version.method( :from_string ) do
+  describe QB::Package::Version.method( :from ) do
   # Doesn't work?!
-  # describe 'QB::Package::Version.from_string' do
-  #   subject { super().method :from_string }
+  # describe 'QB::Package::Version.from' do
+  #   subject { super().method :from }
     
     context "dev version with everything" do
       subject { super().call '0.1.2-dev.3+master.0a1b2c3d' }
@@ -107,7 +107,7 @@ describe QB::Package::Version do
     context "gem-style version with 4 release segments" do
       it {
         expect {
-          QB::Package::Version.from_string '1.2.3.4.dev.5'
+          QB::Package::Version.from '1.2.3.4.dev.5'
         }.to raise_error ArgumentError
       }
     end # gem-style version with 4 release segments
@@ -160,7 +160,7 @@ describe QB::Package::Version do
     
     
     
-  end # .from_string
+  end # .from
   
   
   describe "#to_a" do
@@ -201,7 +201,7 @@ describe QB::Package::Version do
       
       subject { version.release_version }
       
-      it { is_expected.to eq QB::Package::Version.from_string '0.1.2' }
+      it { is_expected.to eq QB::Package::Version.from '0.1.2' }
     end # dev version with everything
     
     context "version with only major" do
@@ -288,13 +288,13 @@ describe QB::Package::Version do
   end # #docker_tag
   
   
-  describe ".from_docker_tag" do
+  describe ".from docker_tag" do
     context "version with build info" do
       include_context :version_with_build_info
       
       it "re-parses into an equal version" do
         expect(
-          QB::Package::Version.from_docker_tag version.docker_tag
+          QB::Package::Version.from version.docker_tag
         ).to eq version
       end
     end # version with build info
@@ -311,12 +311,12 @@ describe QB::Package::Version do
       include_context :version_only_major
       
       it "is equal to another parse of itself" do
-        expect(subject == QB::Package::Version.from_string(raw)).to be true
+        expect(subject == QB::Package::Version.from(raw)).to be true
       end
       
       it "is equal to version where missing minor and patch are 0" do
         expect(
-          subject == QB::Package::Version.from_string('1.0.0')
+          subject == QB::Package::Version.from('1.0.0')
         ).to be true
       end
     end # version with only major
@@ -336,7 +336,7 @@ describe QB::Package::Version do
       
       subject {
         semvers.
-          map { |semver| QB::Package::Version.from_string semver }.
+          map { |semver| QB::Package::Version.from semver }.
           sort.
           map( &:semver )
       }
@@ -358,7 +358,7 @@ describe QB::Package::Version do
         
         it "does reduce parses of the same raw version" do
           expect(
-            [subject, QB::Package::Version.from_string(raw)].uniq.length
+            [subject, QB::Package::Version.from(raw)].uniq.length
           ).to be 1
         end
       end # version with only major
@@ -369,4 +369,3 @@ describe QB::Package::Version do
   
   
 end # QB::Package::Version
-

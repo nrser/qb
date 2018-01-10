@@ -23,7 +23,7 @@ def get_semver_path():
     if not os.path.isfile(bin_path):
         raise Exception("can't find semver at %s" % bin_path)
     
-    return bin_path 
+    return bin_path
 # get_semver_path()
 
 
@@ -122,9 +122,7 @@ def qb_version_parse(version_string):
         '''
         require 'qb'
         
-        puts JSON.dump(
-            QB::Package::Version.from_string %s
-        )
+        puts JSON.dump( QB::Package::Version.from %s )
         ''' % json.dumps(version_string)
     )
     

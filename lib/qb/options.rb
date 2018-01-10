@@ -356,7 +356,7 @@ module QB
       
       opt_parser = OptionParser.new do |opts|
         opts.accept(QB::Package::Version) do |string|
-          QB::Package::Version.from_string(string).to_h
+          QB::Package::Version.from( string ).to_h
         end
         
         opts.banner = @role.banner

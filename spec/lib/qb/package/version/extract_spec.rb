@@ -29,7 +29,7 @@ describe "QB::Package::Version.extract" do
               and have_attributes(
                 length: 1,
                 first: be_a( QB::Package::Version ).
-                  and( eq QB::Package::Version.from_string( string ) ),
+                  and( eq QB::Package::Version.from( string ) ),
               )
           }
         end # called with string
@@ -137,7 +137,7 @@ describe "QB::Package::Version.extract" do
         '0.2.0-rc.8',
         '0.2.0-rc.9',
         '0.2.1-rc.0',
-      ].map { |s| QB::Package::Version.from_string s }
+      ].map { |s| QB::Package::Version.from s }
     end
     
   end # section `git tag`-type output

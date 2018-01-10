@@ -169,7 +169,7 @@ class PathFacts < QB::Ansible::Module
   end
   
   
-  # If `path` is a directory containing the source for a Ruby Gem, add 
+  # If `path` is a directory containing the source for a Ruby Gem, add
   # useful information about it.
   def add_gem_facts
     unless @path.directory?
@@ -193,7 +193,7 @@ class PathFacts < QB::Ansible::Module
     
     spec = Gem::Specification::load(gemspec_path.to_s)
     gem.name = spec.name
-    gem.version = QB::Package::Version.from_gem_version spec.version
+    gem.version = QB::Package::Version.from spec.version
   end
   
   
@@ -218,9 +218,7 @@ class PathFacts < QB::Ansible::Module
     npm.name = npm.package_json['name']
     
     if npm.package_json['version']
-      npm.version = QB::Package::Version.from_npm_version(
-        npm.package_json['version']
-      )
+      npm.version = QB::Package::Version.from npm.package_json['version']
     end
   end
   
@@ -234,7 +232,7 @@ class PathFacts < QB::Ansible::Module
   #         -   True if `@path/VERSION` exists and was successfully parsed.
   # 
   # -   If `has_version_file` is `true`:
-  #     -   
+  #     -
   # 
   def add_version_file_facts
     unless @path.directory?
@@ -250,7 +248,7 @@ class PathFacts < QB::Ansible::Module
     end
     
     version = begin
-      QB::Package::Version.from_string version_file_path.read
+      QB::Package::Version.from version_file_path.read
     rescue Exception => e
       warn "Unable to parse version from #{ version_file_path.to_s }; #{ e }"
       @result.has_version_file = false
@@ -316,7 +314,7 @@ class PathFacts < QB::Ansible::Module
     # Add version/package facts from a @path/VERSION file if present
     add_version_file_facts
     
-    # If we only have one type of package present, we set it's type and 
+    # If we only have one type of package present, we set it's type and
     # version as `package.type` and `package.version`, which makes it easy for
     # code to 'auto-detect' the info.
     # 
