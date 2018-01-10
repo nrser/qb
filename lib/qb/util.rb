@@ -13,7 +13,7 @@ module QB
       string.split(/[\W_\-\/]+/).reject {|w| w.empty?}
     end # .words
     
-    # see if words from an input match words 
+    # see if words from an input match words
     def self.words_start_with? full_string, input
       # QB.debug "does #{ input } match #{ full_string }?"
       
@@ -84,6 +84,7 @@ module QB
       Pathname.new contracted
     end
     
+    
     # find `filename` in `from` or closest parent directory.
     # 
     # @param [String] filename
@@ -96,7 +97,7 @@ module QB
     #   When `true`, a {QB::FSStateError} will be raised if no file is found
     #   (default behavior).
     #   
-    #   This is something of a legacy behavior - I think it would be better 
+    #   This is something of a legacy behavior - I think it would be better
     #   to have {find_up} return `nil` in that case and add a `find_up!`
     #   method that raises on not found. But I'm not going to do it right now.
     # 
