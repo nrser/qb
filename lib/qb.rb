@@ -6,6 +6,7 @@
 
 # Deps
 # -----------------------------------------------------------------------
+require 'nrser'
 require 'nrser/extras'
 
 # Project / Package
@@ -19,10 +20,7 @@ require 'qb/path'
 # Refinements
 # =======================================================================
 
-require 'nrser/refinements'
 using NRSER
-
-require 'nrser/refinements/types'
 using NRSER::Types
 
 
