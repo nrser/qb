@@ -16,8 +16,8 @@ describe_qb_role 'qb/role/qb' do
     
     expect( meta_path.file? ).to be true
     
-    expect( meta_path.read.lines[1] ).
-      to eq "# meta/qb.yml file for #{ name }\n"
+    expect( meta_path.read.lines[2] ).
+      to match /\`#{ Regexp.escape name }\` role/
     
   end
   
