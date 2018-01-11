@@ -1,14 +1,8 @@
-require 'spec_helper'
-
-
-# QB::Package::Version::Leveled#transition
-# ========================================================================
-#
 describe "QB::Package::Version::Leveled#transition" do
-  context "level:" do
+  describe "transitioning level" do
     subject {
       ->( level, string, **options ) {
-        QB::Package::Version.from( string ).transition level: level, **options
+        QB::Package::Version.from( string ).transition_to level, **options
       }
     }
 
@@ -18,7 +12,7 @@ describe "QB::Package::Version::Leveled#transition" do
     #
     # Bump from any version level to dev level.
     #
-    describe "dev" do
+    describe "to dev" do
       subject { super().curry[:dev] }
 
       context "from release" do
@@ -38,11 +32,10 @@ describe "QB::Package::Version::Leveled#transition" do
       end # from release-candidate
 
       context "from dev version" do
-        let( :version ) { QB::Package::Version.from '0.1.2-dev' }
-        subject { version.transition level: :dev }
-
-        it "should just return self" do
-          is_expected.to be version
+        it "should fail" do
+          expect {
+            QB::Package::Version.from( '0.1.2-dev' ).transition_to :dev
+          }.to raise_error QB::VersionError
         end
       end # from dev 0.1.2-dev
 
@@ -142,10 +135,10 @@ describe "QB::Package::Version::Leveled#transition" do
       end # from rc
 
       context "from release" do
-        called_with "0.1.2" do
-          it "should transition patch and set rc to 0: 0.1.3-rc.0" do
-            expect( subject.semver ).to eq '0.1.3-rc.0'
-          end
+        it "should fail" do
+          expect {
+            QB::Package::Version.from( '0.1.2' ).transition_to :rc
+          }.to raise_error QB::VersionError
         end
       end # from release
 
@@ -159,12 +152,11 @@ describe "QB::Package::Version::Leveled#transition" do
       subject { super().curry[:release] }
 
       describe "from dev" do
-        describe_called_with '0.1.2-dev' do
-          it "transitions to release 0.1.2" do
-            is_expected.to be_a( QB::Package::Version ).
-                and have_attributes semver: '0.1.2'
-          end
-        end # called with '0.1.2-dev'
+        it "should fail" do
+          expect {
+            QB::Package::Version.from( '0.1.2-dev' ).transition_to :release
+          }.to raise_error QB::VersionError
+        end
       end # from dev
 
       context "from rc" do
@@ -177,16 +169,13 @@ describe "QB::Package::Version::Leveled#transition" do
       end # from rc
 
       context "from release" do
-        describe_called_with "0.1.2" do
-          it "should transition patch to 0.1.3" do
-            is_expected.to be_a( QB::Package::Version ).
-              and have_attributes semver: '0.1.3'
-          end
+        it "should fail" do
+          expect {
+            QB::Package::Version.from( '0.1.2' ).transition_to :release
+          }.to raise_error QB::VersionError
         end
       end # from release
-
-    end # "to release"
-
+    end # to release
   end # to level
 
 end # QB::Package::Version#transition

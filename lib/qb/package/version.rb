@@ -97,13 +97,9 @@ class QB::Package::Version < QB::Util::Resource
   prop :build,          type: t.array(MIXED_SEGMENT), default: []
 
   prop :release,        type: t.str,            source: :@release
-  prop :level,          type: t.str,            source: :@level
   prop :is_release,     type: t.bool,           source: :release?
   prop :is_prerelease,  type: t.bool,           source: :prerelease?
   prop :is_build,       type: t.bool,           source: :build?
-  prop :is_dev,         type: t.bool,           source: :dev?
-  prop :is_rc,          type: t.bool,           source: :rc?
-  prop :has_level,      type: t.bool,           source: :level?
   prop :semver,         type: t.str,            source: :semver
   prop :docker_tag,     type: t.str,            source: :docker_tag
   prop :build_commit,   type: t.maybe(t.str),   source: :build_commit
@@ -113,8 +109,7 @@ class QB::Package::Version < QB::Util::Resource
   # Attributes
   # =====================================================================
 
-  attr_reader :release,
-              :level
+  attr_reader :release
   
   
   # Class Methods
@@ -157,29 +152,6 @@ class QB::Package::Version < QB::Util::Resource
       end
     }.compact
   end # .extract
-  
-  
-  # Constructor
-  # =====================================================================
-  
-  # Construct a new Version
-  def initialize **values
-    super **values
-    
-    @release = [major, minor, patch].join '.'
-    
-    @level = t.match prerelease[0], {
-      t.is(nil) => ->(_) {
-        if build.empty?
-          'release'
-        end
-      },
-      
-      NAME_SEGMENT => ->(str) { str },
-      
-      NUMBER_SEGMENT => ->(int) { nil },
-    }
-  end
   
   
   # Instance Methods
@@ -235,35 +207,13 @@ class QB::Package::Version < QB::Util::Resource
   end # #build_dirty?
   
   
-  # @return [Boolean]
-  #   True if self is a prerelease version that starts with a string that
-  #   we consider the 'level'.
-  #   
-  def level?
-    !level.nil?
-  end
-  
-  
-  # @return [Boolean]
-  #   True if this version is a dev prerelease (first prerelease element
-  #   is 'dev').
-  # 
-  def dev?
-    level == 'dev'
-  end
-  
-  
-  # @return [Boolean]
-  #   True if this version is a release candidate (first prerelease element
-  #   is 'rc').
-  # 
-  def rc?
-    level == 'rc'
-  end
-  
-  
   # Derived Properties
   # ---------------------------------------------------------------------
+  
+  def release
+    [major, minor, patch].join '.'
+  end
+  
   
   # @return [String]
   #   The Semver version string

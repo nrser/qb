@@ -23,16 +23,8 @@ module QB::Package::Version::From
   # 
   # @return [Class<QB::Package::Version>]
   # 
-  def self.class_for prerelease: [], build: [], **values
-    if (
-      (prerelease.empty? && build.empty?) || # release
-      (prerelease.first == 'dev') || # dev, can have whatever build
-      ( prerelease.first == 'rc' &&
-        build.empty? &&
-        prerelease.length == 2 &&
-        QB::Package::Version::NUMBER_SEGMENT.test( prerelease[1] )
-      ) # rc, can not have build
-    )
+  def self.class_for **values
+    if QB::Package::Version::Leveled.level_for **values
       QB::Package::Version::Leveled
     else
       QB::Package::Version

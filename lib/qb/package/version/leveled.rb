@@ -30,23 +30,128 @@ using NRSER::Types
 # Intended to be immutable for practical purposes.
 # 
 class QB::Package::Version::Leveled < QB::Package::Version
+  DEV = 'dev'
+  RC = 'rc'
+  RELEASE = 'release'
   
-  LEVELS = Set['dev', 'rc', 'release']
+  LEVELS = Set[ DEV, RC, RELEASE ].freeze
   
   module Types
     LEVEL = t.in LEVELS, name: 'LevelType'
     
-    def self.level; LEVEL; end
+    def self.level
+      LEVEL
+    end
   end
   
-  # Props
-  # ============================================================================
   
-  prop :level,  type: Types.level,   source: :level
+  # Props
+  # ==========================================================================
+  
+  prop :level,          type: Types.level,      source: :level
+  prop :is_dev,         type: t.bool,           source: :dev?
+  prop :is_rc,          type: t.bool,           source: :rc?
+  
+  
+  # Class Methods
+  # ==========================================================================
+  
+  # Get the level for version prop values. Returns `nil` if they are not
+  # "leveled".
+  # 
+  # @param [Array<String | Integer>] prerelease:
+  #   The prerelease segments of the version.
+  # 
+  # @param [Array<String | Integer>] build:
+  #   The build segments of the version.
+  # 
+  # @param [Hash<Symbol, Object>] **etc
+  #   Really, anything, but meant to allow you to just pass all
+  #   {QB::Package::Version} prop values to the method.
+  # 
+  # @return [nil]
+  #   If the prop values don't have a level.
+  # 
+  # @return ['dev' | 'rc' | 'release']
+  #   If the values do have a level.
+  # 
+  def self.level_for prerelease: [], build: [], **etc
+    return RELEASE if prerelease.empty? && build.empty?
+    
+    return DEV if prerelease[0] == DEV
+    
+    if  prerelease[0] == RC &&
+        prerelease.length == 2 &&
+        t.non_neg_int.test( prerelease[1] ) &&
+        build.empty?
+      return RC
+    end
+    
+    nil
+  end # .level_for
+  
+  
+  # Just like {.level_for} but raises if the props don't represent a valid
+  # level.
+  # 
+  # @param (see .level_for)
+  # @return (see .level_for)
+  # 
+  # @raise [ArgumentError]
+  #   If the prop values don't represent a version level.
+  # 
+  def self.level_for! **values
+    level_for( **values ).tap { |response|
+      if response.nil?
+        raise ArgumentError.new binding.erb <<-END
+          Prop values not valid for a leveled version:
+          
+              <%= values.pretty_inspect %>
+          
+        END
+      end
+    }
+  end
+  
+  
+  # Constructor
+  # ==========================================================================
+  
+  # Construct a new Version
+  def initialize **values
+    # Just to do the type check...
+    self.class.level_for! **values
+    super **values
+  end
   
   
   # Instance Methods
   # ============================================================================
+  
+  def level
+    self.class.level_for \
+      prerelease: prerelease,
+      build: build
+  end
+  
+  
+  # @return [Boolean]
+  #   True if this version is a dev prerelease (first prerelease element
+  #   is 'dev').
+  # 
+  def dev?
+    level == DEV
+  end
+  
+  
+  # @return [Boolean]
+  #   True if this version is a release candidate (first prerelease element
+  #   is 'rc').
+  # 
+  def rc?
+    level == RC
+  end
+  
   
   # Transitions
   # ---------------------------------------------------------------------
@@ -63,18 +168,25 @@ class QB::Package::Version::Leveled < QB::Package::Version
   # @return [return_type]
   #   @todo Document return value.
   # 
-  def transition_to_dev
+  def transition_to_dev inc: :patch
     props = { prerelease: ['dev'] }
     
-    case self.level
-    when 'release'
-      merge patch: patch.succ, **props
-    when 'rc'
-      merge **props
-    when 'dev'
-      self
-    end
-  end # #bump_dev
+    t.match level,
+      'release', ->(_) {
+        succ = public_send( inc ).succ
+        
+        merge inc => succ, **props
+      },
+      
+      'rc', ->(_) {
+        merge **props
+      },
+      
+      'dev',  ->(_) {
+        raise QB::VersionError,
+          "Version #{ self } is already at `dev` level"
+      }
+  end # #transition_to_dev
 
 
   # Transition to next release-candidate version.
@@ -101,37 +213,42 @@ class QB::Package::Version::Leveled < QB::Package::Version
   #   @todo Document return value.
   # 
   def transition_to_rc existing_versions: nil
-    case self.level
-    when 'release'
-      merge patch: patch.succ, prerelease: ['rc', 0]
-    when 'rc'
-      merge prerelease: ['rc', prerelease[1].succ]
-    when 'dev'
-      if existing_versions.nil?
-        raise ArgumentError.squished <<-END
-          Can't bump to next rc version without knowing what rc versions have
-          already been used.
-        END
-      elsif existing_versions.is_a? String
-        existing_versions = self.class.extract existing_versions
-      end
+    t.match level,
+      'release', ->(_) {
+        raise QB::VersionError,
+          "Can not transition from `release` to `rc` levels (for #{ self })"
+      },
       
-      last_existing_rc = existing_versions.
-        select { |version|
-          version.rc? && version.release == release
-        }.
-        sort.
-        last
+      'rc', ->(_) {
+        merge prerelease: ['rc', prerelease[1].succ]
+      },
       
-      rc_number = if last_existing_rc.nil?
-        0
-      else
-        last_existing_rc.prerelease[1].succ
-      end
-      
-      merge prerelease: ['rc', rc_number]
-    end
-  end # #bump_rc
+      'dev', ->(_) {
+        if existing_versions.nil?
+          raise ArgumentError.squished <<-END
+            Can't bump to next rc version without knowing what rc versions have
+            already been used.
+          END
+        elsif existing_versions.is_a? String
+          existing_versions = self.class.extract existing_versions
+        end
+        
+        last_existing_rc = existing_versions.
+          select { |version|
+            version.rc? && version.release == release
+          }.
+          sort.
+          last
+        
+        rc_number = if last_existing_rc.nil?
+          0
+        else
+          last_existing_rc.prerelease[1].succ
+        end
+        
+        merge prerelease: ['rc', rc_number]
+      }
+  end # #transition_to_rc
 
 
   # @todo Document transition_to_release method.
@@ -139,14 +256,20 @@ class QB::Package::Version::Leveled < QB::Package::Version
   # @return [QB::Package::Version]
   # 
   def transition_to_release
-    case self.level
-    when 'release'
-      # bump forward to next release, M.m.p -> M.m.(p+1)
-      merge patch: patch.succ
-    when 'rc', 'dev'
-      # bump forward to release version for rc or dev
-      release_version
-    end
+    t.match level,
+      'release', ->(_) {
+        raise QB::VersionError,
+          "Version #{ self } is already at `release` level"
+      },
+      
+      'dev', ->(_) {
+        raise QB::VersionError,
+          "Can not transition from `dev` to `release` levels (for #{ self })"
+      },
+      
+      'rc', ->(_) {
+        release_version
+      }
   end # #transition_to_release
 
 
@@ -158,7 +281,7 @@ class QB::Package::Version::Leveled < QB::Package::Version
   # @return [return_type]
   #   @todo Document return value.
   # 
-  def transition level:, **options
+  def transition_to level, **options
     Types.level.check level.to_s
     
     method_name = "transition_to_#{ level }"
@@ -167,7 +290,7 @@ class QB::Package::Version::Leveled < QB::Package::Version
     else
       public_send method_name, **options
     end
-  end # #bump
+  end # #transition
   
   
 end
