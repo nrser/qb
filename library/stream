@@ -2,10 +2,18 @@
 # WANT_JSON
 
 # init bundler in dev env
+
+# HACK  Keep track of the ENV vars we overwrite so we can swap them back in
+#       later when we need to run the command.
+#       
+$replaced_env_vars = {}
+
 if ENV['QB_DEV_ENV']
   ENV.each {|k, v|
     if k.start_with? 'QB_DEV_ENV_'
-      ENV[k.sub('QB_DEV_ENV_', '')] = v
+      key = k.sub('QB_DEV_ENV_', '')
+      $replaced_env_vars[key] = [ENV[key], v]
+      ENV[key] = v
     end
   }
   require 'bundler/setup'
@@ -13,6 +21,8 @@ end
 
 require 'qb'
 require 'cmds'
+
+using NRSER
 
 class Stream < QB::Ansible::Module
   def main
@@ -41,9 +51,31 @@ class Stream < QB::Ansible::Module
     cmd = Cmds.new(template, **opts)
     
     if @args['log']
-      info "STREAMING\n\n#{ cmd.prepare }\n\n"
+      info binding.erb <<-END
+        
+        STREAMING
+        ========================================================================
+        
+        Template:
+        
+            <%= template %>
+        
+        Options:
+        
+            <%= opts.pretty_inspect %>
+        
+        Prepared command:
+        
+          <%= cmd.prepare %>
+        
+      END
     end
     
+    # HACK  Swap any ENV vars we replaced at the top back in
+    $replaced_env_vars.each do |key, (original, replacement)|
+      ENV[key] = original
+    end
+      
     cmd.stream!
     
     changed!
