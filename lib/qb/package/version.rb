@@ -123,6 +123,15 @@ class QB::Package::Version < QB::Util::Resource
   end
   
   
+  # @depreciated Use {.from} instead.
+  # 
+  def self.from_string string
+    QB::Package::Version::From.string string
+  end
+  
+  singleton_class.send :alias_method, :from_s, :from_string
+  
+  
   # Time formatted to be stuck in a version segment per [Semver][] spec.
   # We also strip out '-' to avoid possible parsing weirdness.
   # 
