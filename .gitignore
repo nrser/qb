@@ -181,7 +181,8 @@ celerybeat-schedule
 # this one:
 #env/
 venv/
-ENV/
+# Same as `env/` (f'ing macOS is case-insensitive):
+#ENV/
 env.bak/
 venv.bak/
 
