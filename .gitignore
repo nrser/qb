@@ -177,7 +177,9 @@ celerybeat-schedule
 # Environments
 .env
 .venv
-env/
+# We have a `//lib/qb/ansible/env` folder and don't use virtualenv, so disable
+# this one:
+#env/
 venv/
 ENV/
 env.bak/
@@ -251,4 +253,3 @@ jspm_packages
 #
 # END QB.gitingore
 ##############################################################################
-
