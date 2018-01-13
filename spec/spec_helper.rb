@@ -65,8 +65,11 @@ QB::Role::PATH.unshift TEST_ROLES_DIR
 
 
 RSpec.configure do |config|
+  # Enable flags like --only-failures and --next-failure
+  config.example_status_persistence_file_path = TEMP_DIR / ".rspec_status"
+  
   # Switch to stream commands running roles so you can see their output
-  config.add_setting :stream_role_cmds, 
+  config.add_setting :stream_role_cmds,
     default: ENV.fetch( 'STREAM_ROLE_CMDS', false ).truthy?
 end
 
@@ -102,4 +105,3 @@ def test_role name, merge = [], &block
   
   QB::Role.new dest
 end
-
