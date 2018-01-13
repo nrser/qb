@@ -44,6 +44,12 @@ describe_spec_file(
       describe_called_with prerelease: ['rc', 12345] do
         it { is_expected.to be response }
       end
+      
+      describe "and there is build info" do
+        describe_called_with prerelease: ['rc', 0], build: ['master'] do
+          it { is_expected.to be response }
+        end
+      end # "but it's the only entry"
     end # "when prerelease is ('rc', X) for 0 < X (rc level)"
     
   end # response: QB::Package::Version::Leveled
@@ -79,11 +85,6 @@ describe_spec_file(
         end
       end # "but it's the only entry"
       
-      describe "but build is not empty" do
-        describe_called_with prerelease: ['rc', 0], build: ['master'] do
-          it { is_expected.to be response }
-        end
-      end # "but it's the only entry"
     end # "when prerelease[0] is 'rc' but [1] is not positive integer"
   end # response: QB::Package::Version
   
