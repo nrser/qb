@@ -4,21 +4,31 @@ __metaclass__ = type
 import subprocess
 import os
 import json
+import sys
 
 from ansible.errors import AnsibleError
 
 
-QB_ROOT = os.path.realpath(
+HERE = os.path.dirname(os.path.realpath(__file__))
+
+PROJECT_ROOT = os.path.realpath(
     os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), # /plugins/filter_plugins
-        '..', # /plugins
-        '..', # /
+        HERE, # //plugins/filter_plugins
+        '..', # //plugins
+        '..', # //
     )
 )
 
+LIB_PYTHON_DIR = os.path.join( PROJECT_ROOT, 'lib', 'python' )
+
+if not (LIB_PYTHON_DIR in sys.path):
+    sys.path.insert(0, LIB_PYTHON_DIR)
+
+import qb.interop
+
 
 def get_semver_path():
-    bin_path = os.path.join(QB_ROOT, 'node_modules', 'semver', 'bin', 'semver')
+    bin_path = os.path.join(PROJECT_ROOT, 'node_modules', 'semver', 'bin', 'semver')
     
     if not os.path.isfile(bin_path):
         raise Exception("can't find semver at %s" % bin_path)
@@ -83,7 +93,7 @@ def semver_parse(version):
     
     out = subprocess.check_output(
         cmd,
-        cwd = QB_ROOT
+        cwd = PROJECT_ROOT
     )
     
     version = json.loads(out)
@@ -118,21 +128,9 @@ def qb_version_parse(version_string):
     '''Parse version into QB::Package::Version
     '''
     
-    ruby_code = (
-        '''
-        require 'qb'
-        
-        puts JSON.dump( QB::Package::Version.from %s )
-        ''' % json.dumps(version_string)
+    return qb.interop.send_const(
+        'QB::Package::Version', 'from', version_string
     )
-    
-    cmd = ['/usr/bin/env', 'ruby', '-e', ruby_code]
-    
-    out = subprocess.check_output(cmd)
-    
-    version = json.loads(out)
-    
-    return version
 
 
 def qb_read_version(file_path):
