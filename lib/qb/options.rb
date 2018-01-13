@@ -19,6 +19,10 @@ module QB
     # Constants
     # =======================================================================
     
+    # Default initial values for {#qb}.
+    # 
+    # @return [Hash]
+    # 
     QB_DEFAULTS = {
       'hosts' => ['localhost'].freeze,
       'facts' => true,
@@ -28,15 +32,19 @@ module QB
       'ask' => false,
     }.freeze
     
-    # appended on the end of an `opts.on` call to create a newline after
+    
+    # Appended on the end of an `opts.on` call to create a newline after
     # the option (making the help output a bit easier to read)
     # 
-    # you might think the empty string would be reasonable, but OptionParser
+    # You might think the empty string would be reasonable, but OptionParser
     # blows up if you do that.
+    # 
+    # @return [String]
     # 
     SPACER = ' '
     
-    # attributes
+    
+    # Attributes
     # =======================================================================
     
     # @!attribute [r] ansible
@@ -319,7 +327,7 @@ module QB
     def initialize role, argv
       @role = role
       @argv = argv
-      @qb = QB_DEFAULTS.clone
+      @qb = QB_DEFAULTS.dup
       
       parse!
     end
