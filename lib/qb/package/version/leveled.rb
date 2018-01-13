@@ -82,8 +82,7 @@ class QB::Package::Version::Leveled < QB::Package::Version
     
     if  prerelease[0] == RC &&
         prerelease.length == 2 &&
-        t.non_neg_int.test( prerelease[1] ) &&
-        build.empty?
+        t.non_neg_int.test( prerelease[1] )
       return RC
     end
     
