@@ -1,0 +1,71 @@
+---
+##
+# Apply dep state to a `.gemspec` file
+##
+
+- name: >-
+    Apply `{{ ruby_dep_state }}` state to `{{ ruby_dep_name }}` dep in
+    gemspec at `{{ bundle_root_path_facts.gem.gemspec_path }}`
+  
+  lineinfile:
+    state: >-
+      {{ ruby_dep_state }}
+    
+    path: >-
+      {{ bundle_root_path_facts.gem.gemspec_path }}
+    
+    line: >-
+      {{
+        {
+          'name': ruby_dep_name,
+          'version': ruby_dep_version,
+          'dev': ruby_dep_dev,
+        } | to_gemspec_dep_line
+      }}
+    
+    # Match any dependency of this type (runtime vs dev) for this gem
+    regexp: >-
+      {{
+        {
+          'name': ruby_dep_name,
+          'version': ruby_dep_version,
+          'dev': ruby_dep_dev,
+        } | to_gemspec_dep_re_str
+      }}
+    
+    # Insert after the *last* `spec.add_dependency` or
+    # `spec.add_development_dependency` (depending on if the dep is dev)
+    insertafter: >-
+      {{
+        {
+          'name': ruby_dep_name,
+          'version': ruby_dep_version,
+          'dev': ruby_dep_dev,
+        } | to_gemspec_dep_insert_after
+      }}
+
+
+- when: >-
+    ruby_dep_comment and ruby_dep_state == 'present'
+  
+  name: >-
+    Add the comment above the dep line
+  
+  lineinfile:
+    state: present
+    
+    path: >-
+      {{ bundle_root_path_facts.gem.gemspec_path }}
+    
+    line: >-
+      {{ '  # ' + ruby_dep_comment }}
+    
+    # Insert it before the dep line, using the same regexp to find it
+    insertbefore: >-
+      {{
+        {
+          'name': ruby_dep_name,
+          'version': ruby_dep_version,
+          'dev': ruby_dep_dev,
+        } | to_gemspec_dep_re_str
+      }}

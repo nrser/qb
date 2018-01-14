@@ -1,0 +1,16 @@
+---
+##############################################################################
+# Main tasks for `qb/ruby/dependency` role
+##############################################################################
+
+- when: bundle_root_type is not defined
+  name: >-
+    Include tasks to detect type of `bundle_root={{ bundle_root}}`
+    (gemspec or gemfile)
+  include_tasks: >-
+    {{ role_path }}/tasks/detect_type.yml
+
+- name: >-
+    Include tasks to apply state to `{{ bundle_root_type }}` type
+  include_tasks: >-
+    {{ role_path }}/tasks/types/{{ bundle_root_type }}.yml

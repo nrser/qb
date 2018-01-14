@@ -1,0 +1,18 @@
+---
+##
+# Detect the type of `bundle_root` - gemspec or gemfile
+##
+
+- when: bundle_root_path_facts is not defined
+  name: >-
+    Get QB path facts for the bundle root at `{{ bundle_root }}`
+  path_facts:
+    path: >-
+      {{ bundle_root }}
+  register: bundle_root_path_facts
+
+- name: >-
+    Set bundle_root_type based on `bundle_root_path_facts`
+  set_fact:
+    bundle_root_type: >-
+      {{ ('gem' in bundle_root_path_facts) | ternary('gemspec', 'gemfile') }}

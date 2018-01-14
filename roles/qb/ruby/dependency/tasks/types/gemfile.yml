@@ -1,0 +1,6 @@
+---
+##
+# Apply state to a `Gemfile` file
+##
+
+- fail: msg="FIXME: NOT IMPLEMENTED"

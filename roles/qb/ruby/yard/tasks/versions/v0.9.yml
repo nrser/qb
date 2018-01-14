@@ -1,0 +1,47 @@
+---
+
+- name: >-
+    Manage dependencies
+  with_dict:
+    yard:
+      version: '~> 0.9.12'
+      comment: Doc site generation with `yard`
+    
+    github-markup:
+      version: '~> 1.6'
+      comment: GitHub-Flavored Markdown (GFM) for use with `yard`
+    
+    yard-commonmarker:
+      version: '~> 0.3.0'
+      comment: Provider for `commonmarker`, the new GFM lib
+    
+    redcarpet:
+      state: absent
+  
+  loop_control:
+    loop_var: dep
+  
+  include_role:
+    name: qb/ruby/dependency
+  
+  vars:
+    ruby_dep_name:      "{{ dep.key }}"
+    ruby_dep_state:     "{{ dep.value.state | default( 'present' ) }}"
+    ruby_dep_version:   "{{ dep.value.version | default( None ) }}"
+    ruby_dep_dev:       true
+    ruby_dep_comment:   "{{ dep.value.comment | default( None ) }}"
+    
+
+- name: >-
+    Set `plugin`, `markup-provider` and `markup` settings in
+    {{ yard_opts_file_path }}
+  with_dict:
+    plugin: yard-commonmarker
+    markup-provider: commonmarker
+    markup: commonmark
+  lineinfile:
+    path: >-
+      {{ yard_opts_file_path }}
+    line: >-
+      --{{ item.key }} {{ item.value }}
+    regexp: '^--{{ item.key | regex_escape() }}[\ \=]'

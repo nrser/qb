@@ -1,0 +1,4 @@
+---
+qb/role/qb:
+  filter-plugins:
+  - 'true'

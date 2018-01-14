@@ -1,0 +1,23 @@
+---
+##############################################################################
+# Variable defaults for `qb/ruby/dependency` role
+#
+# @see http://docs.ansible.com/ansible/latest/playbooks_reuse_roles.html#role-default-variables
+# 
+##############################################################################
+
+# Default to target the QB DIRECTORY
+bundle_root: >-
+  {{ qb_dir }}
+
+# Default to present
+ruby_dep_state: present
+
+# Default to no version spec
+ruby_dep_version: null
+
+# Default to no comment
+ruby_dep_comment: null
+
+# Default to a runtime dependency
+ruby_dep_dev: false
