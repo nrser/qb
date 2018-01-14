@@ -7,7 +7,7 @@
 # prefix for role variables
 var_prefix: role
 
-# how to get a default for `dir` if it's not provided as the 
+# how to get a default for `dir` if it's not provided as the
 default_dir: null
 
 vars:
@@ -98,7 +98,7 @@ vars:
   - |
     Generates a `filter_plugins/filter_plugins.py`
     
-    qb qb.role roles/owner.new_role --filter-plugins
+    qb qb.role roles/owner.new_role --filter-plugins=true
     
     
 
