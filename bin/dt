@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# 
+# Run Python (2) doctest on file
+
+python2 -m doctest -v "$@"
