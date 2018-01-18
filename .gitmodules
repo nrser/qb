@@ -13,15 +13,15 @@
 [submodule "roles/nrser.state_mate"]
 	path = roles/nrser.state_mate
 	url = git@github.com:nrser/ansible-nrser.state_mate.git
-[submodule "dev/gems/state_mate"]
+[submodule "dev/packages/gems/state_mate"]
 	path = dev/packages/gems/state_mate
 	url = git@github.com:nrser/state_mate
-[submodule "dev/gems/cmds"]
+[submodule "dev/packages/gems/cmds"]
 	path = dev/packages/gems/cmds
 	url = git@github.com:nrser/cmds.git
-[submodule "dev/gems/nrser"]
+[submodule "dev/packages/gems/nrser"]
 	path = dev/packages/gems/nrser
-	url = git@github.com:nrser/nrser-ruby.git
+	url = git@github.com:nrser/nrser.rb.git
 [submodule "packages/python/ansible"]
 	path = packages/python/ansible
 	url = git@github.com:nrser/ansible.git
