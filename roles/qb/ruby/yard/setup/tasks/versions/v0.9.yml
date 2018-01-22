@@ -43,7 +43,7 @@
   with_dict:
     plugin: yard-commonmarker
     markup-provider: commonmarker
-    markup: commonmark
+    markup: markdown
   lineinfile:
     path: >-
       {{ yard_opts_file_path }}
