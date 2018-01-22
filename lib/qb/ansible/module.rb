@@ -125,7 +125,7 @@ class QB::Ansible::Module
       # 
       @input_file = ARGV[0]
       @input = File.read @input_file
-      @args = JSON.load @input_file
+      @args = JSON.load @input
       
     else
       # QB-specific "fiddle-mode": if we don't have a single valid file path
