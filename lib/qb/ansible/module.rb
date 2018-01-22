@@ -2,6 +2,13 @@ require 'json'
 require 'pp'
 
 
+# Refinements
+# =======================================================================
+
+using NRSER
+using NRSER::Types
+
+
 # Declarations
 # =====================================================================
 
@@ -33,14 +40,16 @@ class QB::Ansible::Module
   end
   
   
-  # Constructor
+  # Construction
   # =====================================================================
   
   def initialize
     @changed = false
-    @input_file = ARGV[0]
-    @input = File.read @input_file
-    @args = JSON.load @input
+    # @input_file = ARGV[0]
+    # @input = File.read @input_file
+    # @args = JSON.load @input
+    init_set_args!
+    
     @facts = {}
     @warnings = []
     
@@ -82,11 +91,72 @@ class QB::Ansible::Module
         END
       end
       
-      instance_variable_set var_name,
-                            type.check(@args.fetch(key.to_s))
+      value = type.check( @args[key.to_s] ) do |type:, value:|
+        all_args = @args
+        
+        binding.erb <<-END
+          Value
+          
+              <%= value.pretty_inspect %>
+          
+          for argument <%= key.inspect %> is not valid for type
+          
+              <%= type %>
+          
+          Arguments:
+          
+              <%= all_args.pretty_inspect %>
+          
+        END
+      end
+      
+      instance_variable_set var_name, value
     }
   end
   
+  
+  protected
+  # ========================================================================
+    
+  def init_set_args!
+    if ARGV.length == 1 && File.file?( ARGV[0] )
+      # "Standard" Ansible-invoked mode, where the args written in JSON format
+      # to a file and the path is provided as the only CLI argument
+      # 
+      @input_file = ARGV[0]
+      @input = File.read @input_file
+      @args = JSON.load @input_file
+      
+    else
+      # QB-specific "fiddle-mode": if we don't have a single valid file path
+      # as CLI arguments, parse the CLI options we have in the common
+      # 
+      #     `--name=value`
+      # 
+      # format into the `@args` hash.
+      # 
+      # This lets us run the module file **directly** from the terminal, which
+      # is just a quick and dirty way of flushing things out.
+      # 
+      @fiddle_mode = true
+      @args = {}
+      
+      ARGV.each do |arg|
+        if arg.start_with? '--'
+          key, value = arg[2..-1].split( '=', 2 )
+          
+          @args[key] = begin
+            JSON.load value
+          rescue
+            value
+          end
+        end
+      end
+    end
+  end # #init_set_args!
+    
+  # end protected
+  public
   
   
   # Instance Methods
@@ -102,10 +172,10 @@ class QB::Ansible::Module
   # 
   # When run inside of QB (targeting localhost only at the moment, sadly)
   # we expose additional IO channels for STDIN, STDOUT and STDERR through
-  # opening unix socket files that the main QB process spawns threads to 
+  # opening unix socket files that the main QB process spawns threads to
   # listen to, and we provide those file paths via environment variables
   # so modules can pick those up and interact with those streams, allowing
-  # them to act like regular scripts inside Ansible-world (see 
+  # them to act like regular scripts inside Ansible-world (see
   # QB::Util::STDIO for details and implementation).
   # 
   # We use those channels if present to provide logging mechanisms.
@@ -170,7 +240,7 @@ class QB::Ansible::Module
   def exit_json hash
     # print JSON response to process' actual STDOUT (instead of $stdout,
     # which may be pointing to the qb parent process)
-    STDOUT.print JSON.dump(self.class.stringify_keys(hash))
+    STDOUT.print JSON.pretty_generate(self.class.stringify_keys(hash))
     
     [
       [:stdin, @qb_stdio_in],
