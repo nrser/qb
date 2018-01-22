@@ -1,0 +1,10 @@
+##
+# Get the output dir for a `yard` installation
+##
+
+- name: >-
+    See if `output-dir` is specified in `{{ yard_opts_file_path }}`
+  vars.rb:
+    bind:
+      path: >-
+        {{ yard_opts_file_path }}

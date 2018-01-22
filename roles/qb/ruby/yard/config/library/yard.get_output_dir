@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+# WANT_JSON
+
+# init bundler in dev env
+if ENV['QB_DEV_ENV']
+  ENV.each {|k, v|
+    if k.start_with? 'QB_DEV_ENV_'
+      ENV[k.sub('QB_DEV_ENV_', '')] = v
+    end
+  }
+  require 'bundler/setup'
+end
+
+require 'qb'
+require 'nrser'
+
+class YardGetOutputDir < QB::Ansible::Module
+
+  arg :bundle_root, NRSER::Types.abs_path
+  
+  def facts_for rel_dir
+    {
+      yard_output_dir: rel_dir,
+      yard_output_abs_dir: File.expand_path( rel_dir, @bundle_root ),
+    }
+  end
+  
+  def default_facts
+    facts_for 'doc'
+  end
+  
+  # entry point for the module. invoked by {\#run}.
+  # 
+  # @return [nil | {Symbol => #to_json}]
+  #   when returning:
+  #   
+  #   -   `nil`: module will successfully exit with no additional changes.
+  #       
+  #   -   `{Symbol => #to_json}`: Hash will be merged over @facts that
+  #       are returned by the module to be set in the Ansible runtime and
+  #       the module will exit successfully.
+  #       
+  def main
+    path = File.join @bundle_root, '.yardopts'
+    
+    if File.exists?  path
+      contents = File.read path
+      match = /^\-\-output-dir[\s\=](.*)$/.match contents
+      
+      if match
+        return facts_for( match[1] )
+      end
+    end
+    
+    default_facts
+  end # #main
+end # YardGetOutputDir
+
+YardGetOutputDir.new.run

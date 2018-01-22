@@ -1,0 +1,27 @@
+---
+##############################################################################
+# Main tasks for `qb/ruby/yard/clean` role
+##############################################################################
+
+- name: >-
+    Remove `{{ bundle_root }}/.yardoc`
+  file:
+    path: >-
+      {{ bundle_root }}/.yardoc
+    state: absent
+
+- when: yard_output_abs_dir is not defined
+  yard.get_output_dir:
+    bundle_root: >-
+      {{ bundle_root }}
+
+- name: >-
+    Remove generated documents
+  stream:
+    cmd: git clean -fdX <%= path %>
+    kwds:
+      path: >-
+        {{ yard_output_dir }}
+    chdir: >-
+      {{ bundle_root }}
+    log: true

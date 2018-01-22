@@ -1,0 +1,30 @@
+##
+# Create
+##
+
+- name: >-
+    Make sure the `yard` opts file at `{{ yard_opts_file_path }}` contains
+    the "-" line that separates options from args, creating if needed
+  lineinfile:
+    path: >-
+      {{ yard_opts_file_path }}
+    line: '-'
+    insertafter: EOF
+    create: true
+
+- name: >-
+    Stat README.md
+  stat:
+    path: >-
+      {{ bundle_root | path_join( 'README.md' ) }}
+  register: yard_setup_readme_stat
+
+- when: >-
+    yard_setup_readme_stat.stat.exists
+  name: >-
+    Add README.md to `{{ yard_opts_file_path }}`
+  lineinfile:
+    path: >-
+      {{ yard_opts_file_path }}
+    line: README.md
+    insertafter: '^\-\s?$'

@@ -3,6 +3,7 @@
 
 allow_duplicates: yes
 
-dependencies: []
+dependencies:
+- role: qb/ruby/yard/config
 # - role: qb/__init__
 #   qb_role_name: qb/ruby/yard

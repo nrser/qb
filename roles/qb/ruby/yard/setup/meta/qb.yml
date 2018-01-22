@@ -5,7 +5,8 @@
 #
 
 # description of the role to show in it's help output.
-description: null
+description: >-
+  Setup the `yard` Ruby documentation system for a gem or app.
 
 # Gemspec-style requirements. Right now only `gems:qb` is used, but plan to
 # generalize in the future.
@@ -41,8 +42,7 @@ var_prefix: yard
 #         directories, use the first one that contains FILENAME. error
 #         if none is found.
 default_dir:
-- find_up: '*.gemspec'
-- find_up: Gemfile
+  from_role: qb/ruby/yard/config
 
 # If `true`, QB will ensure the default dir exists before starting the play.
 #

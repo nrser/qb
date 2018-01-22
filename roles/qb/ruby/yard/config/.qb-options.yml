@@ -1,0 +1,4 @@
+---
+qb/role/qb:
+  modules:
+  - yard.get_output_dir

@@ -1,0 +1,9 @@
+---
+##############################################################################
+# Ansible metadata for `qb/ruby/yard/clean` role
+##############################################################################
+
+allow_duplicates: yes
+
+dependencies:
+- role: qb/ruby/yard/config

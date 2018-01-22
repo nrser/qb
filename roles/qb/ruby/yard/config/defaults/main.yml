@@ -1,0 +1,15 @@
+---
+##############################################################################
+# Variable defaults for `qb/ruby/yard/config` role
+#
+# @see http://docs.ansible.com/ansible/latest/playbooks_reuse_roles.html#role-default-variables
+# 
+##############################################################################
+
+bundle_root: >-
+  {{ qb_dir }}
+
+yard_opts_file_rel_path: .yardopts
+
+yard_opts_file_path: >-
+  {{ bundle_root | path_join( yard_opts_file_rel_path ) }}
