@@ -194,7 +194,7 @@ Gem::Specification.new do |spec|
   # Runtime Dependencies
   # ----------------------------------------------------------------------------
   
-  spec.add_dependency "cmds",             '~> 0.0', ">= 0.2.5"
+  spec.add_dependency "cmds",             '~> 0.0', ">= 0.2.7"
   spec.add_dependency "nrser",            '~> 0.1', ">= 0.1.2"
   spec.add_dependency "nrser-extras",     '~> 0.0', ">= 0.0.3"
   spec.add_dependency "state_mate",       '~> 0.0', ">= 0.1.0"
