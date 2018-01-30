@@ -12,6 +12,7 @@
     insertafter: EOF
     create: true
 
+
 - name: >-
     Stat README.md
   stat:
@@ -19,12 +20,40 @@
       {{ bundle_root | path_join( 'README.md' ) }}
   register: yard_setup_readme_stat
 
+
 - when: >-
     yard_setup_readme_stat.stat.exists
   name: >-
     Add README.md to `{{ yard_opts_file_path }}`
   lineinfile:
-    path: >-
+    dest: >-
       {{ yard_opts_file_path }}
     line: README.md
     insertafter: '^\-\s?$'
+
+
+- name: >-
+    Add `doc/**/*.md` extra files to `{{ yard_opts_file_path }}`
+  lineinfile:
+    dest: >-
+      {{ yard_opts_file_path }}
+    line: 'doc/**/*.md'
+    insertafter: '^\-\s?$'
+
+
+- name: >-
+    Set `plugin`, `markup-provider`, `output-dir` and `markup` settings in
+    {{ yard_opts_file_path }}
+  with_dict:
+    output-dir: >-
+      {{ yard_output_rel_dir }}
+    plugin: yard-commonmarker
+    markup-provider: commonmarker
+    markup: markdown
+  lineinfile:
+    path: >-
+      {{ yard_opts_file_path }}
+    line: >-
+      --{{ item.key }} {{ item.value }}
+    regexp: '^--{{ item.key | regex_escape() }}[\ \=]'
+    insertbefore: '^\-\s?$'

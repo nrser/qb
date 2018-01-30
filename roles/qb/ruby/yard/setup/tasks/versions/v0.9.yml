@@ -30,24 +30,3 @@
     ruby_dep_version:   "{{ dep.value.version | default( None ) }}"
     ruby_dep_dev:       true
     ruby_dep_comment:   "{{ dep.value.comment | default( None ) }}"
-
-
-- name: >-
-    Make sure `{{ yard_opts_file_path }}` is in place and has basics
-  include_tasks: >-
-    {{ role_path }}/tasks/yardopts.yml
-
-- name: >-
-    Set `plugin`, `markup-provider` and `markup` settings in
-    {{ yard_opts_file_path }}
-  with_dict:
-    plugin: yard-commonmarker
-    markup-provider: commonmarker
-    markup: markdown
-  lineinfile:
-    path: >-
-      {{ yard_opts_file_path }}
-    line: >-
-      --{{ item.key }} {{ item.value }}
-    regexp: '^--{{ item.key | regex_escape() }}[\ \=]'
-    insertafter: '^\-\s?$'

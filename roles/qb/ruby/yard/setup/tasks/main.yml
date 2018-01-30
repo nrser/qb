@@ -5,3 +5,31 @@
     Include tasks for Yard version {{ yard_version }}
   include_tasks: >-
     {{ role_path }}/tasks/versions/v{{ yard_version }}.yml
+
+
+- name: >-
+    Configure `{{ yard_opts_file_path }}`
+  include_tasks: >-
+    {{ role_path }}/tasks/yardopts.yml
+
+
+- name: >-
+    Ensure `{{ bundle_root }}/doc` is a directory
+  file:
+    path: >-
+      {{ bundle_root }}/doc
+    state: directory
+
+
+- name: >-
+    Add overrides to `{{ bundle_root }}/.gitignore` to make sure `/doc/` is
+    tracked and ignore `/doc/site/`
+  with_items:
+  - "!/doc/"
+  - "/{{ yard_output_rel_dir }}/"
+  lineinfile:
+    dest: >-
+      {{ bundle_root }}/.gitignore
+    line: >-
+      {{ item }}
+    insertafter: EOF
