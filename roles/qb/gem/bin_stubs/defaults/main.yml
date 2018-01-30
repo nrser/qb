@@ -1,7 +1,0 @@
----
-# defaults file for qb/gem/bin_stubs
-
-gem_root: >-
-  {{ qb_dir }}
-
-force: false

@@ -1,8 +1,0 @@
----
-# meta file for qb/gem/bin_stubs
-
-allow_duplicates: yes
-
-dependencies: []
-# - role: role-name
-

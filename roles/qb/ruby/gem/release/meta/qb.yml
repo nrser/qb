@@ -1,0 +1,21 @@
+---
+# meta/qb.yml file for qb/ruby/gem/release
+# 
+# qb settings for this role. see README.md for more info.
+#
+
+# prefix for role variables
+var_prefix: null
+
+# how to get a default for `dir` if it's not provided as the 
+default_dir: null
+
+# set to false to not save options in /Users/nrser/dev/gh/nrser/qb/roles/qb/ruby/gem/release/.qb-options.yml
+save_options: true
+
+vars: []
+# - name: example
+#   description: an example of a variable.
+#   required: false
+#   type: boolean # boolean (default) | string
+#   short: e

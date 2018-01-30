@@ -1,0 +1,12 @@
+---
+##############################################################################
+# Variable defaults for `qb/ruby/gem/build` role
+##############################################################################
+
+# Default the gem root to the DIRECTORY from QB
+gem_root: >-
+  {{ qb_dir }}
+
+# Where to move the built gem to
+gem_build_dest: >-
+  {{ gem_root }}/pkg

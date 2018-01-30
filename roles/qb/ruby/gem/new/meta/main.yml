@@ -1,0 +1,8 @@
+---
+# meta file for qb/ruby/gem/new
+
+allow_duplicates: yes
+
+dependencies: []
+# - role: role-name
+

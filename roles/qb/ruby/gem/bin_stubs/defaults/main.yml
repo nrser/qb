@@ -1,0 +1,7 @@
+---
+# defaults file for qb/ruby/gem/bin_stubs
+
+gem_root: >-
+  {{ qb_dir }}
+
+force: false
