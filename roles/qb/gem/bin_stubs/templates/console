@@ -1,22 +1,30 @@
 #!/usr/bin/env ruby
 
 require "bundler/setup"
-require 'nrser'
+
+# Load `nrser` gem and use refinements if it's available
+begin
+  require 'nrser'
+rescue LoadError => error
+  puts "WARN -- Failed to load `nrser` gem."
+  puts "WARN -- Add it do your dependencies or edit #{ __FILE__ }"
+else
+  using NRSER
+  using NRSER::Types
+end
+
 require '{{ qb_gem_info.name }}'
-
-
-require 'nrser/refinements'
-using NRSER
-
 
 # You can add fixtures and/or initialization code here to make experimenting
 # with your gem easier. You can also use a different console, if you like.
 
-# (If you use this, don't forget to add pry to your Gemfile!)
+# Load `pry` if it's available, falling back to `irb`
 begin
   require "pry"
 rescue LoadError => error
-  puts "Failed to load `pry` gem - add it to your Gemfile or edit this file"
+  puts "WARN -- Failed to load `pry` gem."
+  puts "WARN -- Add it do your dependencies or edit #{ __FILE__ }"
+  puts "INFO -- Starting `IRB`..."
   
   require "irb"
   IRB.start
