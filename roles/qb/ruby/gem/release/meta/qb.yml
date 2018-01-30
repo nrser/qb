@@ -4,16 +4,22 @@
 # qb settings for this role. see README.md for more info.
 #
 
-# prefix for role variables
-var_prefix: null
+description: |
+  Release a gem, handling version change, tagging, committing, pushing, etc.
+  
+  Depends on `rake` and `bundler` gems, using the `release` task that
+  {Bundler::GemHelpers} provides.
 
-# how to get a default for `dir` if it's not provided as the 
+# prefix for role variables
+var_prefix: gem_release
+
+# how to get a default for `dir` if it's not provided as the
 default_dir: null
 
-# set to false to not save options in /Users/nrser/dev/gh/nrser/qb/roles/qb/ruby/gem/release/.qb-options.yml
-save_options: true
+# Set to false to not save options
+save_options: false
 
-vars: []
+options:
 # - name: example
 #   description: an example of a variable.
 #   required: false
