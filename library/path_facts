@@ -26,9 +26,6 @@ class Result < OpenStruct
   end
 end
 
-GITHUB_SSH_URL_RE = /^git@github\.com\:(?<owner>.*)\/(?<name>.*)\.git$/
-GITHUB_HTTPS_URL_RE = /^https:\/\/github\.com\/(?<owner>.*)\/(?<name>.*)\.git$/
-
 
 class PathFacts < QB::Ansible::Module
   # Add a bunch of useful things to know about the path
@@ -62,93 +59,6 @@ class PathFacts < QB::Ansible::Module
   def add_git_facts
     @result.git = QB::Repo::Git.from_path @path,
                                           use_github_api: !!@args['github_api']
-  end
-  
-  
-  # If the path is part of a Git repo, as well as useful general
-  # Git environment facts.
-  def add_git_facts_old
-    # see if we're in a git repo. first, we need a directory that exists
-    dir = @path.expand_path.ascend.find {|p| p.directory? }
-    
-    Dir.chdir(dir) do
-      root_result = Cmds.capture "git rev-parse --show-toplevel"
-      
-      unless root_result.ok?
-        @result.in_git_repo = false
-        @result.is_git_root = false
-        return
-      end
-      
-      @result.in_git_repo = true
-      
-      git = @result.git = Result.new
-      git.root = Pathname.new root_result.out.chomp
-      @result.is_git_root = @path == git.root
-      
-      user = git.user = Result.new
-      
-      ['name', 'email'].each {|key|
-        user[key] = begin
-          Cmds.chomp! "git config user.#{ key }"
-        rescue
-        end
-      }
-      
-      git.is_clean = Cmds.chomp!('git status --porcelain 2>/dev/null').empty?
-      
-      rev_parse = Cmds.capture 'git rev-parse HEAD'
-      
-      if rev_parse.ok?
-        git.head = rev_parse.out.chomp
-        git.head_short = git.head[0...7]
-      else
-        git.head = git.head_short = nil
-      end
-      
-      branch = Cmds.capture 'git branch --no-color 2> /dev/null'
-      
-      git.branch = if branch.ok?
-        if line = branch.out.lines.find {|line| line.start_with? '*'}
-          if m = line.match(/\*\s+(\S+)/)
-            m[1]
-          end
-        end
-      end
-      
-      git.origin = begin
-        Cmds.chomp! "git remote get-url origin"
-      rescue
-      end
-      
-      match = GITHUB_SSH_URL_RE.match(git.origin) ||
-              GITHUB_HTTPS_URL_RE.match(git.origin)
-      
-      git.is_github = !! match
-      
-      return unless match
-      
-      git.owner = match['owner']
-      git.name = match['name']
-      git.full_name = "#{ git.owner }/#{ git.name }"
-      
-      if true == @args['github_api']
-        github = git.github = Result.new
-        github.api_url = "https://api.github.com/repos/#{ git.owner }/#{ git.name }"
-        
-        response = Net::HTTP.get_response URI(github.api_url)
-        
-        if response.is_a? Net::HTTPSuccess
-          # parse response body and add everything to github result
-          parsed = JSON.parse response.body
-          parsed.each {|k, v| github[k] = v}
-        else
-          # assume it's private if we failed to find it
-          github.private = true
-        end
-        
-      end
-    end
   end
   
   

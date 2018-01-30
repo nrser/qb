@@ -17,10 +17,7 @@ require 'qb/util/resource'
 # Refinements
 # =======================================================================
 
-require 'nrser/refinements'
 using NRSER
-
-require 'nrser/refinements/types'
 using NRSER::Types
 
 
@@ -37,16 +34,33 @@ class QB::Repo < QB::Util::Resource; end
 # Encapsulate information about a Git repository and expose useful operations as
 # instance methods.
 # 
-# The main entry point is {QB::Repo::Git.from_path}, which creates a 
+# The main entry point is {QB::Repo::Git.from_path}, which creates a
 # 
 class QB::Repo::Git < QB::Repo
-  GITHUB_SSH_URL_RE = /^git@github\.com\:(?<owner>.*)\/(?<name>.*)\.git$/
-  GITHUB_HTTPS_URL_RE = /^https:\/\/github\.com\/(?<owner>.*)\/(?<name>.*)\.git$/
+  autoload :User, 'qb/repo/git/user'
+  autoload :GitHub, 'qb/repo/git/github'
   
-  class User < QB::Util::Resource
-    prop :name, type: t.maybe(t.str), default: nil
-    prop :email, type: t.maybe(t.str), default: nil
-  end
+  # Props
+  # =====================================================================
+  
+  prop :user, type: User
+  prop :head, type: t.maybe(t.str)
+  prop :branch, type: t.maybe(t.str)
+  prop :origin, type: t.maybe(t.str)
+  prop :owner, type: t.maybe(t.str)
+  prop :github, type: t.maybe(t.hash_)
+  
+  
+  # Derived Properties
+  # ---------------------------------------------------------------------
+  
+  prop :head_short, type: t.maybe(t.str), source: :head_short
+  prop :full_name,  type: t.maybe(t.str), source: :full_name
+  prop :is_github,  type: t.bool,         source: :github?
+  prop :is_clean,   type: t.bool,         source: :clean?
+  
+  
+
   
   
   # class GitHubRemote < NRSER::Meta::Props::Base
@@ -64,11 +78,11 @@ class QB::Repo::Git < QB::Repo
   #   # =====================================================================
   #   
   #   # Test if a Git SSH or HTTPS remote url points to GitHub.
-  #   # 
+  #   #
   #   # @param [String] url
-  #   # 
+  #   #
   #   # @return [Boolean]
-  #   # 
+  #   #
   #   def self.url? url
   #     SSH_URL_RE.match(url) || HTTPS_URL_RE.match(url)
   #   end # .url?
@@ -76,13 +90,13 @@ class QB::Repo::Git < QB::Repo
   #   
   #   # Instantiate an instance from a Git SSH or HTTPS remote url that points
   #   # to GitHub.
-  #   # 
+  #   #
   #   # @param [type] arg_name
   #   #   @todo Add name param description.
-  #   # 
+  #   #
   #   # @return [QB::Repo::Git::GitHubRemote]
   #   #   @todo Document return value.
-  #   # 
+  #   #
   #   def self.from_url url, use_api: false
   #     match = SSH_URL_RE.match(git.origin) ||
   #             HTTPS_URL_RE.match(git.origin)
@@ -104,13 +118,13 @@ class QB::Repo::Git < QB::Repo
   #   
   #   
   #   # @todo Document full_name method.
-  #   # 
+  #   #
   #   # @param [type] arg_name
   #   #   @todo Add name param description.
-  #   # 
+  #   #
   #   # @return [return_type]
   #   #   @todo Document return value.
-  #   # 
+  #   #
   #   def full_name arg_name
   #     "#{ owner }/#{ name }"
   #   end # #full_name
@@ -139,8 +153,8 @@ class QB::Repo::Git < QB::Repo
   #   the {QB::Repo::Git#github} property for repos that have a GitHub origin
   #   URL.
   #   
-  #   Otherwise we will just assume GitHub repos are private since it's the 
-  #   safe guess, resulting in a {QB::Repo::Git#github} value of 
+  #   Otherwise we will just assume GitHub repos are private since it's the
+  #   safe guess, resulting in a {QB::Repo::Git#github} value of
   #   `{private: true}`.
   # 
   # @return [QB::Repo::Git]
@@ -150,7 +164,7 @@ class QB::Repo::Git < QB::Repo
   #   If `path` is not in a Git repo.
   # 
   # @raise [QB::FSStateError]
-  #   -   If we can't find any existing directory to look in based on 
+  #   -   If we can't find any existing directory to look in based on
   #       `input_path`.
   # 
   def self.from_path path, use_github_api: false
@@ -283,7 +297,7 @@ class QB::Repo::Git < QB::Repo
   # @return [QB::Repo::Git]
   # 
   # @raise [QB::FSStateError]
-  #   -   If we can't find any existing directory to look in based on 
+  #   -   If we can't find any existing directory to look in based on
   #       `input_path`.
   #       
   #   -   If the directory we do find to look in does not seems to be part of
@@ -300,26 +314,6 @@ class QB::Repo::Git < QB::Repo
   end # #from_path!
   
   
-  # Props
-  # =====================================================================
-  
-  prop :user, type: User
-  prop :is_clean, type: t.bool
-  prop :head, type: t.maybe(t.str)
-  prop :branch, type: t.maybe(t.str)
-  prop :origin, type: t.maybe(t.str)
-  prop :owner, type: t.maybe(t.str)
-  prop :github, type: t.maybe(t.hash_)
-  
-  
-  # Derived Properties
-  # ---------------------------------------------------------------------
-  
-  prop :head_short, type: t.maybe(t.str), source: :head_short
-  prop :full_name, type: t.maybe(t.str), source: :full_name
-  prop :is_github, type: t.bool, source: :github?
-  
-  
   # Instance Methods
   # =====================================================================
   
@@ -331,11 +325,22 @@ class QB::Repo::Git < QB::Repo
     head[0...7] if head
   end
   
+  
+  # Always returns `false`, where {QB::Repo::Git::GitHub#github?} always
+  # returns `true`.
+  # 
+  # Use {.from_path} to construct instances so you end up with the right
+  # class.
+  # 
+  # @return [false]
+  # 
   def github?
-    !github.nil?
+    # origin && QB::Repo::Git::GitHub.url?( origin )
+    false
   end
   
-  def api    
+  
+  def api
     @api ||= ::Git.open root_path
   end
   
@@ -343,11 +348,28 @@ class QB::Repo::Git < QB::Repo
   # Reading Repo State
   # ---------------------------------------------------------------------
   
+  def status
+    Cmds.new( 'git status --porcelain', chdir: root_path ).
+      out!.lines.map( &:chomp ).map { |line|
+        m = /\A\s*(?<mode>\S+)\s*(?<path>.*)\z/.match line
+        
+        [m['path'], m['mode']]
+      }.to_h
+  end
+  
+  
   # @return [Boolean]
   #   `false` if the repo has any uncommitted changes or untracked files.
   # 
-  def clean?
-    is_clean
+  def clean? ignore: nil
+    if ignore
+      ignore = [*ignore]
+      status.reject { |path, mode|
+        ignore.any? { |pattern| File.fnmatch? pattern, path }
+      }.empty?
+    else
+      status.empty?
+    end
   end
   
   
@@ -356,9 +378,3 @@ class QB::Repo::Git < QB::Repo
   end
   
 end # class QB::Repo::Git
-
-
-# Post-Processing
-# =======================================================================
-
-require 'qb/repo/git/github'

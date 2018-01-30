@@ -3,36 +3,22 @@
 
 # Stdlib
 # -----------------------------------------------------------------------
-
 require 'pathname'
-
 
 # Deps
 # -----------------------------------------------------------------------
-
 require 'nrser'
-
 
 # Package
 # -----------------------------------------------------------------------
-
 require 'qb/repo/git'
 
 
 # Refinements
 # =======================================================================
 
-require 'nrser/refinements'
 using NRSER
-
-require 'nrser/refinements/types'
 using NRSER::Types
-
-
-# Declarations
-# =======================================================================
-
-module QB; end
 
 
 # Definitions
@@ -62,7 +48,7 @@ class QB::Path < Pathname
   # and where the instance was created, which may be on a totally different
   # system if the instance was loaded from data.
   # 
-  # TODO  Not totally flushed out yet, could imagine a lot of problems and 
+  # TODO  Not totally flushed out yet, could imagine a lot of problems and
   #       weirdness, but it seems like we need something like this to make
   #       instances transportable. Issues with relative paths come to mind...
   # 
@@ -73,7 +59,7 @@ class QB::Path < Pathname
   # The raw path argument used to instantiate the path object.
   # 
   # NOTE  Because we reduce {Pathname} instances to {String} when converting
-  #       to data, there is some lossy-ness. I guess it's similar to how 
+  #       to data, there is some lossy-ness. I guess it's similar to how
   #       symbols and strings all become strings when run through {JSON}
   #       dump and load.
   # 
@@ -120,6 +106,10 @@ class QB::Path < Pathname
         type: t.bool,
         source: :cwd?
   
+  prop  :is_symlink,
+        type: t.bool,
+        source: :symlink?
+  
   prop  :relative,
         type: t.maybe( t.path ),
         source: :relative,
@@ -163,7 +153,7 @@ class QB::Path < Pathname
   #   The {#raw} value is passed up to {Pathname#initialize}.
   #   
   #   {#cwd} is accepted in `values`, allowing a re-instantiated object to
-  #   "make sense" when the process' current directory may no longer be the 
+  #   "make sense" when the process' current directory may no longer be the
   #   one that data was constructed against.
   #   
   #   {#cwd} defaults to the current directory (via {Pathname.getwd}) if not
@@ -254,6 +244,8 @@ class QB::Path < Pathname
     Pathname.new self
   end
   
+  alias_method :pathname, :path
+  
   
   # Composed Sub-Instances
   # ---------------------------------------------------------------------
@@ -285,4 +277,3 @@ class QB::Path < Pathname
   end
   
 end # class QB::Path
-

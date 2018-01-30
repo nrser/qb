@@ -25,7 +25,7 @@ using NRSER::Types
 # Definitions
 # =======================================================================
 
-# Git repo where the `origin` remote points to GitHub, which is used to 
+# Git repo where the `origin` remote points to GitHub, which is used to
 # determine it's owner and name.
 # 
 class QB::Repo::Git::GitHub < QB::Repo::Git
@@ -55,12 +55,12 @@ class QB::Repo::Git::GitHub < QB::Repo::Git
   # ---------------------------------------------------------------------
   
   def self.ssh_url? string
-    SSH_URL_RE =~ string
+    !!(SSH_URL_RE =~ string)
   end
   
   
   def self.https_url? string
-    HTTPS_URL_RE =~ string
+    !!(HTTPS_URL_RE =~ string)
   end
   
   
@@ -122,6 +122,15 @@ class QB::Repo::Git::GitHub < QB::Repo::Git
   # Instance Methods
   # ======================================================================
   
+  # Part of the {QB::Repo::Git} API, always `true` for GitHub instances.
+  # 
+  # @return [true]
+  # 
+  def github?
+    true
+  end
+  
+  
   def api
     QB::GitHub::API.client.repo repo_id.path
   end
@@ -134,4 +143,3 @@ class QB::Repo::Git::GitHub < QB::Repo::Git
   
   
 end # class QB::Repo::Git::GitHub
-

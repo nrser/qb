@@ -6,23 +6,18 @@
 
 # Deps
 # -----------------------------------------------------------------------
+require 'nrser'
 
 # Project / Package
 # -----------------------------------------------------------------------
+require 'qb/util/resource'
 
 
 # Refinements
 # =======================================================================
 
-require 'nrser/refinements'
 using NRSER
-
-require 'nrser/refinements/types'
 using NRSER::Types
-
-
-# Declarations
-# =======================================================================
 
 
 # Definitions
@@ -30,6 +25,7 @@ using NRSER::Types
 
 # @todo document QB::Repo class.
 class QB::Repo < QB::Util::Resource
+  autoload :Git, 'qb/repo/git'
   
   # Constants
   # ======================================================================
@@ -83,14 +79,14 @@ class QB::Repo < QB::Util::Resource
   #   User-provided path value used to construct the resource instance, if any.
   #   
   #   This may not be the same as a root path for the resource, such as with
-  #   resource classes that can be constructed from any path *inside* the 
+  #   resource classes that can be constructed from any path *inside* the
   #   directory, like a {QB::Repo::Git}.
   #   
   #   @return [String | Pathname]
   #     If the resource instance was constructed based on a path argument.
   #   
   #   @return [nil]
-  #     If the resource instance was *not* constructed based on a path 
+  #     If the resource instance was *not* constructed based on a path
   #     argument.
   #   
   prop  :ref_path, type: t.maybe( t.path )
@@ -129,9 +125,3 @@ class QB::Repo < QB::Util::Resource
   
   
 end # class QB::Repo
-
-
-# Post-Processing
-# =======================================================================
-
-require 'qb/repo/git'

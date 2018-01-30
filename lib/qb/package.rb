@@ -18,17 +18,8 @@ require_relative './package/version'
 # Refinements
 # =======================================================================
 
-require 'nrser/refinements'
 using NRSER
-
-require 'nrser/refinements/types'
 using NRSER::Types
-
-
-# Declarations
-# =======================================================================
-
-module QB; end
 
 
 # Definitions
@@ -54,14 +45,14 @@ class QB::Package < QB::Util::Resource
   #   User-provided path value used to construct the resource instance, if any.
   #   
   #   This may not be the same as a root path for the resource, such as with
-  #   resource classes that can be constructed from any path *inside* the 
+  #   resource classes that can be constructed from any path *inside* the
   #   directory, like a {QB::Repo::Git}.
   #   
   #   @return [String | Pathname]
   #     If the resource instance was constructed based on a path argument.
   #   
   #   @return [nil]
-  #     If the resource instance was *not* constructed based on a path 
+  #     If the resource instance was *not* constructed based on a path
   #     argument.
   #   
   prop  :ref_path, type: t.maybe( t.dir_path )
@@ -144,7 +135,7 @@ class QB::Package < QB::Util::Resource
   
   # Relative path from the {#repo} root to the {#root_path}.
   # 
-  # Used as the version tag prefix (unless it's `.` - when the repo root is 
+  # Used as the version tag prefix (unless it's `.` - when the repo root is
   # the root path).
   # 
   # @return [Pathname]
@@ -159,7 +150,7 @@ class QB::Package < QB::Util::Resource
   # Only makes any sense if the package is in a recognized repo, and will error
   # out if that's not the case.
   # 
-  # The most basic prefix is "v" for packages located at the root of the 
+  # The most basic prefix is "v" for packages located at the root of the
   # repository.
   # 
   # @example
@@ -230,4 +221,3 @@ end # class QB::Package
 # =======================================================================
 
 require_relative './package/gem'
-
