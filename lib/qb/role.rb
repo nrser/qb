@@ -47,7 +47,7 @@ class QB::Role
   # Constants
   # =====================================================================
   
-  # Array of string paths to directories to search for roles or paths to 
+  # Array of string paths to directories to search for roles or paths to
   # `ansible.cfg` files to look for an extract role paths from.
   # 
   # For the moment at least you can just mutate this value like you would
@@ -60,8 +60,8 @@ class QB::Role
   # 
   # **WARNING**
   # 
-  #   Search is **deep** - don't point this at large directory trees and 
-  #   expect any sort of reasonable performance (any directory that 
+  #   Search is **deep** - don't point this at large directory trees and
+  #   expect any sort of reasonable performance (any directory that
   #   contains `node_modules` is usually a terrible idea for instance).
   # 
   BUILTIN_PATH = [
@@ -131,7 +131,7 @@ class QB::Role
   ].freeze
   
   
-  # Array of string paths to directories to search for roles or paths to 
+  # Array of string paths to directories to search for roles or paths to
   # `ansible.cfg` files to look for an extract role paths from.
   # 
   # Value is a duplicate of the frozen {QB::Role::BUILTIN_PATH}. You can
@@ -147,8 +147,8 @@ class QB::Role
   # 
   # **WARNING**
   # 
-  #   Search is **deep** - don't point this at large directory trees and 
-  #   expect any sort of reasonable performance (any directory that 
+  #   Search is **deep** - don't point this at large directory trees and
+  #   expect any sort of reasonable performance (any directory that
   #   contains `node_modules` is usually a terrible idea for instance).
   # 
   PATH = BUILTIN_PATH.dup
@@ -157,7 +157,7 @@ class QB::Role
   # Class Methods
   # =======================================================================
   
-  # Reset {QB::Role::PATH} to the original built-in values in 
+  # Reset {QB::Role::PATH} to the original built-in values in
   # {QB::Role::BUILTIN_PATH}.
   # 
   # Created for testing but might be useful elsewhere as well.
@@ -206,7 +206,7 @@ class QB::Role
   #     i.  ./dev/roles/tmp
   #         -   used for roles that are downloaded but shouldn't be included
   #             in source control.
-  # 3.  
+  # 3.
   # 
   # @return [Array<Pathname>]
   #   places to look for role dirs.
@@ -237,7 +237,7 @@ class QB::Role
         ['', '.yml', '.yaml'].flat_map { |ext|
           Pathname.glob(search_dir.join '**', 'meta', "qb#{ ext }").
             map {|meta_path|
-              [meta_path.dirname.dirname, search_dir: search_dir] 
+              [meta_path.dirname.dirname, search_dir: search_dir]
             }
         }
       }.
@@ -261,19 +261,19 @@ class QB::Role
       return [role] if role.display_path.to_s == input
     }
     
-    # create an array of "separator" variations to try *exact* matching 
+    # create an array of "separator" variations to try *exact* matching
     # against. in order of preference:
     # 
     # 1.  exact input
     #     -   this means if you ended up with roles that actually *are*
-    #         differnetiated by '_/-' differences (which, IMHO, is a 
+    #         differnetiated by '_/-' differences (which, IMHO, is a
     #         horrible fucking idea), you can get exactly what you ask for
     #         as a first priority
     # 2.  input with '-' changed to '_'
     #     -   prioritized because convetion is to underscore-separate
     #         role names.
     # 3.  input with '_' changed to '-'
-    #     -   really just for convience's sake so you don't really have to 
+    #     -   really just for convience's sake so you don't really have to
     #         remember what separator is used.
     #     
     separator_variations = [
@@ -289,7 +289,7 @@ class QB::Role
       }.each { |role|
         # exact match without the namespace prefix ('qb.' or similar)
         return [role] if role.namespaceless == variation
-      }  
+      }
     }
     
     # see if we prefix match any full names
@@ -306,7 +306,7 @@ class QB::Role
         role.namespaceless.start_with? variation
       }
       unless namespaceless_prefix_matches.empty?
-        return namespaceless_prefix_matches 
+        return namespaceless_prefix_matches
       end
     }
     
@@ -370,7 +370,7 @@ class QB::Role
   end # .require
   
   
-  # Get the include path for an included role based on the 
+  # Get the include path for an included role based on the
   # option metadata that defines the include and the current
   # include path.
   # 
@@ -385,7 +385,7 @@ class QB::Role
   # @return [Array<string>]
   #   include path for the included role.
   # 
-  def self.get_include_path role, option_meta, current_include_path      
+  def self.get_include_path role, option_meta, current_include_path
     new_include_path = if option_meta.key? 'as'
       case option_meta['as']
       when nil, false
@@ -549,7 +549,7 @@ class QB::Role
   # in meta.
   def var_prefix
     # ugh, i was generating meta/qb.yml files that set 'var_prefix' to
-    # `null`, but it would be nice to 
+    # `null`, but it would be nice to
     # 
     meta_or 'var_prefix', namespaceless
   end
@@ -744,7 +744,7 @@ class QB::Role
   end
   
   
-  # Parsed tree structure of version requirements of the role from the 
+  # Parsed tree structure of version requirements of the role from the
   # `requirements` value in the QB meta data.
   # 
   # @return [Hash]
@@ -767,7 +767,7 @@ class QB::Role
   #   If the version of Ansible found does not satisfy the role's requirements.
   # 
   # @raise [QB::QBVersionError]
-  #   If the the version of QB we're running does not satisfy the role's 
+  #   If the the version of QB we're running does not satisfy the role's
   #   requirements.
   # 
   def check_requirements
@@ -825,7 +825,7 @@ class QB::Role
     # all. you need to use `false` if you want to tell QB not to do something.
     # 
     # @param [String | Symbol | Array<String | Symbol>] keys
-    #   Single 
+    #   Single
     # 
     # @return [Object]
     # 
@@ -858,7 +858,7 @@ class QB::Role
       end
       
       raise QB::Role::MetadataError.squished <<-END
-        Expected metadata for role #{ self } to define (non-null) value for 
+        Expected metadata for role #{ self } to define (non-null) value for
         one of keys #{ keys.inspect }.
       END
     end # need_meta
