@@ -1,0 +1,42 @@
+##
+# Do the release by invoking `rake release` if there's a `Rakefile`, and
+# otherwise by executing a small script that manually loads up the
+# {Bundler::GemHelper} tasks and execute the `release` task.
+# 
+# NOTE  This will *still* fail if the `rake` gem isn't present at all, but
+#       it's installed by default in all generated gems, so it seems like a
+#       decent bet it will be there.
+# 
+##
+
+- name: >-
+    See if there is a `Rakefile` in `{{ gem_root }}`
+  stat:
+    path: >-
+      {{ gem_root }}/Rakefile
+  register: gem_rakefile_stat_res
+
+
+- when: gem_rakefile_stat_res.stat.exists
+  name: >-
+    Release via `bundle exec rake release` task
+  stream:
+    log: true
+    chdir: >-
+      {{ gem_root }}
+    cmd: bundle exec rake release
+
+
+- when: not gem_rakefile_stat_res.stat.exists
+  name: >-
+    Release by executing a small script that calls the Rake release task
+  stream:
+    chdir: >-
+      {{ gem_root }}
+    stream:
+      log: true
+      cmd: bundle exec ruby -e <%= script %>
+      kwds:
+        script: |
+          Bundler::GemHelper.install_tasks
+          Rake::Task['release'].execute

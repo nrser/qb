@@ -147,11 +147,9 @@
 
 
 - name: >-
-    Release with Bundler via `bundle exec rake release`.
-  shell: bundle exec rake release
-  args:
-    chdir: >-
-      {{ gem_root }}
+    Do the actual release via Rake and Bundler's gem helper tasks
+  include_tasks: >-
+    {{ role_path }}/tasks/release.yml
 
 
 - name: >-
