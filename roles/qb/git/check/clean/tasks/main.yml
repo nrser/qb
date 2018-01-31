@@ -1,13 +1,30 @@
 ---
 # tasks file for qb/git/check/clean
 
-- name: >
-    Get git status for repo {{ git_root }}
-  shell: git status --porcelain 2>/dev/null
-  args:
-    chdir: "{{ git_root }}"
-  register: git_check_clean_status
-  changed_when: false
+- path_facts:
+    path: >-
+      {{ git_root }}
+  register: git_root_facts
+
+- set_fact:
+    git_check_clean: >-
+      {{
+        git_root_facts.git
+          | qb_send( 'clean?', ignore=git_check_clean_ignore )
+      }}
+
+# - name: >
+#     Get git status for repo {{ git_root }}
+#   shell: >-
+#     git status
+#     {% if git_check_clean_ignore_submodules %}
+#       --ignore-submodules
+#     {% endif %}
+#     --porcelain 2>/dev/null
+#   args:
+#     chdir: "{{ git_root }}"
+#   register: git_check_clean_status
+#   changed_when: false
 
 - name: >
     Fail if the repo at {{ git_root }} has any untracked or modified files.
@@ -16,4 +33,3 @@
       Repo at {{ git_root }} can not have any untracked or
       modified files, please commit or stash and retry.
   when: (git_check_clean_status.stdout_lines | length) != 0
-
