@@ -1,0 +1,7 @@
+
+# When true allow submodules to be dirty
+git_root: >-
+  {{ qb_dir }}
+
+git_check_clean_ignore_submodules: false
+git_check_clean_ignore: []
