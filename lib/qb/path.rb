@@ -136,6 +136,18 @@ class QB::Path < Pathname
         source: :git
   
   
+  # # Value would be *loadable* via init
+  # prop  :packages,
+  #       type: t.map( keys: t.sym, values: QB::Package ),
+  #       default: ->() { QB::Package.all_from_path self }
+  # 
+  # 
+  # # Value would be ignored by init and re-computed
+  # prop  :packages,
+  #       type: t.map( keys: t.sym, values: QB::Package ),
+  #       source: ->() { QB::Package.all_from_path self },
+  #       cache: true
+  
   # Constructor
   # ======================================================================
   
