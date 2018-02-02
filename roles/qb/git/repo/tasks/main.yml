@@ -1,5 +1,5 @@
 ---
-# tasks file for qb.git_repo
+# tasks file for qb/git/repo
 
 - name: >-
     Create {{ git_repo_dest }} directory

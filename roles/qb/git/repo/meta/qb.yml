@@ -1,0 +1,6 @@
+# Shown in help output, etc.
+description: >-
+  Ensure directory is a Git repo - init and add basic ignore sections
+
+# Prefix for role variables
+var_prefix: git_repo

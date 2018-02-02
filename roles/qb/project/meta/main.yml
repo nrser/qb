@@ -2,5 +2,6 @@
 # meta file for qb/project
 
 dependencies:
-- role: qb.git_repo
-  git_repo_dest: "{{ project_dest }}"
+- role: qb/git/repo
+  git_repo_dest: >-
+    {{ project_dest }}
