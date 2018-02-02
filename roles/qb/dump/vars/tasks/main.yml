@@ -1,5 +1,5 @@
 ---
-# tasks file for qb.vars
+# tasks file for qb/dump/vars
 
 - when: vars_output is defined
   local_action:

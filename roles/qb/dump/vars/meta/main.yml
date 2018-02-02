@@ -1,8 +1,7 @@
 ---
-# meta file for qb.vars
+# meta file for qb/dump/vars
 
 allow_duplicates: yes
 
 dependencies: []
 # - role: role-name
-

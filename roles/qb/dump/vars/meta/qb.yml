@@ -1,5 +1,5 @@
 ---
-# meta/qb.yml file for qb.vars
+# meta/qb.yml file for qb/dump/vars
 # 
 # qb settings for this role. see README.md for more info.
 #
@@ -7,7 +7,7 @@
 # prefix for role variables
 var_prefix: null
 
-# how to get a default for `dir` if it's not provided as the 
+# how to get a default for `dir` if it's not provided as the
 default_dir: null
 
 # set to false to not save options in .qb-options.yml files
