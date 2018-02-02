@@ -10,7 +10,7 @@
 
 # Shown in help output, etc.
 description: >-
-  TODO describe qb/git/check/clean role
+  Fail if Git repo working directory isn't clean
 
 # Gemspec-style requirements. Right now only `.gems.qb` is used.
 requirements:
