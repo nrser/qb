@@ -93,8 +93,8 @@ class QB::Package::Version < QB::Util::Resource
   prop :major,          type: NUMBER_SEGMENT
   prop :minor,          type: NUMBER_SEGMENT,         default: 0
   prop :patch,          type: NUMBER_SEGMENT,         default: 0
-  prop :prerelease,     type: t.array(MIXED_SEGMENT), default: []
-  prop :build,          type: t.array(MIXED_SEGMENT), default: []
+  prop :prerelease,     type: t.array(MIXED_SEGMENT), default: ->{ [] }
+  prop :build,          type: t.array(MIXED_SEGMENT), default: ->{ [] }
 
   prop :release,        type: t.str,            source: :@release
   prop :is_release,     type: t.bool,           source: :release?
