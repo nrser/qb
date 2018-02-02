@@ -8,47 +8,29 @@ using NRSER
 
 module QB
   module Util
-    # split a string into 'words' for word-based matching
+    
+    # Split a string into 'words' for word-based matching
+    # 
+    # @return [Array<String>]
+    #   Array of non-empty words in `string`.
+    # 
     def self.words string
-      string.split(/[\W_\-\/]+/).reject {|w| w.empty?}
+      string.words
     end # .words
+    
+    
+    def self.words_slice? full_string, input, &is_match
+      full_string.words.slice? input.words, &is_match
+    end # .words_include?
+    
     
     # see if words from an input match words
     def self.words_start_with? full_string, input
-      # QB.debug "does #{ input } match #{ full_string }?"
-      
-      input_words = words input
-      
-      # short-circuit if there are no input words ('./' for example)
-      return false if input_words.empty?
-      
-      full_string_words = words full_string
-      
-      full_string_words.each_with_index {|word, start_index|
-        # compute the end index in full_string_words
-        end_index = start_index + input_words.length - 1
-        
-        # short-circuit if can't match (more input words than full words left)
-        if end_index >= full_string_words.length
-          return false
-        end
-        
-        # create the slice to test against
-        slice = full_string_words[start_index..end_index]
-        
-        # see if every word in the slice starts with the corresponding word
-        # in the input
-        if slice.zip(input_words).all? {|full_word, input_word|
-          full_word.start_with? input_word
-        }
-          # got a match!
-          return true
-        end
-      }
-      
-      # no match
-      false
-    end # .match_words?
+      words_slice? full_string, input do |full_string_word, input_word|
+        full_string_word.start_with? input_word
+      end
+    end # .words_start_with?
+    
     
     # @return [Pathname] absolute resolved path.
     def self.resolve *segments
