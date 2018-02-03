@@ -548,6 +548,32 @@ class QB::Role
   end # #check_requirements
   
   
+  # @return [String]
+  #   The `description` value from the role's QB metadata, or '' if it doesn't
+  #   have one
+  def description
+    meta['description'].to_s
+  end
+  
+  
+  # Short summary pulled from the role description - first line if it's
+  # multi-line, or first sentence if it's a single line.
+  # 
+  # Will be an empty string if the role doesn't have a description.
+  # 
+  # @return [String]
+  # 
+  def summary
+    description.lines.first.thru { |line|
+      if line
+        line.split( '. ', 2 ).first
+      else
+        ''
+      end
+    }
+  end
+  
+  
   # Language Inter-Op
   # -----------------------------------------------------------------------
   

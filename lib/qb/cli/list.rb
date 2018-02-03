@@ -1,3 +1,9 @@
+# Refinements
+# =======================================================================
+
+using NRSER
+
+
 # Definitions
 # =======================================================================
 
@@ -32,7 +38,15 @@ module QB::CLI
       QB::Role.available
     end
     
-    puts roles
+    name_col_width = roles.map { |r| r.display_name.length }.max + 2
+    
+    roles.each { |role|
+      summary = role.summary.truncate \
+        QB::CLI.terminal_width - name_col_width
+      
+      puts ("%-#{ name_col_width }s" % role.display_name) + summary
+    }
+    
     puts
     
     return 0

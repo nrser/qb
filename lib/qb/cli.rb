@@ -33,8 +33,6 @@ module QB; end
 
 module QB::CLI
   
-  include SemanticLogger::Loggable
-  
   
   # Constants
   # ============================================================================
@@ -45,6 +43,23 @@ module QB::CLI
   # 
   DEBUG_ARGS = ['-D', '--DEBUG'].freeze
   
+  
+  # Default terminal line width to use if we can't figure it out dynamically.
+  # 
+  # @return [Fixnum]
+  # 
+  DEFAULT_TERMINAL_WIDTH = 80
+  
+  
+  # Mixins
+  # ============================================================================
+  
+  # Add {.logger} and {#logger} methods
+  include SemanticLogger::Loggable
+  
+  
+  # Module (Static) Methods
+  # ============================================================================
   
   def self.set_debug! args
     if DEBUG_ARGS.any? {|arg| args.include? arg}
@@ -141,5 +156,50 @@ module QB::CLI
       ask_for_option role: role, option: option
     }
   end # .ask_for_options
+  
+  
+  # Lifted from Thor
+  # ----------------------------------------------------------------------------
+  # 
+  # Who I guess took it from Rake..?
+  # 
+  # I think I'll move QB to Atli at some point but I wanted these now.
+  # 
+  
+  # This code was copied from Rake, available under MIT-LICENSE
+  # Copyright (c) 2003, 2004 Jim Weirich
+  def self.terminal_width
+    result = if ENV["QB_COLUMNS"]
+      ENV["QB_COLUMNS"].to_i
+    else
+      unix? ? dynamic_width : DEFAULT_TERMINAL_WIDTH
+    end
+    result < 10 ? DEFAULT_TERMINAL_WIDTH : result
+  rescue
+    DEFAULT_TERMINAL_WIDTH
+  end
+  
+  
+  # Calculate the dynamic width of the terminal
+  def self.dynamic_width
+    @dynamic_width ||= (dynamic_width_stty.nonzero? || dynamic_width_tput)
+  end
+  
+  
+  def self.dynamic_width_stty
+    `stty size 2>/dev/null`.split[1].to_i
+  end
+  
+  
+  def self.dynamic_width_tput
+    `tput cols 2>/dev/null`.to_i
+  end
+  
+  
+  def self.unix?
+    RUBY_PLATFORM =~ \
+      /(aix|darwin|linux|(net|free|open)bsd|cygwin|solaris|irix|hpux)/i
+  end
+
   
 end # module QB::CLI
