@@ -7,16 +7,16 @@
 require 'yaml'
 require 'cmds'
 
-
 # deps
 # ----------------------------------------------------------------------------
-
 
 # package
 # ----------------------------------------------------------------------------
 
 # Breakouts
 require 'qb/role/errors'
+require 'qb/role/search_path'
+require 'qb/role/matches'
 require 'qb/role/name'
 require 'qb/role/default_dir'
 
@@ -24,14 +24,8 @@ require 'qb/role/default_dir'
 # Refinements
 # =======================================================================
 
-require 'nrser/refinements'
 using NRSER
-
-
-# Declarations
-# =======================================================================
-
-module QB; end
+using NRSER::Types
 
 
 # Contains info on a QB role.
@@ -44,133 +38,8 @@ class QB::Role
   include SemanticLogger::Loggable
   
   
-  # Constants
-  # =====================================================================
-  
-  # Array of string paths to directories to search for roles or paths to
-  # `ansible.cfg` files to look for an extract role paths from.
-  # 
-  # For the moment at least you can just mutate this value like you would
-  # `$LOAD_PATH`:
-  # 
-  #     QB::Role::PATH.unshift '~/where/some/roles/be'
-  #     QB::Role::PATH.unshift '~/my/ansible.cfg'
-  # 
-  # The paths are searched from first to last.
-  # 
-  # **WARNING**
-  # 
-  #   Search is **deep** - don't point this at large directory trees and
-  #   expect any sort of reasonable performance (any directory that
-  #   contains `node_modules` is usually a terrible idea for instance).
-  # 
-  BUILTIN_PATH = [
-    
-    # Development Paths
-    # =================
-    # 
-    # These come first because:
-    # 
-    # 1.  They are working dir-local.
-    # 
-    # 2.  They should only be present in local development, and should be
-    #     capable of overriding roles in other local directories to allow
-    #     custom development behavior (the same way `./dev/bin` is put in
-    #     front or `./bin`).
-    # 
-    
-    # Role paths declared in ./dev/ansible.cfg, if it exists.
-    File.join('.', 'dev', 'ansible.cfg'),
-    
-    # Roles in ./dev/roles
-    File.join('.', 'dev', 'roles'),
-    
-    
-    # Working Directory Paths
-    # =======================
-    # 
-    # Next up, `ansible.cfg` and `roles` directory in the working dir.
-    # Makes sense, right?
-    # 
-    
-    # ./ansible.cfg
-    File.join('.', 'ansible.cfg'),
-    
-    # ./roles
-    File.join('.', 'roles'),
-    
-    
-    # Working Directory-Local Ansible Directory
-    # =========================================
-    # 
-    # `ansible.cfg` and `roles` in a `./ansible` directory, making a common
-    # place to put Ansible stuff in an project accessible when running from
-    # the project root.
-    # 
-    
-    # ./ansible/ansible.cfg
-    File.join('.', 'ansible', 'ansible.cfg'),
-    
-    # ./ansible/roles
-    File.join('.', 'ansible', 'roles'),
-    
-    # TODO  Git repo root relative?
-    #       Some sort of flag file for a find-up?
-    #       System Ansible locations?
-    
-    
-    # QB Gem Role Directories
-    # =======================
-    # 
-    # Last, but far from least, paths provided by the QB Gem to the user's
-    # QB role install location and the roles that come built-in to the gem.
-    
-    QB::USER_ROLES_DIR,
-    
-    QB::GEM_ROLES_DIR,
-  ].freeze
-  
-  
-  # Array of string paths to directories to search for roles or paths to
-  # `ansible.cfg` files to look for an extract role paths from.
-  # 
-  # Value is a duplicate of the frozen {QB::Role::BUILTIN_PATH}. You can
-  # reset to those values at any time via {QB::Role.reset_path!}.
-  # 
-  # For the moment at least you can just mutate this value like you would
-  # `$LOAD_PATH`:
-  # 
-  #     QB::Role::PATH.unshift '~/where/some/roles/be'
-  #     QB::Role::PATH.unshift '~/my/ansible.cfg'
-  # 
-  # The paths are searched from first to last.
-  # 
-  # **WARNING**
-  # 
-  #   Search is **deep** - don't point this at large directory trees and
-  #   expect any sort of reasonable performance (any directory that
-  #   contains `node_modules` is usually a terrible idea for instance).
-  # 
-  PATH = BUILTIN_PATH.dup
-
-  
   # Class Methods
   # =======================================================================
-  
-  # Reset {QB::Role::PATH} to the original built-in values in
-  # {QB::Role::BUILTIN_PATH}.
-  # 
-  # Created for testing but might be useful elsewhere as well.
-  # 
-  # @return [Array<String>]
-  #   The reset {QB::Role::PATH}.
-  # 
-  def self.reset_path!
-    PATH.clear
-    BUILTIN_PATH.each { |path| PATH << path }
-    PATH
-  end # .reset_path!
-  
   
   # true if pathname is a QB role directory.
   def self.role_dir? pathname
@@ -181,54 +50,15 @@ class QB::Role
   end
   
   
-  # @param dir [Pathname] dir to include.
-  def self.roles_paths dir
-    cfg_roles_path(dir) + [
-      dir.join('roles'),
-      dir.join('roles', 'tmp'),
-    ]
-  end
-  
-  # places to look for qb role directories. these paths are also included
-  # when qb runs a playbook.
+  # All {QB::Role} found in search path.
   # 
-  # TODO resolution order:
+  # Does it's best to remove duplicates that end up being reached though
+  # multiple search paths (happens most in development).
   # 
-  # 1.  paths specific to this run:
-  #     a.  TODO paths provided on the cli.
-  # 2.  paths specific to the current directory:
-  #     a.  paths specified in ./ansible.cfg (if it exists)
-  #     b.  ./roles
-  #     d.  paths specified in ./ansible/ansible.cfg (if it exists)
-  #     e.  ./ansible/roles
-  #     g.  paths specified in ./dev/ansible.cfg (if it exists)
-  #     h.  ./dev/roles
-  #     i.  ./dev/roles/tmp
-  #         -   used for roles that are downloaded but shouldn't be included
-  #             in source control.
-  # 3.
+  # @return [Array<QB::Role>]
   # 
-  # @return [Array<Pathname>]
-  #   places to look for role dirs.
-  # 
-  def self.search_path
-    QB::Role::PATH.
-      map { |path|
-        if QB::Ansible::ConfigFile.end_with_config_file?(path)
-          if File.file?(path)
-            QB::Ansible::ConfigFile.new(path).defaults.roles_path
-          end
-        else
-          QB::Util.resolve path
-        end
-      }.
-      flatten.
-      reject(&:nil?)
-  end
-  
-  # array of QB::Role found in search path.
   def self.available
-    search_path.
+    self.search_path.
       select {|search_dir|
         # make sure it's there (and a directory)
         search_dir.directory?
@@ -241,92 +71,10 @@ class QB::Role
             }
         }
       }.
-      flatten(1).
-      map {|args|
-        QB::Role.new *args
-      }.
+      flatten( 1 ).
+      map { |args| QB::Role.new *args }.
       uniq
   end
-  
-  # Get an array of QB::Role that match an input string.
-  # 
-  # @return [Array<QB::Role>]
-  # 
-  def self.matches input
-    # keep this here to we don't re-gen every loop
-    available = self.available
-    
-    # first off, see if input matches any relative paths exactly
-    available.each {|role|
-      return [role] if role.display_path.to_s == input
-    }
-    
-    # create an array of "separator" variations to try *exact* matching
-    # against. in order of preference:
-    # 
-    # 1.  exact input
-    #     -   this means if you ended up with roles that actually *are*
-    #         differnetiated by '_/-' differences (which, IMHO, is a
-    #         horrible fucking idea), you can get exactly what you ask for
-    #         as a first priority
-    # 2.  input with '-' changed to '_'
-    #     -   prioritized because convetion is to underscore-separate
-    #         role names.
-    # 3.  input with '_' changed to '-'
-    #     -   really just for convience's sake so you don't really have to
-    #         remember what separator is used.
-    #     
-    separator_variations = [
-      input,
-      input.gsub('-', '_'),
-      input.gsub('_', '-'),
-    ]
-    
-    separator_variations.each { |variation|
-      available.each { |role|
-        # exact match to full name
-        return [role] if role.name == variation
-      }.each { |role|
-        # exact match without the namespace prefix ('qb.' or similar)
-        return [role] if role.namespaceless == variation
-      }
-    }
-    
-    # see if we prefix match any full names
-    separator_variations.each { |variation|
-      name_prefix_matches = available.select { |role|
-        role.name.start_with? variation
-      }
-      return name_prefix_matches unless name_prefix_matches.empty?
-    }
-    
-    # see if we prefix match any name
-    separator_variations.each { |variation|
-      namespaceless_prefix_matches = available.select { |role|
-        role.namespaceless.start_with? variation
-      }
-      unless namespaceless_prefix_matches.empty?
-        return namespaceless_prefix_matches
-      end
-    }
-    
-    # see if we prefix match any display paths
-    separator_variations.each { |variation|
-      path_prefix_matches = available.select { |role|
-        role.display_path.start_with? variation
-      }
-      return path_prefix_matches unless path_prefix_matches.empty?
-    }
-    
-    # see if we word match any display paths
-    name_word_matches = available.select { |role|
-      QB::Util.words_start_with? role.display_path.to_s, input
-    }
-    return name_word_matches unless name_word_matches.empty?
-    
-    # nada
-    []
-  end # .matches
   
   
   # Find exactly one matching role for the input string or raise.
@@ -499,8 +247,15 @@ class QB::Role
   # Instance Methods
   # =====================================================================
   
+  # Just a string version of {#display_path}
+  # 
+  def display_name
+    display_path.to_s
+  end
+  
+  
   def options_key
-    @display_path.to_s
+    display_name
   end
   
   # load qb metadata from meta/qb.yml or from executing meta/qb and parsing

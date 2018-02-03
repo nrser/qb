@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 ##
 # {QB::Role} methods for dealing with role names.
 # 
-# Broken out from the main `//lib/qb/role.rb` file because it was starting to 
+# Broken out from the main `//lib/qb/role.rb` file because it was starting to
 # get long and unwieldy.
 # 
 ##
@@ -23,12 +25,8 @@ require 'qb/util'
 # Refinements
 # =======================================================================
 
-require 'nrser/refinements'
 using NRSER
-
-
-# Declarations
-# =======================================================================
+using NRSER::Types
 
 
 # Definitions
@@ -66,8 +64,8 @@ class QB::Role
     # Find the first directory in the search path that contains the path,
     # if any do.
     # 
-    # It *could* be in more than one in funky situations like overlapping 
-    # search paths or link silliness, but that doesn't matter - we consider 
+    # It *could* be in more than one in funky situations like overlapping
+    # search paths or link silliness, but that doesn't matter - we consider
     # the first place we find it to be the relevant once, since the search
     # path is most-important-first.
     # 
