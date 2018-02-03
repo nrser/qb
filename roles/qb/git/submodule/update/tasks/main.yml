@@ -1,5 +1,5 @@
 ---
-# tasks file for qb.git_submodule_update
+# tasks file for qb/git/submodule/update
 
 - name: update submodules
   command: git submodule update --init

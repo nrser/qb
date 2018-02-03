@@ -1,5 +1,5 @@
 ---
-# meta file for qb.git_submodule_update
+# meta file for qb/git/submodule/update
 
 allow_duplicates: yes
 

@@ -1,5 +1,5 @@
 ---
-# meta/qb.yml file for qb.git_submodule_update
+# meta/qb.yml file for qb/git/submodule/update
 # 
 # qb settings for this role. see README.md for more info.
 #
@@ -8,7 +8,7 @@
 description: null
 
 # prefix for role variables
-var_prefix: null
+var_prefix: git_submodule_update
 
 # how to get a default for `dir` if it's not provided as the only
 # positional argument. if a positional argument is provided it will
@@ -25,7 +25,7 @@ var_prefix: null
 # -   cwd
 #     -   use the directory the `qb` command is invoked form.
 # -   {exe: PATH}
-#     -   invoke an execuable, passing a JSON serialization of the options 
+#     -   invoke an execuable, passing a JSON serialization of the options
 #         mapping their CLI names to values. path can be relative to role
 #         directory.
 default_dir: git_root
