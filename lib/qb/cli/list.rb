@@ -1,15 +1,3 @@
-# Requirements
-# =====================================================================
-
-# package
-
-
-# Declarations
-# =======================================================================
-
-module QB; end
-
-
 # Definitions
 # =======================================================================
 
@@ -37,11 +25,17 @@ module QB::CLI
   #   Error exit status - we don't want `qb ... && ...` to move on to the
   #   second command when we end up falling back to `help`.
   # 
-  def self.list args = []
-    puts QB::Role.available
+  def self.list pattern = nil
+    roles = if pattern
+      QB::Role.matches pattern
+    else
+      QB::Role.available
+    end
+    
+    puts roles
     puts
     
-    return 1
+    return 0
   end # .help
   
 end # module QB::CLI

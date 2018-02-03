@@ -55,6 +55,8 @@ def main args
     [:run, args.rest]
   when 'setup'
     [:setup, args.rest]
+  when 'list', 'ls'
+    [:list, *args.rest]
   else
     # default to `run` on the full args
     [:run, args]
