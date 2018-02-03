@@ -1,0 +1,82 @@
+---
+# tasks file for qb/nodejs/npm/hack
+
+# - set_fact:
+#     hack_npm_rel_dir: "{{ qb_dir | relpath(qb_cwd) }}"
+
+- name: setup some variables
+  vars.rb:
+    namespace: hack_npm
+    bind:
+      qb_dir: "{{ qb_dir }}"
+      qb_cwd: "{{ qb_cwd }}"
+    src: |
+      require 'pathname'
+      require 'cmds'
+    
+      vars = {}
+      
+      # get the root of the git repo that we're operating from
+      Dir.chdir qb_cwd do
+        begin
+          vars['repo_root'] = Cmds.out!('git rev-parse --show-toplevel').strip
+        rescue Exception => e
+          raise "don't seem to be in a git repo..? #{ e.message }"
+        end
+      end
+      
+      # get the relative path
+      vars['rel_dir'] = Pathname.new(qb_dir)
+        .relative_path_from(Pathname.new(vars['repo_root']))
+        .to_s
+      
+      # for the rest we want to be in the repo root
+      Dir.chdir vars['repo_root'] do
+        # see if the submodule is already in place
+        
+      end
+      
+      vars
+
+# - debug:
+#     msg:
+#       repo_root: "{{ hack_npm_repo_root }}"
+#       rel_dir: "{{ hack_npm_rel_dir }}"
+# 
+# - fail:
+#     msg: HERE
+
+- include: create.yml
+  when: hack_npm_create
+
+- name: "add {{ hack_npm_owner }}/{{ hack_npm_name }} submodule"
+  command: >
+    git submodule add --force
+      git@github.com:{{ hack_npm_owner }}/{{ hack_npm_name }}.git
+      {{ hack_npm_rel_dir }}
+  args:
+    chdir: "{{ hack_npm_repo_root }}"
+    creates: "{{ qb_dir }}"
+
+# - name: add linking to dev/setup.yml
+#   # - name: npm link nrser.js for jash so it can build
+#   #   tags:
+#   #   - npm-link
+#   #   command: npm link ../nrser.js
+#   #   args:
+#   #     chdir: "{{ dev_setup_project_root }}/packages/{{ item }}"
+#   #   with_items:
+#   #   - jash
+#   state:
+#     debug: w
+#     yaml:
+#       key: "{{ qb_cwd }}/dev/setup.yml:0:tasks"
+#       array_contains:
+#         name: "npm link {{ hack_npm_rel_dir }}"
+#         tags:
+#         - npm-link
+#         command: "npm link {{ hack_npm_rel_dir }}"
+#         args:
+#           chdir: "{{ '{{ dev_setup_project_root }}' }}"
+#       create: true
+      

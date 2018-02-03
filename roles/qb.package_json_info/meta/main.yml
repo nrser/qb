@@ -1,9 +1,0 @@
----
-# meta file for qb.package_json_info
-
-allow_duplicates: yes
-
-dependencies: # []
-- role: qb.read_json
-  read_json_src: "{{ package_json_info_dir }}/package.json"
-  read_json_dump: "{{ package_json_info_dump }}"

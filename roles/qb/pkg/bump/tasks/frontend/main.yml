@@ -7,12 +7,13 @@
   set_fact:
     bump_frontend_dir: "{{ bump_repo_root }}/frontend"
 
-- name: get frontend/package.json info
-  include_role:
-    name: qb.package_json_info
-  vars:
-    package_json_info_dir: "{{ bump_frontend_dir }}"
-    package_json_info_var: bump_frontend_package_json
+# Deleted role, use path_facts
+# - name: get frontend/package.json info
+#   include_role:
+#     name: qb.package_json_info
+#   vars:
+#     package_json_info_dir: "{{ bump_frontend_dir }}"
+#     package_json_info_var: bump_frontend_package_json
 
 - name: >
     set frontend_version to the semver object

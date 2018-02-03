@@ -1,0 +1,6 @@
+---
+# meta file for qb/json/read
+
+allow_duplicates: yes
+
+dependencies: []

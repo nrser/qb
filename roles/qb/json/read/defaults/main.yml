@@ -1,0 +1,9 @@
+---
+# defaults file for qb/json/read
+
+# Don't write parsed object to a var by default
+json_var: null
+
+# Default to dump the parsed value if `QB_DEBUG` env var exists
+json_dump: >-
+  {{ ansible_env.QB_DEBUG is defined }}

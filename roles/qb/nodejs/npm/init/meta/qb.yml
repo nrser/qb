@@ -1,0 +1,72 @@
+---
+# meta/qb.yml file for qb/nodejs/npm/init
+# 
+# qb settings for this role. see README.md for more info.
+#
+
+# prefix for role variables
+var_prefix: npm_package
+
+# how to get a default for `dir` if it's not provided as the
+default_dir: null
+
+# set to false to not save options in .qb-options.yml files
+save_options: true
+
+vars:
+# - name: example
+#   description: an example of a variable.
+#   required: false
+#   type: boolean # boolean (default) | string
+#   short: e
+- name: force
+  description: force stuff (npm init, qb/git/ignore, qb/project).
+  type: boolean
+  short: f
+  save: false
+
+- name: scope
+  description: npm scope to create the module under.
+  type: string
+  accept_false: true
+  short: s
+
+- name: name
+  description: name of npm module.
+  type: string
+
+- name: private
+  description: mark the npm module private in package.json
+  type: boolean
+
+- name: version
+  description: package.json version.
+  type: string
+
+- name: description
+  description: package.json description.
+  type: string
+
+- name: main
+  description: pacakge.json main (entry point).
+  type: string
+
+# TODO lists don't work
+# - name: keywords
+#   description: package.json keywords
+#   type: Array<string>
+
+- name: license
+  description: package.json license.
+  type: string
+
+- name: author
+  description: pacakge.json author.
+  type: string
+
+- name: project
+  description: include qb/project role.
+  type: boolean
+  short: p
+
+- include: qb/project

@@ -1,0 +1,38 @@
+---
+# meta/qb.yml file for qb/nodejs/npm/hack
+# 
+# qb settings for this role. see README.md for more info.
+#
+
+# prefix for role variables
+var_prefix: hack_npm
+
+# how to get a default for `dir` if it's not provided as the
+default_dir: null
+
+# set to false to not save options in .qb-options.yml files
+save_options: false
+
+options:
+# - name: example
+#   description: an example of a variable.
+#   required: false
+#   type: boolean # boolean (default) | string
+#   short: e
+- name: name
+  type: string
+  description: the repo name
+  short: n
+
+- name: owner
+  type: string
+  description: the repo owner
+  short: o
+
+- name: create
+  type: boolean
+  description: create a new npm package to hack
+  short: c
+
+- include: qb/nodejs/npm/init
+  as: package

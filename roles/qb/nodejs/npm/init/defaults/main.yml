@@ -1,0 +1,18 @@
+---
+# defaults file for qb/nodejs/npm/init
+npm_package_force: false
+
+# package.json stuff
+npm_package_name: "{{ qb_dir | basename }}"
+npm_package_scope: null
+npm_package_scoped_name: "{{ ('@' + npm_package_scope + '/' + npm_package_name) if npm_package_scope else npm_package_name }}"
+npm_package_private: true
+npm_package_version: "0.1.0"
+npm_package_description: "{{ npm_package_scoped_name }} package"
+npm_package_main: "index.js"
+npm_package_keywords: []
+npm_package_license: "{{ 'UNLICENSED' if npm_package_private else 'ISC' }}"
+npm_package_author: "{{ npm_package_scope if npm_package_scope else git_user_name }}"
+npm_package_scripts: {}
+
+npm_package_project: false
