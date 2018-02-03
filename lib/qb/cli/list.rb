@@ -41,8 +41,7 @@ module QB::CLI
     name_col_width = roles.map { |r| r.display_name.length }.max + 2
     
     roles.each { |role|
-      summary = role.summary.truncate \
-        QB::CLI.terminal_width - name_col_width
+      summary = role.summary.truncate QB::CLI.terminal_width - name_col_width
       
       puts ("%-#{ name_col_width }s" % role.display_name) + summary
     }
