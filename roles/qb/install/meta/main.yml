@@ -1,5 +1,5 @@
 ---
-# meta file for qb.install
+# meta file for qb/install
 
 allow_duplicates: yes
 

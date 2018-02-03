@@ -1,8 +1,5 @@
 ---
-qb.gem:
-  constant: QB
-  license: MIT
 qb/project:
   dev-bin: false
-qb.install_gem:
+qb/ruby/gem/install:
   rubies: global

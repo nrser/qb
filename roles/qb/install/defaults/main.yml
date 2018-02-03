@@ -1,5 +1,5 @@
 ---
-# defaults file for qb.install
+# defaults file for qb/install
 
 install_path: >-
   {{ qb_user_roles_dir }}

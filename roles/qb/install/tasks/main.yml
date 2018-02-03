@@ -1,5 +1,5 @@
 ---
-# tasks file for qb.install
+# tasks file for qb/install
 
 - include: git.yml
   when: not install_link
