@@ -86,12 +86,15 @@
       
       next_version = segments.join('.')
       
+      # quick hack to deal with `a-b => a/b` gem names
+      name_path = name.gsub '-', '/'
+      
       {
         'name' => name,
         'current_version' => version.version,
         'release_version' => version.release,
         'next_version' => next_version,
-        'version_path' => "#{ gem_root }/lib/#{ name }/version.rb",
+        'version_path' => "#{ gem_root }/lib/#{ name_path }/version.rb",
         'spec_path' => spec_path,
       }
 
