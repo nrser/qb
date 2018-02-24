@@ -31,9 +31,18 @@ module QB
   # Constants
   # =====================================================================
   
-  ROOT = (Pathname.new(__FILE__).dirname + '..').expand_path
-  GEM_ROLES_DIR = ROOT + 'roles'
-  USER_ROLES_DIR = Pathname.new(ENV['HOME']).join '.ansible', 'roles'
+  # Absolute path to `//roles`.
+  # 
+  # @return [Pathname]
+  # 
+  GEM_ROLES_DIR = ROOT / 'roles'
+  
+  
+  # Absolute path to the user's roles dir, which is `~/.ansible/roles`.
+  # 
+  # @return [Pathname]
+  # 
+  USER_ROLES_DIR = ENV['HOME'].to_pn / '.ansible' / 'roles'
   
   
   # Mixins

@@ -2,12 +2,33 @@ module QB
   # Constants
   # =====================================================================
   
+  # Absolute path to the gem's root directory.
+  # 
+  # @return [Pathname]
+  # 
+  ROOT = ( Pathname.new( __FILE__ ).dirname / '..' / '..' ).expand_path
+  
+  
+  # The gem's name.
+  # 
+  # @return [String]
+  # 
   GEM_NAME = 'qb'
   
-  VERSION = '0.3.22.dev'
   
+  # String version read from `//VERSION`
+  # 
+  # @return [String]
+  # 
+  VERSION = ( ROOT / 'VERSION' ).read.chomp
+  
+  
+  # Minimum version of Ansible required. Encoded as a {Gem::Version}
+  # so we can compare it.
+  # 
+  # @return [Gem::Version]
+  # 
   MIN_ANSIBLE_VERSION = Gem::Version.new '2.1.2'
-  
   
   
   # Class Methods
