@@ -1,6 +1,18 @@
 ---
 # tasks file for qb/ruby/gem/release
 
+# NOTE  We do this because the `release` Rake task `bundler/gem_tasks`
+#       provides **will** fail if there are any uncommitted files...
+#       which is annoying as all hell when the dirt is just a dev submod that
+#       is not used in the release version, but there does not seem to be
+#       any options to ignore files or paths:
+#       
+#       https://github.com/bundler/bundler/blob/c4fc79a2bfed38335a3371300bea49286a371d83/lib/bundler/gem_helper.rb#L151
+#       
+#       So, we do the check first so we don't both with anything else if it's
+#       going to fail (and it's the most common thing that gets in the way,
+#       so it's nice to catch it early).
+#       
 - name: >-
     Check that the git repo at {{ gem_root }} is clean.
   include_role:
