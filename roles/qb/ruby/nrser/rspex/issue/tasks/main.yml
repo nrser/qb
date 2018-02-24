@@ -1,5 +1,5 @@
 ---
-# tasks file for qb/rspex/issue
+# tasks file for qb/ruby/nrser/rspex/issue
 
 - set_fact:
     issue: >-
