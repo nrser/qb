@@ -11,7 +11,7 @@
     regexp: >-
       VERSION\s*=\s*["'][^"']+["']
     replace: >-
-      VERSION = "{{  }}"
+      VERSION = '{{ version }}'
 
 
 # Handle VERSION file
