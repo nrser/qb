@@ -63,64 +63,15 @@
       gem_root: "{{ gem_root }}"
       version_file: "{{ gem_version_file }}"
       cwd: "{{ qb_cwd }}"
-    src: |
-      spec_pattern = "#{ gem_root }/*.gemspec"
-      spec_path = Dir.glob(spec_pattern)[0]
-      
-      if spec_path.nil?
-        raise "No gemspec found for pattern #{ spec_pattern }"
-      end
-      
-      # The gem *may already be loaded*, which would break the standard gemspec
-      # approach because the `require` will be a no-op, resulting in the
-      # already loaded version number being used instead of the one in the
-      # file.
-      # 
-      # This is only a problem for NRSER, which is loaded in vars.rb.rb, but
-      # this fix should work for any module without worrying about what is
-      # currently loaded... grab the info we need in a clean child process.
-      # 
-      code = <<-END
-        require 'json'
-        spec = Gem::Specification.load(#{ JSON.dump spec_path })
-        puts JSON.dump({
-          'version' => spec.version.version,
-          'name' => spec.name,
-        })
-      END
-      obj = JSON.load `ruby -e #{ code.shellescape }`
-      version = Gem::Version.new obj['version']
-      name = obj['name']
-      
-      segments = version.segments.dup
-      segments.pop while segments.any? {|s| s.is_a? String}
-      
-      segments[-1] = segments[-1].succ
-      segments << 'dev'
-      
-      next_version = segments.join('.')
-      
-      version_path = if version_file.nil?
-        # quick hack to deal with `a-b => a/b` gem names
-        name_path = name.gsub '-', '/'
-        
-        File.join gem_root, 'lib', name_path, 'version.rb'
-      else
-        File.expand_path version_file, cwd
-      end
-      
-      unless File.file?( version_path )
-        raise "Version file not found at #{ version_path }"
-      end
-      
-      {
-        'name' => name,
-        'current_version' => version.version,
-        'release_version' => version.release,
-        'next_version' => next_version,
-        'version_path' => version_path,
-        'spec_path' => spec_path,
-      }
+    file: >-
+      {{ role_path }}/scripts/gem_and_version_info.rb
+    provides:
+      gem_name: non_empty_str
+      gem_current_version: non_empty_str
+      gem_release_version: non_empty_str
+      gem_next_version: non_empty_str
+      gem_version_path: abs_path
+      gem_spec_path: abs_path
 
 
 - debug:
@@ -131,46 +82,23 @@
         {{ gem_release_version }}
     - next: >-
         {{ gem_next_version }}
-    # - spec_path: >-
-    #     {{ gem_spec_path }}
-    # - version_path: >-
-    #     {{ gem_version_path }
+    - spec_path: >-
+        {{ gem_spec_path }}
+    - version_path: >-
+        {{ gem_version_path }}
 
 
 - when: gem_current_version != gem_release_version
   name: >-
     Change version in `{{ gem_version_path }}` from current
-    `{{ gem_current_version }}` to `{{ gem_release_version }}`.
-  block:
-  - name: >-
-      Change version to release version `{{ gem_release_version }}`.
-    replace:
-      dest: >-
-        {{ gem_version_path }}
-      regexp: >-
-        VERSION\s*=\s*["']{{ gem_current_version }}["']
-      replace: >-
-        VERSION = "{{ gem_release_version }}"
-  
-  
-  - when: gem_current_version != gem_release_version
-    name: >-
-      Add version file `{{ gem_version_path }}` to Git.
-    command: >-
-      git add {{ gem_version_path }}
-    args:
-      chdir: >-
-        {{ gem_root }}
-
-  
-  - name: >-
-      Commit version file `{{ gem_version_path }}` in Git.
-    command: git commit -m "bump to v{{ gem_release_version }}"
-    args:
-      chdir: >-
-        {{ gem_root }}
-    when: gem_current_version != gem_release_version
-  # /block
+    `{{ gem_current_version }}` to release `{{ gem_release_version }}`.
+  include_tasks: >-
+    {{ role_path }}/tasks/_set_version.yml
+  vars:
+    version: >-
+      {{ gem_release_version }}
+    commit_message: >-
+      bump to v{{ gem_release_version }}
 
 
 - name: >-
@@ -181,31 +109,13 @@
 
 - name: >-
     Change version to next version `{{ gem_next_version }}`.
-  replace:
-    dest: >-
-      {{ gem_version_path }}
-    regexp: >-
-      VERSION\s*=\s*["']{{ gem_release_version }}["']
-    replace: >-
-      VERSION = "{{ gem_next_version }}"
-
-
-- name: >-
-    Add next dev version to git.
-  command: >-
-    git add {{ gem_version_path }}
-  args:
-    chdir: >-
-      {{ gem_root }}
-
-
-- name: >-
-    Commit next dev version.
-  command: >-
-    git commit -m "start {{ gem_next_version }}"
-  args:
-    chdir: >-
-      {{ gem_root }}
+  include_tasks: >-
+    {{ role_path }}/tasks/_set_version.yml
+  vars:
+    version: >-
+      {{ gem_next_version }}
+    commit_message: >-
+      start {{ gem_next_version }}
 
 
 - name: >-

@@ -251,6 +251,10 @@ jspm_packages
 
 # ansible retry files
 .qb-playbook.retry
+
+# error logs
+ansible-error.log
+
 #
 # END QB.gitingore
 ##############################################################################

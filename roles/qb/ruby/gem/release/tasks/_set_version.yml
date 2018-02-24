@@ -1,0 +1,43 @@
+# Set the gem version in either a `VERSION` constant in a Ruby source file
+# or as the sole contents of a `<gem_root>/VERSION` file.
+
+# Handle Ruby file
+- when: (gem_version_path | basename) != 'VERSION'
+  name: >-
+    Replace version string with '{{ version }}' in `{{ gem_version_path }}`
+  replace:
+    dest: >-
+      {{ gem_version_path }}
+    regexp: >-
+      VERSION\s*=\s*["'][^"']+["']
+    replace: >-
+      VERSION = "{{  }}"
+
+
+# Handle VERSION file
+- when: (gem_version_path | basename) == 'VERSION'
+  name: >-
+    Overwrite VERSION file at `{{ gem_version_path }}` with '{{ version }}'
+  copy:
+    dest: >-
+      {{ gem_version_path }}
+    content: >-
+      {{ version }}
+
+
+- name: >-
+    Add version file `{{ gem_version_path }}` to Git
+  command: >-
+    git add {{ gem_version_path | quote }}
+  args:
+    chdir: >-
+      {{ gem_root }}
+
+
+- name: >-
+    Commit version file `{{ gem_version_path }}` in Git
+  command: >-
+    git commit -m {{ commit_message | quote }}
+  args:
+    chdir: >-
+      {{ gem_root }}
