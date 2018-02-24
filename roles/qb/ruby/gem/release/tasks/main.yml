@@ -129,3 +129,22 @@
 - debug:
     msg: >
       v{{ gem_release_version }} released.
+
+
+- name: >-
+    See if a post-release script exists at `//dev/hooks/post-release`.
+  stat:
+    path: >-
+      {{ gem_root | path_join( 'dev', 'hooks', 'post-release' ) }}
+  register: gem_post_release_script_stat
+
+
+- when: >-
+    gem_post_release_script_stat.stat.exists and
+      gem_post_release_script_stat.stat.executable
+  name: >-
+    Execute `//dev/hooks/post-release` script.
+  stream:
+    cmd: ./dev/hooks/post-release
+    chdir: >-
+      {{ gem_root }}

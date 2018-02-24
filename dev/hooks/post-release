@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+##
+# Upgrade `qb` gem in it's rbenv lock (if it exists)
+##
+
+locks = `rbenv lock ls`
+
+if  $? == 0 &&
+    locks.lines.any? { |line| line.start_with? 'qb: ' }
+  puts "Found `qb` rbenv lock, installing new `qb` version..."
+  puts `rbenv lock exec qb -- gem install qb`
+  puts "Done!"
+end

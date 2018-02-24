@@ -5,7 +5,8 @@ require 'pp'
 require "bundler/setup"
 require 'qb'
 
-require 'nrser/refinements'
+require 'nrser'
+
 using NRSER
 
 # Make sure we're not pointing to any local dev gems
