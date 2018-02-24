@@ -4,7 +4,7 @@
 # provides a host of helpers for building and running the QB Role through
 # the `cmds` gem.
 # 
-describe_qb_role 'qb/rspex/generate' do
+describe_qb_role 'qb/ruby/nrser/rspex/generate' do
   # Work with a temp copy of `//test/packages/gems/test_gem`
   include_context :temp_gem
   
@@ -92,4 +92,4 @@ describe_qb_role 'qb/rspex/generate' do
     end # context "explicit `--require=other_helper` option"
     
   end # "generating spec for a class"
-end # qb_role 'qb/rspec/generate'
+end # qb_role 'qb/ruby/nrser/rspex/generate'
