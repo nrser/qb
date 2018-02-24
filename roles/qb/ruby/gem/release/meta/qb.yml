@@ -25,3 +25,10 @@ options:
 #   required: false
 #   type: boolean # boolean (default) | string
 #   short: e
+
+- name: version_file
+  var_name: gem_version_file
+  description: >-
+    Specify where the version file is for cases where it can't be inferred
+  required: false
+  type: path

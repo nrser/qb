@@ -3,3 +3,5 @@
 
 gem_root: >-
   {{ qb_dir }}
+
+gem_version_file: null
