@@ -8,6 +8,8 @@ locks = `rbenv lock ls`
 if  $? == 0 &&
     locks.lines.any? { |line| line.start_with? 'qb: ' }
   puts "Found `qb` rbenv lock, installing new `qb` version..."
-  puts `rbenv lock exec qb -- gem install qb`
-  puts "Done!"
+  puts "TODO This doesn't work..."
+  # puts `rbenv lock exec qb -- gem install qb`
+  # puts `rbenv lock exec qb -- rbenv version`
+  # puts "Done!"
 end
