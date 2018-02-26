@@ -195,7 +195,7 @@ Gem::Specification.new do |spec|
   # ----------------------------------------------------------------------------
   
   spec.add_dependency "cmds",             '~> 0.0', ">= 0.2.7"
-  spec.add_dependency "nrser",            '~> 0.1', ">= 0.1.4"
+  spec.add_dependency "nrser",            '>= 0.2.0.pre.2'
   spec.add_dependency "state_mate",       '~> 0.0', ">= 0.1.0"
   
   # Used to parse `ansible.cfg` files
