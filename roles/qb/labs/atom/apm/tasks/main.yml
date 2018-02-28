@@ -1,0 +1,15 @@
+---
+##############################################################################
+# Main tasks for `qb/atom/pkg` role
+##############################################################################
+
+- name: >-
+    Install Atom package
+  qb.send:
+    to: QB::Atom::APM
+    method: install
+    kwds:
+      name: >-
+        {{ apm_package_name }}
+  register: apm_install_rsp
+        

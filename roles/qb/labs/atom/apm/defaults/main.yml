@@ -1,0 +1,9 @@
+---
+##############################################################################
+# Variable defaults for `qb/atom/pkg` role
+#
+# @see http://docs.ansible.com/ansible/latest/playbooks_reuse_roles.html#role-default-variables
+# 
+##############################################################################
+
+apm_bin: amp
