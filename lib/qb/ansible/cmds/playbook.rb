@@ -206,6 +206,11 @@ class QB::Ansible::Cmds::Playbook < ::Cmds
   end # #before_write
   
   
+  def prepare *args, &block
+    prepared = super *args, &block
+    prepared.gsub /[\s\n\\]+\z/, ''
+  end
+  
   protected
   # ========================================================================
     
