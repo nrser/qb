@@ -25,12 +25,20 @@ before_install:
   # Install requirements (Ansible and QB Python module/filter deps)
   - pip install -r requirements.txt
   
+  - which ansible-playbook
+  - ansible --version
+  
   # Install `//package.json` to get `semver`
   - yarn
   
   # Install gem
   - gem update --system
   - gem install bundler
+  
+  # DEBUG
+  - ls -lah
+  - ls -lah ./tmp/
+  - ls -lah ./bin/
   
 language: ruby
 
