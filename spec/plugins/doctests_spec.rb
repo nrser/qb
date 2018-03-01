@@ -39,22 +39,6 @@ require 'qb'
 # @todo document Doctest module.
 module Doctest
   
-  # Switch python bin depending on local dev / Travis CI env
-  # 
-  # @todo
-  #   Probably want more robust way of finding the Python we want and figuring
-  #   out we're in Travis.
-  # 
-  # @return [String]
-  # 
-  def self.python_bin
-    if File.exists? '/home/travis'
-      'python'
-    else
-      'python2'
-    end
-  end
-  
   # See if a Python file is using `doctest`.
   # 
   # Ironically, I'm not using this function... I'm just running every file.
@@ -85,7 +69,7 @@ describe "Plugin Doctests" do
       it "should exit with status 0" do
         expect(
           Cmds.stream "<%= bin %> -m doctest -v <%= path %>",
-            bin: Doctest.python_bin,
+            bin: QB::Python.bin,
             path: path
         ).to be 0
       end

@@ -52,7 +52,8 @@ describe QB::Repo::Git do
               'name' => `git config user.name`.chomp,
               'email' => `git config user.email`.chomp,
             },
-            'origin' => 'git@github.com:nrser/qb.git',
+            
+            'origin' => /nrser\/qb\.git$/,
             
             'is_clean' => Dir.chdir( QB::ROOT ) {
               `git status --porcelain 2>/dev/null`.chomp.empty?
@@ -65,4 +66,3 @@ describe QB::Repo::Git do
     end # QB::ROOT
   end # .from_path
 end # QB::Repo::Git
-

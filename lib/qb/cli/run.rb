@@ -220,7 +220,7 @@ module QB::CLI
       
       env = QB::Ansible::Env::Devel.new
       exe = [
-        "python2",
+        QB::Python.bin,
         (QB::Ansible::Env::Devel::ANSIBLE_HOME / 'bin' / 'ansible-playbook')
       ].join " "
       

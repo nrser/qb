@@ -11,6 +11,7 @@ require 'nrser'
 # Project / Package
 # -----------------------------------------------------------------------
 require 'qb/errors'
+require 'qb/python'
 require 'qb/version'
 require 'qb/util'
 require 'qb/path'
