@@ -63,7 +63,7 @@ module QB::CLI
   
   def self.set_debug! args
     if DEBUG_ARGS.any? {|arg| args.include? arg}
-      QB::Util::Logging.setup level: :debug
+      ENV['QB_DEBUG'] = 'true'
       DEBUG_ARGS.each {|arg| args.delete arg}
     end
   end

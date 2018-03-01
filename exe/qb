@@ -35,11 +35,13 @@ using NRSER
 # Definitions
 # =======================================================================
 
-def main args
+def main *args
   Thread.current.name = 'main'
   logger = SemanticLogger['qb/exe/qb#main']
   
   QB::CLI.set_debug! args
+  QB::Util::Logging.setup sync: true, dest: $stderr
+  
   logger.debug args: args
   
   QB.check_ansible_version
@@ -79,4 +81,4 @@ end
 # Execution
 # ============================================================================
 
-main(ARGV) # if __FILE__ == $0 # doesn't work with gem stub or something?
+main( *ARGV ) # if __FILE__ == $0 # doesn't work with gem stub or something?
