@@ -195,7 +195,7 @@ Gem::Specification.new do |spec|
   # ----------------------------------------------------------------------------
   
   spec.add_dependency "cmds",             '~> 0.2.7'
-  spec.add_dependency "nrser",            '< 0.3', '>= 0.2.0.pre.2'
+  spec.add_dependency "nrser",            '< 0.3', '>= 0.2.0.pre.3'
   
   # My gem to help manage system state
   spec.add_dependency "state_mate",       '~> 0.1.3'
