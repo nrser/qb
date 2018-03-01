@@ -206,6 +206,11 @@ class QB::Ansible::Cmds::Playbook < ::Cmds
   end # #before_write
   
   
+  # HACK  To fix test fails on linux... seems you can't end a command there
+  #       with a `\`
+  # 
+  # @todo Move up to Cmds
+  # 
   def prepare *args, &block
     prepared = super *args, &block
     prepared.gsub /[\s\n\\]+\z/, ''
