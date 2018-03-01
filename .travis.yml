@@ -13,28 +13,17 @@ git:
 python: 2.7.13
 
 before_install:
-  # DEBUG   Dump Python exe paths and versions
-  - pyenv versions
-  - pyenv install 2.7.13
-  - pyenv global 2.7.13
-  - pyenv root
-  - pyenv versions
-  - which python
-  - python -V
-  - which pip
-  - pip -V
-  # - which python2.7
-  # - python2.7 -V
-  # - which pip2.7
-  # - pip 2.7 -V
-  
-  # Install Ansible
-  - pip install ansible==2.4.1.0
-  
   # Use sed to replace the SSH URL with the public URL, then init and update
   # submodules
   - sed -i 's/git@github.com:/git:\/\/github.com\//' .gitmodules
   - git submodule update --init --recursive
+  
+  # Travis has 2.7.14 pre-installed in pyenv, so use that
+  # - pyenv install 2.7.13
+  - pyenv global 2.7.14
+  
+  # Install requirements (Ansible and QB Python module/filter deps)
+  - pip install -r requirements.txt
   
   # Install `//package.json` to get `semver`
   - yarn
@@ -42,7 +31,7 @@ before_install:
   # Install gem
   - gem update --system
   - gem install bundler
-        
+  
 language: ruby
 
 rvm:
