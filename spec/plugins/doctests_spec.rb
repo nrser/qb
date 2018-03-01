@@ -5,13 +5,13 @@
 # 
 # [doctest]: https://docs.python.org/2/library/doctest.html
 # 
-# It's not a *great* solution, but it's simple, self-contained, and 
+# It's not a *great* solution, but it's simple, self-contained, and
 # *something*... which is much, much better than trying to fiddle-test them
 # through running roles (super slow).
 # 
 # This file serves as a driver to run the doctests as part of the RSpec suite.
 # 
-# The example group for each plugin is metadata tagged with it's repo-relative 
+# The example group for each plugin is metadata tagged with it's repo-relative
 # path like:
 # 
 #     plugin: "plugins/filter_plugins/version_plugins.py"
@@ -68,7 +68,7 @@ describe "Plugin Doctests" do
     ) do
       it "should exit with status 0" do
         expect(
-          Cmds.stream "python2 -m doctest -v <%= path %>", path: path
+          Cmds.stream "python2.7 -m doctest -v <%= path %>", path: path
         ).to be 0
       end
     end

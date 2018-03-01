@@ -1,3 +1,10 @@
+# NOTE  May be possible to test multiple languages:
+#       
+#       https://stackoverflow.com/questions/27644586/how-to-set-up-travis-ci-with-multiple-languages
+#       
+#       Though seems like that runs them in different instances.
+# 
+
 # disable the default submodule logic
 # See https://gist.github.com/iedemam/9830045
 git:
@@ -13,12 +20,12 @@ before_install:
   - yarn
   
   # Install Ansible
-  - pip2 install ansible==2.4.1.0
+  - pip2.7 install ansible==2.4.1.0
   
   # Install gem
   - gem update --system
   - gem install bundler
-
+        
 language: ruby
 
 rvm:
