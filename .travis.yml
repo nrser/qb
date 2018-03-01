@@ -11,6 +11,19 @@ git:
   submodules: false
 
 before_install:
+  # DEBUG   Dump Python exe paths and versions
+  - which python
+  - python -V
+  - which python2.7
+  - python2.7 -V
+  - which pip
+  - pip -V
+  - which pip2.7
+  - pip 2.7 -V
+  
+  # Install Ansible
+  - pip install ansible==2.4.1.0
+  
   # Use sed to replace the SSH URL with the public URL, then init and update
   # submodules
   - sed -i 's/git@github.com:/git:\/\/github.com\//' .gitmodules
@@ -18,9 +31,6 @@ before_install:
   
   # Install `//package.json` to get `semver`
   - yarn
-  
-  # Install Ansible
-  - pip2.7 install ansible==2.4.1.0
   
   # Install gem
   - gem update --system

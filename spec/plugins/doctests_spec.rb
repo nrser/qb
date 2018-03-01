@@ -68,7 +68,7 @@ describe "Plugin Doctests" do
     ) do
       it "should exit with status 0" do
         expect(
-          Cmds.stream "python2.7 -m doctest -v <%= path %>", path: path
+          Cmds.stream "python -m doctest -v <%= path %>", path: path
         ).to be 0
       end
     end
