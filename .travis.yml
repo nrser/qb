@@ -4,12 +4,18 @@ git:
   submodules: false
 
 before_install:
-  # use sed to replace the SSH URL with the public URL, then init and update
+  # Use sed to replace the SSH URL with the public URL, then init and update
   # submodules
   - sed -i 's/git@github.com:/git:\/\/github.com\//' .gitmodules
   - git submodule update --init --recursive
   
+  # Install `//package.json` to get `semver`
   - yarn
+  
+  # Install Ansible
+  - pip2 install ansible==2.4.1.0
+  
+  # Install gem
   - gem update --system
   - gem install bundler
 
