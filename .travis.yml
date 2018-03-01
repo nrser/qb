@@ -10,16 +10,18 @@
 git:
   submodules: false
 
+python: 2.7.13
+
 before_install:
   # DEBUG   Dump Python exe paths and versions
   - which python
   - python -V
-  - which python2.7
-  - python2.7 -V
   - which pip
   - pip -V
-  - which pip2.7
-  - pip 2.7 -V
+  # - which python2.7
+  # - python2.7 -V
+  # - which pip2.7
+  # - pip 2.7 -V
   
   # Install Ansible
   - pip install ansible==2.4.1.0
