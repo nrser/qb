@@ -306,7 +306,7 @@ module QB::CLI
     
     logger.debug "Command prepared, running...",
       command: cmd,
-      prepared: cmd.prepared
+      prepared: cmd.prepare
     
     status = cmd.stream
     
