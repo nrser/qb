@@ -12,6 +12,10 @@
 git:
   submodules: false
 
+os:
+  - linux
+  - osx
+
 before_install:
   # Use sed to replace the SSH URL with the public URL, then init and update
   # submodules
