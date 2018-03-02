@@ -25,6 +25,7 @@ before_install:
   
   # Travis has 2.7.14 pre-installed in pyenv, so use that
   # - pyenv install 2.7.13
+  - pyenv list
   - pyenv global 2.7.14
   
   # Install requirements (Ansible and QB Python module/filter deps)
