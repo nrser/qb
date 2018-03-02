@@ -2,15 +2,15 @@
 #       
 #       https://stackoverflow.com/questions/27644586/how-to-set-up-travis-ci-with-multiple-languages
 #       
-#       Though seems like that runs them in different instances.
+#       Though seems like that runs them in different instances, where as we
+#       just need Python and NodeJS available in the Ruby spec... which I
+#       figured out, see below...
 # 
 
 # disable the default submodule logic
 # See https://gist.github.com/iedemam/9830045
 git:
   submodules: false
-
-python: 2.7.13
 
 before_install:
   # Use sed to replace the SSH URL with the public URL, then init and update
@@ -38,11 +38,14 @@ before_install:
 language: ruby
 
 rvm:
+  # The min Ruby requirement in the gemspec
+  - 2.3.0
+  # The most recent patch of all more recent minor versions
   - 2.3.6
   - 2.4.3
   - 2.5.0
 
-script: bundle exec rspec --fail-fast
+script: bundle exec rspec
 
 sudo: false
 
