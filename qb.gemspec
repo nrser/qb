@@ -194,8 +194,11 @@ Gem::Specification.new do |spec|
   # Runtime Dependencies
   # ----------------------------------------------------------------------------
   
-  spec.add_dependency "cmds",             '~> 0.2.7'
+  # My guns
   spec.add_dependency "nrser",            '< 0.3', '>= 0.2.0.pre.3'
+  
+  # My favorite wrapper
+  spec.add_dependency "cmds",             '~> 0.2.8'
   
   # My gem to help manage system state
   spec.add_dependency "state_mate",       '~> 0.1.3'
