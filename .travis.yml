@@ -17,15 +17,21 @@ os:
   - osx
 
 before_install:
-  # Use sed to replace the SSH URL with the public URL, then init and update
+  # Replace the SSH URL with the public URL, then init and update
   # submodules
-  # - sed -i 's/git@github.com:/git:\/\/github.com\//' .gitmodules
   - ./test/bin/git-submod-ssh-to-https.rb
   - git submodule update --init --recursive
   
-  # Travis has 2.7.14 pre-installed in pyenv, so use that
-  # - pyenv install 2.7.13
-  - pyenv list
+  # Travis Linux has 2.7.14 pre-installed in pyenv, so use that
+  # 
+  # We need to install on OSX
+  - |
+      if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        brew update
+        brew install pyenv
+        pyenv install 2.7.14
+      fi
+  # Set the global on both OS
   - pyenv global 2.7.14
   
   # Install requirements (Ansible and QB Python module/filter deps)
