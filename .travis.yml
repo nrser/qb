@@ -22,15 +22,17 @@ before_install:
   - ./test/bin/git-submod-ssh-to-https.rb
   - git submodule update --init --recursive
   
-  # Travis Linux has 2.7.14 pre-installed in pyenv, so use that
-  # 
-  # We need to install on OSX
-  - |
-      if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-        brew update
-        brew install pyenv
-        pyenv install 2.7.14
-      fi
+  # # Travis Linux has 2.7.14 pre-installed in pyenv, so use that
+  # #
+  # # We need to install on OSX
+  # - |
+  #     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+  #       brew update
+  #       brew install pyenv
+  #       pyenv install 2.7.14
+  #     fi
+  # DEBUG see what python versions are available?
+  - pyenv versions
   # Set the global on both OS
   - pyenv global 2.7.14
   
