@@ -31,8 +31,9 @@ before_install:
   #       brew install pyenv
   #       pyenv install 2.7.14
   #     fi
-  # DEBUG see what python versions are available?
-  - pyenv versions
+  
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then pyenv install 2.7.14; fi
+  
   # Set the global on both OS
   - pyenv global 2.7.14
   
