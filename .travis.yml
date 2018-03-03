@@ -28,6 +28,7 @@ before_install:
   - |
       if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         pyenv install 2.7.14
+        echo 'eval "$(pyenv init -)"' > ~/.bash_profile
       fi
   
   - echo $PATH

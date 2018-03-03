@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # import some python modules that we'll use.  These are all
 # available in Python's core

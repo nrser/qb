@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import subprocess
 import os
@@ -55,7 +55,7 @@ def main():
         'qb_git_origin_url': ['git', 'remote', 'get-url', 'origin'],
     }
     
-    for key, cmd in cmds.iteritems():        
+    for key, cmd in cmds.iteritems():
         try:
             value = subprocess.check_output(cmd).rstrip()
             facts[key] = value

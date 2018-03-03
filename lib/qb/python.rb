@@ -16,11 +16,12 @@ module QB::Python
   # @return [String]
   # 
   def self.bin
-    if File.exists? '/home/travis'
-      'python'
-    else
-      'python2'
-    end
+    # if File.exists? '/home/travis'
+    #   'python'
+    # else
+    #   'python2'
+    # end
+    'python'
   end
   
 end # module QB::Python
