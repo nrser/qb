@@ -17,36 +17,36 @@ os:
   - osx
 
 before_install:
-  # Replace the SSH URL with the public URL, then init and update
-  # submodules
-  - ./test/bin/git-submod-ssh-to-https.rb
-  - git submodule update --init --recursive
-  
-  # Install all the stuff we need on OSX (comes installed on Linux)
-  - |
-      if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-        pyenv install 2.7.14
-        echo 'eval "$(pyenv init -)"' > ~/.bash_profile
-        source ~/.bash_profile
-        pyenv global 2.7.14
-        brew install yarn
-      fi
-  
-  # Set the global on both OS
-  - pyenv global 2.7.14
-  
-  # Install requirements (Ansible and QB Python module/filter deps)
-  - pip install -r requirements.txt
-  
-  - which ansible-playbook
-  - ansible --version
-  
-  # Install `//package.json` to get `semver`
-  - yarn
-  
-  # Install gem
-  - gem update --system
-  - gem install bundler
+  # # Replace the SSH URL with the public URL, then init and update
+  # # submodules
+  # - ./test/bin/git-submod-ssh-to-https.rb
+  # - git submodule update --init --recursive
+  # 
+  # # Install all the stuff we need on OSX (comes installed on Linux)
+  # - |
+  #     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+  #       pyenv install 2.7.14
+  #       echo 'eval "$(pyenv init -)"' > ~/.bash_profile
+  #       source ~/.bash_profile
+  #       pyenv global 2.7.14
+  #       brew install yarn
+  # 
+  #       #
+  #     fi
+  # 
+  # # Set the global on both OS
+  # - pyenv global 2.7.14
+  # 
+  # # Install requirements (Ansible and QB Python module/filter deps)
+  # - pip install -r requirements.txt
+  # 
+  # # Install `//package.json` to get `semver`
+  # - yarn
+  # 
+  # # Install gem
+  # - gem update --system
+  # - gem install bundler
+  - ./test/ci/travis/bin/before_install.sh
   
 language: ruby
 
