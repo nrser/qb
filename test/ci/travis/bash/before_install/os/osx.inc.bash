@@ -4,7 +4,11 @@ echo 'eval "$(pyenv init -)"' > ~/.bash_profile
 
 source ~/.bash_profile
 
-# Install `yarn` via Homebrew. Way too noisy, so just toss the output 
+echo "PATH: ${PATH}"
+echo "which python: $(which python)"
+echo "~/.bash_profile: $(cat ~/.bash_profile)"
+
+# Install `yarn` via Homebrew. Way too noisy, so just toss the output
 brew install yarn >/dev/null
 
 # Set Git user and email because QB expects there to be one
