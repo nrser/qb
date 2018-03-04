@@ -13,7 +13,11 @@ PYTHON_VERSION='2.7.14'
 TRAVIS_DIR="./test/ci/travis"
 TRAVIS_BIN_DIR="${TRAVIS_DIR}/bin"
 
-OS_SCRIPT_PATH="${TRAVIS_BIN_DIR}/before_install/os/${TRAVIS_OS_NAME}.inc.bash"
+# Path to OS-specific "before install" script
+# 
+# Like `//test/ci/travis/bash/before_install/os/osx.inc.bash`
+# 
+OS_SCRIPT_PATH="${TRAVIS_DIR}/bash/before_install/os/${TRAVIS_OS_NAME}.inc.bash"
 
 ./test/bin/git-submod-ssh-to-https.rb
 git submodule update --init --recursive
