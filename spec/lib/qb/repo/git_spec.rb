@@ -6,6 +6,18 @@ describe QB::Repo::Git do
       
       subject { QB::Repo::Git.from_path QB::ROOT }
       
+      # {QB::Repo::Git:User} will have `nil` values for `#name` and `#email`
+      # if there are none, so handle that
+      name, email = [:name, :email].map { |key|
+        out = `git config user.#{ key }`.chomp
+        
+        if out == ''
+          nil
+        else
+          out
+        end
+      }
+      
       it_behaves_like QB::Repo::Git, and_is_expected: {
         to: {
           have_attributes: {
@@ -28,8 +40,8 @@ describe QB::Repo::Git do
         it_behaves_like QB::Repo::Git::User, and_is_expected: {
           to: {
             have_attributes: {
-              name: `git config user.name`.chomp,
-              email: `git config user.email`.chomp,
+              name: name,
+              email: email,
             }
           }
         }
@@ -49,8 +61,8 @@ describe QB::Repo::Git do
             
             'user' => {
               '__class__' => QB::Repo::Git::User.name,
-              'name' => `git config user.name`.chomp,
-              'email' => `git config user.email`.chomp,
+              'name' => name,
+              'email' => email,
             },
             
             'origin' => /nrser\/qb\.git$/,
