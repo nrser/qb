@@ -48,6 +48,12 @@ before_install:
   # - gem install bundler
   - ./test/ci/travis/bin/before_install.sh
   
+  # DEBUG
+  - pyenv version
+  - echo $PATH
+  - which python
+  - python -V
+  
 language: ruby
 
 rvm:
