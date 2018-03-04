@@ -31,6 +31,7 @@ else
 fi
 
 # Set global python version
+PYENV_VERSION="${PYTHON_VERSION}"
 pyenv global "$PYTHON_VERSION"
 
 # Install requirements (Ansible and QB Python module/filter deps)
