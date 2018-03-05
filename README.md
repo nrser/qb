@@ -36,14 +36,16 @@ and opening
 Quickies
 ------------------------------------------------------------------------------
 
-1.  Status: **UNSTABLE**
+1.  Status: **UNSTABLE (BUT GETTING BETTER)**
     
     A bit past experimental, but still actively exploring API and features. Any and every thing subject to breaking changes until we hit `1.0`. Generally trying to bump the minor version with larger changes, but not paying a huge amount of attention to it. Being used personally and in projects and organizations I work with.
 
-2.  Compatibility: **OSX/macOS-only**
+2.  Compatibility: **Unix-based, specifically OSX**
     
-    Though it would probably run fine on Linux, if not other \*nix as well.
-
+    Developed and used on OSX/macOS, though [Travis tests][travis] tests pass on Linux as well (currently Ubuntu Trusty 14.04, see [Travis Build Env][]).
+    
+    I don't know of any fundamental reason it wouldn't work on other \*nixes, but you will probably have to figure it out yourself.
+    
 3.  Installation
     
     Head over to {file:doc/getting_started.md Getting Started}.
@@ -54,6 +56,8 @@ Quickies
 
 
 <!-- References & Further Reading: -->
+
+[Travis Build Env]: https://docs.travis-ci.com/user/reference/overview/#Container-based
 
 [Homebrew]: https://brew.sh/
 
