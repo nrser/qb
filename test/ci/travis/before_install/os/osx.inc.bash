@@ -1,4 +1,4 @@
-pyenv install "${PYTHON_VERSION}"
+pyenv install "${QB_PYTHON_VERSION}"
 
 echo 'eval "$(pyenv init -)"' > ~/.bash_profile
 
