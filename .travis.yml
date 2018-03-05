@@ -1,14 +1,16 @@
-# NOTE  May be possible to test multiple languages:
+# NOTE  Everything is collected together into a single shell script:
 #       
-#       https://stackoverflow.com/questions/27644586/how-to-set-up-travis-ci-with-multiple-languages
+#       https://github.com/travis-ci/travis-ci/issues/7472#issuecomment-286910242
 #       
-#       Though seems like that runs them in different instances, where as we
-#       just need Python and NodeJS available in the Ruby spec... which I
-#       figured out, see below...
-# 
+#       so it's important to `source` other scripts so they affect the
+#       environment in the right way.
+#       
 
-# disable the default submodule logic
-# See https://gist.github.com/iedemam/9830045
+# Disable the default submodule logic, since we need to transform the paths
+# from SSH -> HTTPS first.
+# 
+# See notes in `//test/ci/travis/before_install.inc.bash`
+# 
 git:
   submodules: false
 
@@ -17,48 +19,7 @@ os:
   - osx
 
 before_install:
-  # # Replace the SSH URL with the public URL, then init and update
-  # # submodules
-  # - ./test/bin/git-submod-ssh-to-https.rb
-  # - git submodule update --init --recursive
-  # 
-  # # Install all the stuff we need on OSX (comes installed on Linux)
-  # - |
-  #     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-  #       pyenv install 2.7.14
-  #       echo 'eval "$(pyenv init -)"' > ~/.bash_profile
-  #       source ~/.bash_profile
-  #       pyenv global 2.7.14
-  #       brew install yarn
-  # 
-  #       #
-  #     fi
-  # 
-  # # Set the global on both OS
-  # - pyenv global 2.7.14
-  # 
-  # # Install requirements (Ansible and QB Python module/filter deps)
-  # - pip install -r requirements.txt
-  # 
-  # # Install `//package.json` to get `semver`
-  # - yarn
-  # 
-  # # Install gem
-  # - gem update --system
-  # - gem install bundler
-  # 
-  
-  # Maybe this will help?
-  # 
-  # https://github.com/travis-ci/travis-ci/issues/7472#issuecomment-286910242
-  # 
   - source ./test/ci/travis/before_install.inc.bash
-  
-  # DEBUG
-  - pyenv version
-  - echo $PATH
-  - which python
-  - python -V
   
 language: ruby
 

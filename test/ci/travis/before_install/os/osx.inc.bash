@@ -1,12 +1,7 @@
-pyenv install "${QB_PYTHON_VERSION}"
-
+# OSX doesn't have `pyenv` initialized in the profile, so add it and
+# source it so it works here too
 echo 'eval "$(pyenv init -)"' > ~/.bash_profile
-
 source ~/.bash_profile
-
-echo "PATH: ${PATH}"
-echo "which python: $(which python)"
-echo "~/.bash_profile: $(cat ~/.bash_profile)"
 
 # Install `yarn` via Homebrew. Way too noisy, so just toss the output
 brew install yarn >/dev/null
