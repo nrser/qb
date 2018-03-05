@@ -46,7 +46,13 @@ before_install:
   # # Install gem
   # - gem update --system
   # - gem install bundler
-  - ./test/ci/travis/bin/before_install.sh
+  # 
+  
+  # Maybe this will help?
+  # 
+  # https://github.com/travis-ci/travis-ci/issues/7472#issuecomment-286910242
+  # 
+  - source ./test/ci/travis/bin/before_install.sh
   
   # DEBUG
   - pyenv version
