@@ -1,6 +1,12 @@
 QB
 ==============================================================================
 
+[![Gem Version](http://img.shields.io/gem/v/qb.svg)][gem]
+[![Build Status](http://img.shields.io/travis/nrser/qb.svg)][travis]
+
+[gem]: https://rubygems.org/gems/qb
+[travis]: http://travis-ci.org/nrser/qb
+
 QB is all about projects. Named after everyone's favorite projects.
 
 QB works by running [Ansible][] plays. So you can think about it as "quarterback" if you happen to be from the corner of the world where that makes any sense.
