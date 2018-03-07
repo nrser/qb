@@ -218,6 +218,16 @@ Gem::Specification.new do |spec|
   # Ruby lib wrapping `git` binary system calls for use in {QB::Repo::Git}
   spec.add_dependency 'git',              '~> 1.3'
   
+  # Ruby SemVer v2 implementation
+  # 
+  # Sub-proc'ing into JavaScript to use their `semver` package is *way* too
+  # slow when processing lists of version strings (like Git tags).
+  # 
+  # Yeah, it could be sped up at the cost of added complexity, but I'm just
+  # going to see if this work ok first.
+  # 
+  spec.add_dependency 'semver2', '~> 3.4.2'
+  
   
   # Development-Only Extra Metadata
   # ============================================================================

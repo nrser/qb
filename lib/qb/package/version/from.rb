@@ -1,5 +1,20 @@
 # frozen_string_literal: true
 
+
+# Requirements
+# =======================================================================
+
+# Stdlib
+# -----------------------------------------------------------------------
+
+# Deps
+# -----------------------------------------------------------------------
+require 'semver'
+
+# Project / Package
+# -----------------------------------------------------------------------
+
+
 # Refinements
 # =======================================================================
 
@@ -80,30 +95,59 @@ module QB::Package::Version::From
   end
   
   singleton_class.send :alias_method, :gem_version, :gemver
-
+  
+  
+  def self.split_identifiers string
+    string.split QB::Package::Version::IDENTIFIER_SEPARATOR
+  end
+  
+  
+  # Parse and/or validate version *identifiers*.
+  # 
+  # See {QB::Package::Version} for details on *identifiers*.
+  # 
+  # @param [String | Integer] value
+  #   A value that is either already an *identifier* or a string that can
+  #   be parsed into one.
+  # 
+  # @return [String | Integer]
+  #   A valid *identifier*.
+  # 
+  def self.identifier_for value
+    case value
+    when QB::Package::Version::NUMBER_IDENTIFIER_RE
+      value.to_i
+    when  QB::Package::Version::MIXED_SEGMENT
+      value
+    else
+      raise ArgumentError.new binding.erb <<~END
+        Can't parse identifier <%= value.inspect %>
+        
+        Expected one of:
+        
+        1.  <%= QB::Package::Version::NUMBER_IDENTIFIER_RE %>
+        2.  <%= QB::Package::Version::MIXED_SEGMENT %>
+        
+      END
+    end
+  end # .identifier_for
+  
+  
+  def self.segment_for string
+    split_identifiers( string ).map { |s| identifier_for s }
+  end
+  
 
   def self.semver version
-    stmt = NRSER.squish <<-END
-      var Semver = require('semver');
-      
-      console.log(
-        JSON.stringify(
-          Semver(#{ JSON.dump version })
-        )
-      );
-    END
-    
-    parse = JSON.load Cmds.new(
-      "node --eval %s", args: [stmt], chdir: QB::ROOT
-    ).out!
+    parse = SemVer.parse version
     
     prop_values \
       raw: version,
-      major: parse['major'],
-      minor: parse['minor'],
-      patch: parse['patch'],
-      prerelease: parse['prerelease'],
-      build: parse['build']
+      major: parse.major,
+      minor: parse.minor,
+      patch: parse.patch,
+      prerelease: segment_for( parse.prerelease ),
+      build: segment_for( parse.metadata )
   end
   
   singleton_class.send :alias_method, :npm_version, :semver
