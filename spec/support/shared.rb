@@ -21,7 +21,7 @@ shared_context "test role paths" do
   
   let(:not_in_path_role_name) { 'qb/not_in_path_test' }
   
-  let(:not_in_path_role_rel_path) { 
+  let(:not_in_path_role_rel_path) {
     'test/roles_not_in_path/qb/not_in_path_test'
   }
 end # test role paths
@@ -41,6 +41,15 @@ end # reset role path
 
 shared_context :clear_temp_roles do
   before {
+    # puts "CLEARING TEMP ROLES!!!!"
+    FileUtils.rm_rf TEMP_ROLES_DIR if TEMP_ROLES_DIR.exist?
+    FileUtils.mkdir_p TEMP_ROLES_DIR
+  }
+end # reset temp roles
+
+
+shared_context :before_all_clear_temp_roles do
+  before( :all ) {
     # puts "CLEARING TEMP ROLES!!!!"
     FileUtils.rm_rf TEMP_ROLES_DIR if TEMP_ROLES_DIR.exist?
     FileUtils.mkdir_p TEMP_ROLES_DIR
