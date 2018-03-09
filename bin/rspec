@@ -1,3 +1,21 @@
-#!/usr/bin/env bash
+#!/usr/bin/env ruby
 
-bundle exec rspec "$@"
+require 'pathname'
+require 'bundler/setup'
+
+require 'qb/version'
+
+argv = ARGV.flat_map do |arg|
+  case arg
+  when '-l', '--last'
+    Pathname.
+      glob(QB::ROOT / 'spec' / '**' / '*_spec.rb').
+      sort_by( &:mtime ).
+      last.
+      to_s
+  else
+    arg
+  end
+end
+
+exec 'rspec', *argv
