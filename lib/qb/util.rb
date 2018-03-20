@@ -1,4 +1,3 @@
-require_relative './util/logging'
 require_relative './util/stdio'
 require_relative './util/interop'
 require_relative './util/bundler'

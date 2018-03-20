@@ -195,7 +195,7 @@ Gem::Specification.new do |spec|
   # ----------------------------------------------------------------------------
   
   # My guns
-  spec.add_dependency "nrser",            '< 0.3', '>= 0.2.0.pre.3'
+  spec.add_dependency "nrser",            '~> 0.2.0'
   
   # My favorite wrapper
   spec.add_dependency "cmds",             '~> 0.2.10'

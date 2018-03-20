@@ -37,10 +37,10 @@ using NRSER
 
 def main *args
   Thread.current.name = 'main'
-  logger = SemanticLogger['qb/exe/qb#main']
+  logger = NRSER::Logging['qb/exe/qb#main']
   
   QB::CLI.set_debug! args
-  QB::Util::Logging.setup sync: true, dest: $stderr
+  NRSER::Logging.setup_for_cli! application: 'qb'
   
   logger.debug args: args
   
