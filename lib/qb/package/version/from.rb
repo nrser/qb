@@ -66,11 +66,16 @@ module QB::Package::Version::From
   # 
   # @return [QB::Package::Version]
   # 
-  def self.gemver version
-    version = Gem::Version.new( version ) if version.is_a?( String )
+  def self.gemver source
+    gem_version = case source
+    when Gem::Version
+      source
+    else
+      Gem::Version.new source.to_s
+    end
     
     # release segments are everything before a string
-    release_segments = version.segments.take_while { |seg|
+    release_segments = gem_version.segments.take_while { |seg|
       !seg.is_a?(String)
     }
     
@@ -80,14 +85,14 @@ module QB::Package::Version::From
     if release_segments.length > 3
       raise ArgumentError,
             "We don't handle releases with more than 3 segments " +
-            "(found #{ release_segments.inspect } in #{ version })"
+            "(found #{ release_segments.inspect } in #{ gem_version })"
     end
     
-    prerelease_segments = version.segments[release_segments.length..-1]
+    prerelease_segments = gem_version.segments[release_segments.length..-1]
     
     prop_values \
-      raw: version.to_s,
-      major: release_segments[0] || 0,
+      raw: source.to_s,
+      major: release_segments[0],
       minor: release_segments[1] || 0,
       patch: release_segments[2] || 0,
       prerelease: prerelease_segments,

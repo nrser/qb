@@ -40,123 +40,142 @@ RSpec.shared_context :version_with_build_info do
 end #:version_with_build_info
 
 
-describe QB::Package::Version do
-  # subject { QB::Package::Version }
+describe_class QB::Package::Version do
   
-  describe ".new" do
-    context "bad args" do
-      it "Fails when raw is not a string or nil" do
-        expect {
-          QB::Package::Version.new raw: 1, major: 0
-        }.to raise_error TypeError
+  # Bad prop values
+  # ========================================================================
+  # 
+  describe_section "bad prop values" do
+    
+    describe_instance raw: 1, major: 0 do
+      it do
+        expect { subject }.to raise_error TypeError
       end
-    end # bad args
+    end
     
-  end # .new
+  end # Bad prop values
+  # ************************************************************************
   
   
-
-  describe QB::Package::Version.method( :from ) do
-  # Doesn't work?!
-  # describe 'QB::Package::Version.from' do
-  #   subject { super().method :from }
+  describe_method :from do
     
-    context "dev version with everything" do
-      subject { super().call '0.1.2-dev.3+master.0a1b2c3d' }
+    
+    describe_section "rejects" do
+    # ========================================================================
       
-      it_behaves_like QB::Package::Version, and_is_expected: {
-        to: {
-          have_attributes: {
-            major: 0,
-            minor: 1,
-            patch: 2,
-            prerelease: ['dev', 3],
-            level: 'dev',
-            build: ['master', '0a1b2c3d'],
-            release: '0.1.2',
-            semver: '0.1.2-dev.3+master.0a1b2c3d',
+      context "empty string" do
+        describe_called_with '' do
+          it do
+            expect{ subject }.to raise_error TypeError
+          end
+        end # called with ''
+      end
+      
+      
+      context "gem-style version with 4 release segments" do
+        describe_called_with '1.2.3.4.dev.5' do
+          it do
+            expect { subject }.to raise_error ArgumentError
+          end
+        end
+      end # gem-style version with 4 release segments
+      
+    end # section rejects
+    # ************************************************************************
+    
+    
+    describe_section "accepts" do
+    # ========================================================================
+      
+    context "dev version with everything" do
+      describe_called_with '0.1.2-dev.3+master.0a1b2c3d' do
+        it_behaves_like QB::Package::Version, and_is_expected: {
+          to: {
+            have_attributes: {
+              major: 0,
+              minor: 1,
+              patch: 2,
+              prerelease: ['dev', 3],
+              level: 'dev',
+              build: ['master', '0a1b2c3d'],
+              release: '0.1.2',
+              semver: '0.1.2-dev.3+master.0a1b2c3d',
+            }
           }
         }
-      }
+      end
     end # version with major, minor, patch, prerelease, build
     
     
     context "version with only major" do
-      subject { super().call '1' }
-      
-      it_behaves_like QB::Package::Version, and_is_expected: {
-        to: {
-          have_attributes: {
-            major: 1,
-            minor: 0,
-            patch: 0,
-            prerelease: [],
-            prerelease?: false,
-            level: 'release',
-            build: [],
-            build?: false,
-            release: '1.0.0',
-            semver: '1.0.0',
+      describe_called_with '1' do
+        it_behaves_like QB::Package::Version, and_is_expected: {
+          to: {
+            have_attributes: {
+              major: 1,
+              minor: 0,
+              patch: 0,
+              prerelease: [],
+              prerelease?: false,
+              level: 'release',
+              build: [],
+              build?: false,
+              release: '1.0.0',
+              semver: '1.0.0',
+            }
           }
         }
-      }
+      end
     end # "version with only major"
     
     
-    context "gem-style version with 4 release segments" do
-      it {
-        expect {
-          QB::Package::Version.from '1.2.3.4.dev.5'
-        }.to raise_error ArgumentError
-      }
-    end # gem-style version with 4 release segments
-    
-    
     context "Release version" do
-      subject { super().call '0.1.2' }
-      
-      it_behaves_like QB::Package::Version, and_is_expected: {
-        to: {
-          have_attributes: {
-            major: 0,
-            minor: 1,
-            patch: 2,
-            prerelease: [],
-            prerelease?: false,
-            level: 'release',
-            build: [],
-            build?: false,
-            release: '0.1.2',
-            semver: '0.1.2',
+      describe_called_with '0.1.2' do
+        it_behaves_like QB::Package::Version, and_is_expected: {
+          to: {
+            have_attributes: {
+              major: 0,
+              minor: 1,
+              patch: 2,
+              prerelease: [],
+              prerelease?: false,
+              level: 'release',
+              build: [],
+              build?: false,
+              release: '0.1.2',
+              semver: '0.1.2',
+            }
           }
         }
-      }
+      end
     end # Release version
     
     
     context "Build with no prerelease" do
-      subject { super().call '0.1.2+master.0a1b2c3d' }
-      
-      it_behaves_like QB::Package::Version, and_is_expected: {
-        to: {
-          have_attributes: {
-            major: 0,
-            minor: 1,
-            patch: 2,
-            prerelease: [],
-            prerelease?: false,
-            build: ['master', '0a1b2c3d'],
-            build?: true,
-            release: '0.1.2',
-            semver: '0.1.2+master.0a1b2c3d',
+      describe_called_with '0.1.2+master.0a1b2c3d' do
+        it_behaves_like QB::Package::Version, and_is_expected: {
+          to: {
+            have_attributes: {
+              major: 0,
+              minor: 1,
+              patch: 2,
+              prerelease: [],
+              prerelease?: false,
+              build: ['master', '0a1b2c3d'],
+              build?: true,
+              release: '0.1.2',
+              semver: '0.1.2+master.0a1b2c3d',
+            }
           }
         }
-      }
+      end
     end # Build with no prerelease
-    
-    
+      
+    end # section accepts
+    # ************************************************************************
     
   end # .from
+  # ************************************************************************
   
   
   describe "#to_a" do
@@ -297,7 +316,6 @@ describe QB::Package::Version do
   end # .from_docker_tag
   
   
-  
   # Language Interface
   # =====================================================================
   
@@ -345,8 +363,7 @@ describe QB::Package::Version do
   # ************************************************************************
   
   
-  
-  describe "Language Integration" do
+  describe_section "Language Integration" do
   # =====================================================================
     describe "Array#uniq" do
       context "version with only major" do
