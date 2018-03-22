@@ -1,3 +1,6 @@
+# encoding: UTF-8
+# frozen_string_literal: true
+
 # Requirements
 # =======================================================================
 
@@ -39,6 +42,94 @@ class QB::Package < QB::Util::Resource; end
 # 
 # Intended to be immutable for practical purposes.
 # 
+# Based off [SemVer 2][] and - in particular - the [Node semver package][]
+# interpretation / implementation, though we don't use that package at all
+# at this point (sub-shelling out became too expensive, and explorations into
+# Ruby Racer, etc. didn't pan out (don't remember exactly why)).
+# 
+# [SemVer 2]: https://semver.org/spec/v2.0.0.html
+# [Node semver package]: https://www.npmjs.com/package/semver
+# 
+# Let's start the show with some fun...
+# 
+# Terminology
+# ----------------------------------------------------------------------------
+# 
+# Working off what's in the [SemVer 2][] spec as much as possible.
+# 
+# We're going to start from the bottom and build up...
+# 
+# 
+# ### Identifiers
+# 
+# *Identifiers* ([SemVer 2][] spec term) are the atoms of the version:
+# the values that will not be further divided.
+# 
+# They come in two types (my terms):
+# 
+# 1.  *Number Identifiers*
+#     
+#     Non-negative integers. Their string representations may not include
+#     leading zeros.
+# 
+# 2.  *Name Identifiers*
+#     
+#     Non-empty strings that contain only `a-z`, `A-Z` and `-` and are
+#     **not** number identifiers.
+# 
+# All identifiers must be exclusively one type or the other.
+# 
+# Parse and validate identifiers with
+# {QB::Package::Version::From.identifier_for}.
+# 
+# 
+# ### Segments
+# 
+# *Segments* (my term) are sequences of zero or more *identifiers*.
+# 
+# In string representation, the *identifiers* in a *segment* are separated
+# by the dot (`.`) character.
+# 
+# > **NOTE**
+# >
+# > As identifiers can not be empty, a segment's string representation may not
+# > start or end with `.`, and may not contain consecutive `.`.
+# 
+# There are three types of segments:
+# 
+# 1.  *Release Segment*
+#     
+#     Composed of exactly three *number identifiers*:
+#     
+#     1.  *Major*
+#     2.  *Minor*
+#     3.  *Patch*
+#     
+#     > **NOTE**
+#     >
+#     > Ruby's Gem version format doesn't require anything but the *major*
+#     > identifier, in which case we default missing ones to `0`.
+#     
+# 2.  *Prerelease Segment*
+#     
+#     Composed of zero or more *identifiers* - number or name, in any order.
+# 
+# 3.  *Build Segment*
+#     
+#     Composed of zero or more *identifiers* - number or name, in any order.
+# 
+# 
+# ### Versions
+# 
+# A *version* is exactly one release segment, prerelease segment and build
+# segment, in which the prerelease and build segments may be empty as noted
+# above.
+# 
+# In SemVer string representation, the release segment is always present, and
+# a non-empty prerelease segment may follow it, separated by a `-` character.
+# 
+# A non-empty build segment may follow those, separated by a `+` character.
+# 
 class QB::Package::Version < QB::Util::Resource
   
   # Mixins
@@ -51,9 +142,22 @@ class QB::Package::Version < QB::Util::Resource
   # Constants
   # =====================================================================
   
+  # Pattern to match string *identifiers* that are version "numlets" (the
+  # non-negative integer number part of version "numbers").
+  # 
+  # @return [Regexp]
+  # 
+  NUMBER_IDENTIFIER_RE = /\A(?:0|(?:[1-9]\d*))\z/
+  
+  # What separates *identifiers* (the base undivided values).
+  # 
+  # @return [String]
+  # 
+  IDENTIFIER_SEPARATOR = '.'
+  
   NUMBER_SEGMENT = t.non_neg_int
-  NAME_SEGMENT = t.str
-  MIXED_SEGMENT = t.union NUMBER_SEGMENT, NAME_SEGMENT
+  NAME_SEGMENT = t.non_empty_str
+  MIXED_SEGMENT = t.xor NUMBER_SEGMENT, NAME_SEGMENT
   
   
   # Reasonably simple regular expression to extract things that might be
