@@ -70,8 +70,8 @@ class QB::Role
   # 
   def default_dir cwd, options
     logger.debug "CALLING default_dir",
-      role: self.instance_variables.map_values { |k, v|
-        self.instance_variable_get k
+      role: self.instance_variables.assoc_to { |key|
+        self.instance_variable_get key
       },
       cwd: cwd,
       options: options

@@ -194,7 +194,7 @@ class QB::Repo::Git < QB::Repo
       
       root_path = Pathname.new root_result.out.chomp
       
-      user = User.new **NRSER.map_values(User.props.keys) {|key, _|
+      user = User.new **User.props.keys.assoc_to { |key|
         begin
           Cmds.chomp! "git config user.#{ key }"
         rescue
