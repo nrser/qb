@@ -12,6 +12,12 @@ describe_spec_file(
           expect{ subject }.to raise_error TypeError
         end
       end # called with ''
+      
+      describe_called_with '' do
+        it do
+          is_expected.to eq "blah"
+        end
+      end # called with ''
     end
     
   end # section rejects
