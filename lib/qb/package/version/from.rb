@@ -184,6 +184,8 @@ module QB::Package::Version::From
   def self.string source
     source = source.to_s unless source.is_a?( String )
     
+    t.non_empty_str.check source
+    
     if source.include? '_'
       docker_tag source
     elsif source.include?( '-' ) || source.include?( '+' )

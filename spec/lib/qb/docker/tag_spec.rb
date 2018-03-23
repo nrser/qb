@@ -5,8 +5,6 @@ describe_spec_file(
   class: QB::Docker::Tag,
 ) do
   
-  
-  
   describe_section "accepts" do
   # ========================================================================
     
@@ -65,10 +63,15 @@ describe_spec_file(
     
     
     context "no source or version" do
-      describe_instance( {} ) do
-        it do
-          expect { subject }.to raise_error TypeError, /failed check/
-        end
+      # describe_instance( {} ) do
+      #   it do
+      #     expect { subject }.to raise_error TypeError, /failed type check/
+      #   end
+      # end
+      it do
+        expect {
+          QB::Docker::Tag.new
+        }.to raise_error TypeError
       end
     end # no source or version
     

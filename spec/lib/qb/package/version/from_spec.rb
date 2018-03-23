@@ -9,7 +9,7 @@ describe_spec_file(
       context "empty string" do
         describe_called_with '' do
           it do
-            expect{ subject }.to raise_error TypeError, /failed type check/
+            expect{ subject }.to raise_error TypeError
           end
         end # called with ''
       end
