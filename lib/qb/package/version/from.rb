@@ -184,7 +184,7 @@ module QB::Package::Version::From
     elsif string.include?( '-' ) || string.include?( '+' )
       semver string
     else
-      gem_version string
+      gemver string
     end
   end
 
