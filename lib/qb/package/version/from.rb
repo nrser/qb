@@ -68,10 +68,10 @@ module QB::Package::Version::From
   # 
   def self.gemver source
     gem_version = case source
-    when Gem::Version
+    when ::Gem::Version
       source
     else
-      Gem::Version.new source.to_s
+      ::Gem::Version.new source.to_s
     end
     
     # release segments are everything before a string
@@ -179,6 +179,15 @@ module QB::Package::Version::From
   # @return [QB::Package::Version]
   # 
   def self.string string
+    if string.empty?
+      raise ArgumentError.new binding.erb <<~END
+        Can not parse version from empty string.
+        
+        Requires at least a major version.
+        
+      END
+    end
+    
     if string.include? '_'
       docker_tag string
     elsif string.include?( '-' ) || string.include?( '+' )
@@ -197,8 +206,8 @@ module QB::Package::Version::From
       string object
     when Hash
       prop_values **object
-    when Gem::Version
-      gem_version object
+    when ::Gem::Version
+      gemver object
     else
       raise TypeError.new binding.erb <<-END
         `object` must be String, Hash or Gem::Version

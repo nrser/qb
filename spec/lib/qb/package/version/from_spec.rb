@@ -9,7 +9,8 @@ describe_spec_file(
       context "empty string" do
         describe_called_with '' do
           it do
-            expect{ subject }.to raise_error TypeError
+            expect{ subject }.to raise_error ArgumentError,
+              /Can not parse version from empty string/
           end
         end # called with ''
       end
