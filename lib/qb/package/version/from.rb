@@ -143,11 +143,13 @@ module QB::Package::Version::From
   end
   
 
-  def self.semver version
-    parse = SemVer.parse version
+  def self.semver source
+    source = source.to_s unless source.is_a?( String )
+    
+    parse = SemVer.parse source
     
     prop_values \
-      raw: version,
+      raw: source,
       major: parse.major,
       minor: parse.minor,
       patch: parse.patch,
@@ -167,7 +169,7 @@ module QB::Package::Version::From
   # 
   def self.docker_tag source
     source = source.to_s unless source.is_a?( String )
-    self.string( source.gsub( '_', '+' ) ).merge raw: version
+    self.string( source.gsub( '_', '+' ) ).merge raw: source
   end # .docker_tag
 
 
