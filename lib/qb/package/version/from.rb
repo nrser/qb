@@ -160,40 +160,34 @@ module QB::Package::Version::From
 
   # Parse Docker image tag version and create an instance.
   # 
-  # @param [String] version
+  # @param [#to_s] source
   #   String version to parse.
   # 
   # @return [QB::Package::Version]
   # 
-  def self.docker_tag version
-    string( version.gsub( '_', '+' ) ).merge raw: version
+  def self.docker_tag source
+    source = source.to_s unless source.is_a?( String )
+    self.string( source.gsub( '_', '+' ) ).merge raw: version
   end # .docker_tag
 
 
   # Parse string version into an instance. Accept Semver, Ruby Gem and
   # Docker image tag formats.
   # 
-  # @param [String]
+  # @param [#to_s] source
   #   String version to parse.
   # 
   # @return [QB::Package::Version]
   # 
-  def self.string string
-    if string.empty?
-      raise ArgumentError.new binding.erb <<~END
-        Can not parse version from empty string.
-        
-        Requires at least a major version.
-        
-      END
-    end
+  def self.string source
+    source = source.to_s unless source.is_a?( String )
     
-    if string.include? '_'
-      docker_tag string
-    elsif string.include?( '-' ) || string.include?( '+' )
-      semver string
+    if source.include? '_'
+      docker_tag source
+    elsif source.include?( '-' ) || source.include?( '+' )
+      semver source
     else
-      gemver string
+      gemver source
     end
   end
 
