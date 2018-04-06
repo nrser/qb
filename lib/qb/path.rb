@@ -8,6 +8,8 @@ require 'pathname'
 # Deps
 # -----------------------------------------------------------------------
 require 'nrser'
+require 'nrser/refinements/types'
+require 'nrser/props/immutable/instance_variables'
 
 # Package
 # -----------------------------------------------------------------------
@@ -17,7 +19,6 @@ require 'qb/repo/git'
 # Refinements
 # =======================================================================
 
-using NRSER
 using NRSER::Types
 
 
@@ -32,7 +33,7 @@ class QB::Path < Pathname
   # Mixins
   # =====================================================================
   
-  include NRSER::Meta::Props
+  include NRSER::Props::Immutable::InstanceVariables
   
   
   # Props

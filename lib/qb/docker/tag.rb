@@ -55,10 +55,9 @@ class QB::Docker::Tag < QB::Util::Resource
   
   prop  :version,
         type: t.maybe( QB::Package::Version ),
-        # default: nil
-        default: ->( instance, **values ) {
+        default: ->( source: ) {
           begin
-            QB::Package::Version::From.docker_tag values[:source]
+            QB::Package::Version::From.docker_tag source
           rescue ArgumentError => error
             nil
           rescue TypeError => error

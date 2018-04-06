@@ -1,0 +1,24 @@
+$class: Docker.Tag
+
+constructor:
+  - arg:
+      name: source
+      type: string
+    do:
+      source: { $: source }
+  
+  - arg:
+      name: props
+      type: dict
+    do: { $: props }
+
+.string:
+  do:
+    $if: { $has: .source }
+    then: { $: .source }
+    else: { $: .version. }
+
+.version:
+  do:
+    $try:
+      $version.from.docker_tag: { $: .string }

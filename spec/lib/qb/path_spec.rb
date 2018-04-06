@@ -1,7 +1,7 @@
-require 'spec_helper'
-
-describe QB::Path do
-  
+describe_spec_file(
+  spec_path: __FILE__,
+  class: QB::Path,
+) do
   context "directory path" do
   
     context 'raw: QB::ROOT' do
@@ -120,4 +120,3 @@ describe QB::Path do
   
   
 end # QB::Repo::Git
-

@@ -18,7 +18,6 @@ require_relative './package/version'
 # Refinements
 # =======================================================================
 
-using NRSER
 using NRSER::Types
 
 

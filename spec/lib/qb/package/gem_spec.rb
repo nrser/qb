@@ -2,20 +2,18 @@
 # Spec for {QB::Package::Gem}
 ##
 
-require 'spec_helper'
-
 require 'nrser/refinements'
 using NRSER
 
 require 'qb/package/gem'
 
-describe "QB::Package::Gem" do
-  subject { QB::Package::Gem }
+describe_spec_file(
+  spec_path: __FILE__,
+  class: QB::Package::Gem,
+) do
   
-  describe ".gemspec_path" do
+  describe_method :gemspec_path do
   # =====================================================================
-    
-    subject { super().method :gemspec_path }
     
     called_with QB::ROOT do
       it "returns //qb.gemspec" do
@@ -26,7 +24,7 @@ describe "QB::Package::Gem" do
   end # .gemspec_path
   
   
-  describe ".from_root_path" do
+  describe_method :from_root_path do
   # =====================================================================
     
     subject { super().method :from_root_path }

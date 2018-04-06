@@ -5,13 +5,7 @@
 # -----------------------------------------------------------------------
 
 require 'nrser'
-
-
-# Refinements
-# =======================================================================
-
-require 'nrser/refinements'
-using NRSER
+require 'nrser/props/immutable/instance_variables'
 
 
 # Declarations
@@ -27,10 +21,15 @@ module QB::Util; end
 # Base class for QB "resources" - object representations of outside structures
 # and concepts: things that live on disk, in remote systems or other runtimes.
 # 
-# At the moment, it's simply an extension of {NRSER::Meta::Props::Base}, but 
-# it is here to serve as a centralized point to implement common behaviors,
-# some of which would be lifted up to the {NRSER} properties system if they 
-# prove sufficiently useful and general.
-# 
-class QB::Util::Resource < NRSER::Meta::Props::Base
+class QB::Util::Resource
+  
+  # Mixins
+  # =====================================================================
+  
+  include NRSER::Props::Immutable::InstanceVariables
+    
+  
+  def initialize source = {}
+    initialize_props source
+  end # #initialize
 end # class QB::Util::Resource
