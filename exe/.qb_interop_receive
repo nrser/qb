@@ -29,7 +29,7 @@ require 'qb'
 if ENV['QB_STDIO_ERR']
   $stderr = UNIXSocket.new ENV['QB_STDIO_ERR']
   
-  NRSER::Logging.setup_for_cli! application: 'qb'
+  NRSER::Log.setup_for_cli! application: 'qb'
   
   QB.debug "Connected to QB stderr stream at #{ ENV['QB_STDIO_ERR'] } #{ $stderr.path }."
 end

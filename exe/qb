@@ -37,10 +37,10 @@ using NRSER
 
 def main *args
   Thread.current.name = 'main'
-  logger = NRSER::Logging['qb/exe/qb#main']
+  logger = NRSER::Log['qb/exe/qb#main']
   
   QB::CLI.set_debug! args
-  NRSER::Logging.setup_for_cli! application: 'qb'
+  NRSER::Log.setup_for_cli! application: 'qb'
   
   logger.debug args: args
   
