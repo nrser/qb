@@ -15,7 +15,7 @@ description: >-
 # Gemspec-style requirements. Right now only `.gems.qb` is used.
 requirements:
   gems:
-    qb: ~> 0.3.0
+    qb: '>= 0.3.0'
 
 # Prefix for role variables
 var_prefix: setup

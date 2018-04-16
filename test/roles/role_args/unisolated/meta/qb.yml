@@ -14,7 +14,7 @@ description: >-
 # generalize in the future.
 requirements:
   gems:
-    qb: ~> 0.3.0
+    qb: '>= 0.3.0'
 
 # prefix for role variables
 var_prefix: false

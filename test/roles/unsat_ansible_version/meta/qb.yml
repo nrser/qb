@@ -12,7 +12,7 @@ description: null
 requirements:
   ansible: '>= 9.8.7.6'
   gems:
-    qb: ~> 0.3.0
+    qb: '>= 0.3.0'
 
 # prefix for role variables
 var_prefix: null

@@ -15,7 +15,12 @@ description: >-
 # Gemspec-style requirements. Right now only `.gems.qb` is used.
 requirements:
   gems:
-    qb: '>= 0.3.0'
+    # Role options taking advantage of the {NRSER::Types} system require
+    # QB 0.4.
+    # 
+    # TODO  Change this to `>= 0.4.0` when 0.4.0 is released.
+    # 
+    qb: '>= 0.4.0.dev'
 
 # Prefix for role variables
 var_prefix: {{ role_namespaceless }}

@@ -11,7 +11,7 @@ description: null
 # generalize in the future.
 requirements:
   gems:
-    qb: ~> 0.3.0
+    qb: '>= 0.3.0'
 
 # prefix for role variables
 var_prefix: false # Don't prefix variables
@@ -33,11 +33,11 @@ var_prefix: false # Don't prefix variables
 # -   cwd
 #     -   use the directory the `qb` command is invoked form.
 # -   {exe: PATH}
-#     -   invoke an executable, passing a JSON serialization of the options 
+#     -   invoke an executable, passing a JSON serialization of the options
 #         mapping their CLI names to values. path can be relative to role
 #         directory.
 # -   {find_up: FILENAME}
-#     -   starting at the current directory and climbing up to parent 
+#     -   starting at the current directory and climbing up to parent
 #         directories, use the first one that contains FILENAME. error
 #         if none is found.
 default_dir: null
@@ -45,7 +45,7 @@ default_dir: null
 # If `true`, QB will ensure the default dir exists before starting the play.
 # 
 # For legacy reasons, this defaults to `true` if not present, but we want to 
-# default declare it as `false` here so new roles can turn it on only if 
+# default declare it as `false` here so new roles can turn it on only if
 # they need it.
 # 
 mkdir: false
@@ -76,7 +76,7 @@ options:
 - name: require
   description: >-
     Explicitly specify files to require at the top of spec files.
-    When not provided, will add all `<spec_dir>/*_helper.rb` files that 
+    When not provided, will add all `<spec_dir>/*_helper.rb` files that
     are NOT auto-required via `<gem_root>/.rspec`.
   required: false
   type: list
