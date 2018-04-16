@@ -68,33 +68,6 @@ class QB::Docker::Tag < QB::Util::Resource
   invariant t.or  t.attrs( source:  t.not( t.nil ) ),
                   t.attrs( version: t.not( t.nil ) )
   
-  # schema do
-  #   prop  :string,
-  #         type: t.non_empty_str,
-  #         source: :to_s
-  # 
-  #   prop  :source,
-  #         type: t.non_empty_str?,
-  #         default: nil
-  # 
-  #   prop  :version,
-  #         type: t.maybe( QB::Package::Version ),
-  #         # default: nil
-  #         default: ->( instance, **values ) {
-  #           begin
-  #             QB::Package::Version::From.docker_tag values[:source]
-  #           rescue ArgumentError => error
-  #             nil
-  #           rescue TypeError => error
-  #             nil
-  #           end
-  #         }
-  # 
-  #   invariant t.or  t.attrs( source:  t.not( t.nil ) ),
-  #                   t.attrs( version: t.not( t.nil ) )
-  # end
-    
-  
   # Instance Methods
   # ======================================================================
   
