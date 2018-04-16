@@ -1,16 +1,30 @@
+# Requirements
+# ========================================================================
+
+# Deps
+# ------------------------------------------------------------------------
+
+require 'nrser/errors/nicer_error'
+
+
+# Definitions
+# ========================================================================
+
 module QB
   # Base class for QB errors.
-  class Error < StandardError; end
+  class Error < StandardError
+    include NRSER::NicerError
+  end
   
   
   # State Errors
   # =====================================================================
   # 
-  # Raised when something - a role, the file system, etc. - is in a state 
+  # Raised when something - a role, the file system, etc. - is in a state
   # that we can't deal with.
   # 
   
-  # Raised when something is in a bad state and no more specific error 
+  # Raised when something is in a bad state and no more specific error
   # subclass applies.
   class StateError < Error; end
   
