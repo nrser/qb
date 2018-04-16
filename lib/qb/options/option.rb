@@ -53,7 +53,7 @@ class QB::Options::Option
   
   
   
-  # Constructor
+  # Construction
   # ======================================================================
   
   def initialize role, meta, include_path
@@ -80,23 +80,19 @@ class QB::Options::Option
     
     @value = nil
     
+    # Initialize `@type` var
     init_type!
   end
   
-  
-  private
+  protected
   # ========================================================================
     
-    
-    # @todo Document init_make_type! method.
+    # Initialize `@type` to the {NRSER::Types::Type} loaded from the option
+    # meta's `type` value.
     # 
-    # @private
+    # @protected
     # 
-    # @param [type] arg_name
-    #   @todo Add name param description.
-    # 
-    # @return [return_type]
-    #   @todo Document return value.
+    # @return [nil]
     # 
     def init_type!
       type_meta = meta[:type]
@@ -176,11 +172,13 @@ class QB::Options::Option
       
       @type = type
       
-    end # #init_make_type!
+    end # #init_type!
     
-    
-  public # end private *****************************************************
+  public # end protected *****************************************************
   
+  
+  # Instance Methods
+  # ========================================================================
   
   # if the option is required in the cli
   def required?
@@ -241,8 +239,7 @@ class QB::Options::Option
   end
   
   
-  
-  private
+  protected
   # ========================================================================
     
   # Get the value at the first found of the keys or the default.
@@ -261,6 +258,6 @@ class QB::Options::Option
     default
   end
     
-  public # end private *****************************************************
+  protected # end private ****************************************************
   
 end # class QB::Options::Option
