@@ -29,7 +29,7 @@ class QB::Util::Resource
   include NRSER::Props::Immutable::InstanceVariables
     
   
-  def initialize source = {}
-    initialize_props source
+  def initialize values = {}
+    initialize_props values
   end # #initialize
 end # class QB::Util::Resource
