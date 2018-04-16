@@ -1,0 +1,137 @@
+---
+##############################################################################
+# QB metadata for `qb/docker/image` role.
+# 
+# QB settings for this role.
+# 
+# @see http://www.rubydoc.info/gems/qb/file/doc/qb_roles/metadata.md
+#
+##############################################################################
+
+# Shown in help output, etc.
+description: |-
+  Make a Docker image available, pulling or building as necessary.
+  
+  Basically a wrapper around Ansible's [docker_image][] module.
+  
+  [docker_image]: http://docs.ansible.com/ansible/latest/modules/docker_image_module.html
+
+# Gemspec-style requirements. Right now only `.gems.qb` is used.
+requirements:
+  gems:
+    qb: '>= 0.4.0.dev'
+
+# Prefix for role variables
+var_prefix: docker_image
+
+# How to get a default for `DIRECTORY` arg if not provided by user.
+# 
+# @see http://www.rubydoc.info/gems/qb/file/doc/qb_roles/metadata/default_dir.md
+# 
+default_dir: null # means use *must* provide `DIRECTORY` arg
+
+# If `true`, QB will ensure `DIRECTORY` exists before starting the play.
+mkdir: false
+
+# Default user to become for play
+default_user: null
+
+# Save options in `.qb-options.yml` files
+save_options: false
+
+# Options to pass to `ansible-playbook`
+ansible_options: {}
+
+# Role CLI options that become Ansible vars
+options:
+# - name: example
+#   description: an example of a variable.
+#   required: false
+#   type: boolean # boolean (default) | string
+#   short: e
+
+- name: api_version
+  type: str
+  description: |-
+    The version of the Docker API running on the Docker Host.
+    
+    Defaults to the latest version of the API supported by docker-py.
+  required: false
+
+- name: archive_path
+  type: path
+  description: |-
+    Use with state present to archive an image to a .tar file.
+  required: false
+  
+- name: buildargs
+  type: dict
+  description: |-
+    Name and values for Dockerfile ARGs.
+  required: false
+
+- name: cacert_path
+  type: file_path
+  description: |-
+    Use a CA certificate when performing server verification by providing the
+    path to a CA certificate file.
+  required: false
+
+- name: cert_path
+  type: file_path
+  description: |-
+    Path to the client's TLS certificate file.
+  required: false
+
+- name: container_limits
+  type:
+    shape:
+      memswap: int?
+      cpushares: str?
+      cpusetcpus: str?
+      memory: str?
+  description: |-
+    A dictionary of limits applied to each container created by the build
+    process.
+    
+    See http://docs.ansible.com/ansible/latest/modules/docker_image_module.html
+  required: false
+
+- name: docker_host
+  type: str
+  description: |-
+    The URL or Unix socket path used to connect to the Docker API. To connect
+    to a remote host, provide the TCP connection string. For example,
+    'tcp://192.0.2.23:2376'.
+    
+    If TLS is used to encrypt the connection, the module will automatically
+    replace 'tcp' in the connection URL with 'https'.
+  required: false
+
+- name: dockerfile
+  type: file_path
+  description: |-
+    Use with state present to provide an alternate name for the Dockerfile
+    to use when building an image.
+  required: false
+
+- name: force
+  type: bool
+  description: |-
+    Behavior depends on `state`:
+    
+    -   Use with state `absent` to un-tag and remove all images matching the
+        specified name.
+    
+    -   Use with state `present` to build, load or pull an image when the
+        image already exists.
+  required: false
+
+- name: http_timeout
+  type: int
+  description: |-
+    Timeout for HTTP requests during the image build operation (in seconds).
+  required: false
+
+# - name: key_path
+#   type: file_path

@@ -1,542 +1,480 @@
 require 'optparse'
 
-require_relative "role/errors"
-require_relative "options/option"
-require 'qb/package/version'
+require_relative "./role/errors"
+require_relative './package/version'
 
-require 'nrser/refinements'
-using NRSER
+require 'nrser/refinements/types'
+using NRSER::Types
 
 
-module QB
-  class Options
-    # Mixins
-    # ========================================================================
-    
-    include SemanticLogger::Loggable
-    
-    
-    # Constants
-    # =======================================================================
-    
-    # Default initial values for {#qb}.
-    # 
-    # @return [Hash]
-    # 
-    QB_DEFAULTS = {
-      'hosts' => ['localhost'].freeze,
-      'facts' => true,
-      'print' => [].freeze,
-      'verbose' => false,
-      'run' => true,
-      'ask' => false,
-    }.freeze
-    
-    
-    # Appended on the end of an `opts.on` call to create a newline after
-    # the option (making the help output a bit easier to read)
-    # 
-    # You might think the empty string would be reasonable, but OptionParser
-    # blows up if you do that.
-    # 
-    # @return [String]
-    # 
-    SPACER = ' '
-    
-    
-    # Attributes
-    # =======================================================================
-    
-    # @!attribute [r] ansible
-    #   @return [Hash<String, String>]
-    #     options to pass through to ansible-playbook.
-    attr_reader :ansible
-    
-    # @!attribute [r] role_options
-    #   @return [Hash<String, QB::Options::Option>]
-    #     options to pass through to ansible-playbook.
-    attr_reader :role_options
-    
-    # @!attribute [r] qb
-    #   @return [Hash<String, *>]
-    #     common qb-level options.
-    attr_reader :qb
-    
-    # class methods
-    # =======================================================================
+class QB::Options
+  
+  # Sub-Tree Requirements
+  # ========================================================================
+  
+  require_relative './options/types'
+  require_relative './options/option'
+  
+  
+  # Constants
+  # =======================================================================
+  
+  # Default initial values for {#qb}.
+  # 
+  # @return [Hash]
+  # 
+  QB_DEFAULTS = {
+    'hosts' => ['localhost'].freeze,
+    'facts' => true,
+    'print' => [].freeze,
+    'verbose' => false,
+    'run' => true,
+    'ask' => false,
+  }.freeze
+  
+  
+  # Appended on the end of an `opts.on` call to create a newline after
+  # the option (making the help output a bit easier to read)
+  # 
+  # You might think the empty string would be reasonable, but OptionParser
+  # blows up if you do that.
+  # 
+  # @return [String]
+  # 
+  SPACER = ' '
+  
+  
+  # Mixins
+  # ========================================================================
+  
+  include NRSER::Log::Mixin
+  
+  
+  # Attributes
+  # =======================================================================
+  
+  # @!attribute [r] ansible
+  #   @return [Hash<String, String>]
+  #     options to pass through to ansible-playbook.
+  attr_reader :ansible
+  
+  # @!attribute [r] role_options
+  #   @return [Hash<String, QB::Options::Option>]
+  #     options to pass through to ansible-playbook.
+  attr_reader :role_options
+  
+  # @!attribute [r] qb
+  #   @return [Hash<String, *>]
+  #     common qb-level options.
+  attr_reader :qb
+  
+  # class methods
+  # =======================================================================
 
-    # turn a name into a "command line" version by replacing underscores with
-    # dashes.
-    # 
-    # @param [String] option_name
-    #   the input option name.
-    # 
-    # @return [String]
-    #   the CLI-ized name.
-    # 
-    # @example
-    #   QB::Options.cli_ize_name "my_var" # => "my-var"
-    # 
-    def self.cli_ize_name option_name
-      option_name.gsub '_', '-'
-    end
-    
-    # turn a name into a "ruby / ansible variable" version by replacing
-    # dashes with underscores.
-    # 
-    # @param [String] option_name
-    #   the input option name.
-    # 
-    # @return [String]
-    #   the ruby / ansible var-ized name.
-    # 
-    # @example
-    #   QB::Options.cli_ize_name "my-var" # => "my_var"
-    # 
-    def self.var_ize_name option_name
-      option_name.gsub '-', '_'
-    end
-    
-    def self.include_role opts, options, include_meta, include_path
-      role_name = include_meta['include']
-      role = QB::Role.require role_name
-      new_include_path = if include_meta.key? 'as'
-        case include_meta['as']
-        when nil, false
-          # include it in with the parent role's options
-          include_path
-        when String
-          include_path + [include_meta['as']]
-        else
-          raise QB::Role::MetadataError.new,
-            "bad 'as' value: #{ include_meta.inspect }"
-        end
+  # turn a name into a "command line" version by replacing underscores with
+  # dashes.
+  # 
+  # @param [String] option_name
+  #   the input option name.
+  # 
+  # @return [String]
+  #   the CLI-ized name.
+  # 
+  # @example
+  #   QB::Options.cli_ize_name "my_var" # => "my-var"
+  # 
+  def self.cli_ize_name option_name
+    option_name.gsub '_', '-'
+  end
+  
+  # turn a name into a "ruby / ansible variable" version by replacing
+  # dashes with underscores.
+  # 
+  # @param [String] option_name
+  #   the input option name.
+  # 
+  # @return [String]
+  #   the ruby / ansible var-ized name.
+  # 
+  # @example
+  #   QB::Options.cli_ize_name "my-var" # => "my_var"
+  # 
+  def self.var_ize_name option_name
+    option_name.gsub '-', '_'
+  end
+  
+  def self.include_role opts, options, include_meta, include_path
+    role_name = include_meta['include']
+    role = QB::Role.require role_name
+    new_include_path = if include_meta.key? 'as'
+      case include_meta['as']
+      when nil, false
+        # include it in with the parent role's options
+        include_path
+      when String
+        include_path + [include_meta['as']]
       else
-        include_path + [role.namespaceless]
+        raise QB::Role::MetadataError.new,
+          "bad 'as' value: #{ include_meta.inspect }"
       end
-      
-      QB.debug "including #{ role.name } as #{ new_include_path.join('-') }"
-      
-      opts.separator "Options for included #{ role.name } role:"
-      
-      add opts, options, role, new_include_path
+    else
+      include_path + [role.namespaceless]
     end
     
-    # add the options from a role to the OptionParser
-    def self.add opts, options, role, include_path = []
-      QB.debug "adding options", "role" => role
-      
-      role.option_metas.each do |option_meta|
-        if option_meta.key? 'include'
-          include_role opts, options, option_meta, include_path
+    QB.debug "including #{ role.name } as #{ new_include_path.join('-') }"
+    
+    opts.separator "Options for included #{ role.name } role:"
+    
+    add opts, options, role, new_include_path
+  end
+  
+  # Add the options from a role to the OptionParser
+  # 
+  # @param [OptionParser] opts
+  #   The option parser to add options to.
+  # 
+  def self.add opts, options, role, include_path = []
+    QB.debug "adding options", "role" => role
+    
+    role.option_metas.each do |option_meta|
+      if option_meta.key? 'include'
+        include_role opts, options, option_meta, include_path
+        
+      else
+        # create an option
+        option = Option.new role, option_meta, include_path
+        
+        on_args = []
+        
+        if option.type == t.bool
+          # don't use short names when included (for now)
+          if include_path.empty? && option.meta['short']
+            on_args << "-#{ option.meta['short'] }"
+          end
+          
+          on_args << "--[no-]#{ option.cli_name }"
           
         else
-          # create an option
-          option = Option.new role, option_meta, include_path
-          
-          on_args = []
-          
-          if option.meta['type'] == 'boolean'
-            # don't use short names when included (for now)
-            if include_path.empty? && option.meta['short']
-              on_args << "-#{ option.meta['short'] }"
-            end
+          ruby_type = Class.new.tap { |klass|
             
-            on_args << "--[no-]#{ option.cli_name }"
-            
-          else
-            ruby_type = case option.meta['type']
-            when nil
-              raise QB::Role::MetadataError.squished <<-END
-                must provide type in QB metadata for option
-                #{ option.meta_name }
-              END
+            opts.accept( klass ) { |value|
+              logger.trace "accepting value",
+                value: value,
+                option: option,
+                klass: klass
               
-            when 'string', 'str'
-              String
-              
-            when 'array', 'list'
-              Array
-              
-            when 'integer', 'int'
-              Integer
-              
-            when 'version'
-              QB::Package::Version
-              
-            when 'hash', 'dict'
-              Class.new.tap { |klass|
-                opts.accept(klass) { |value|
-                  value.split(',').map { |pair_str|
-                    split = pair_str.split ':'
-                    if split.length > 2
-                      raise ArgumentError.dedented <<-END
-                        
-                        Can only have a single ':' in `hash` options.
-                        
-                        Found #{ pair_str.inspect }
-                        
-                        In #{ value.inspect }
-                        
-                      END
-                    end
-                    [split[0], split[1]]
-                  }.to_h
-                }
-              }
-              
-            when 'path'
-              String
-              # Class.new.tap { |klass|
-              #   opts.accept(klass) { |value|
-              #     
-              #   }
-              # }
-            
-            when 'glob'
-              Class.new.tap { |klass|
-                opts.accept(klass) { |glob|
-                  if glob.start_with? '//'
-                    glob = NRSER.git_root(Dir.getwd).
-                      join(glob[2..-1]).
-                      to_s
-                  end
-                  
-                  Dir[glob]
-                }
-              }
-              
-            when Hash
-              if option.meta['type'].key? 'one_of'
-                Class.new.tap { |klass|
-                  opts.accept(klass) { |value|
-                    if option.meta['type']['one_of'].include? value
-                      value
-                    else
-                      raise QB::Role::MetadataError,
-                        "option '#{ option.cli_name }' must be one of: #{ option.meta['type']['one_of'].join(', ') }"
-                    end
-                  }
-                }
-              else
-                raise QB::Role::MetadataError,
-                  "bad type for option #{ option.meta_name }: #{ option.meta['type'].inspect }"
-              end
-            else
-              raise QB::Role::MetadataError,
-                "bad type for option #{ option.meta_name }: #{ option.meta['type'].inspect }"
-            end
-            
-            # don't use short names when included (for now)
-            if include_path.empty? && option.meta['short']
-              on_args << "-#{ option.meta['short'] } #{ option.meta_name.upcase }"
-            end
-            
-            if option.meta['accept_false']
-              on_args << "--[no-]#{ option.cli_name }=#{ option.meta_name.upcase }"
-            else
-              on_args << "--#{ option.cli_name }=#{ option.meta_name.upcase }"
-            end
-              
-            
-            on_args << ruby_type
-          end
-          
-          on_args << option.description
-          
-          if option.required?
-            on_args << "REQUIRED."
-          end
-          
-          if role.defaults.key? option.var_name
-            if option.meta['type'] == 'boolean'
-              on_args << if role.defaults[option.var_name]
-                "DEFAULT: --#{ option.cli_name }"
-              else
-                "DEFAULT: --no-#{ option.cli_name }"
-              end
-            elsif !role.defaults[option.var_name].nil?
-              on_args << "DEFAULT: #{ role.defaults[option.var_name] }"
-            end
-          end
-          
-          if option.has_examples?
-            on_args << 'examples:'
-            
-            option.examples.each_with_index {|example, index|
-              lines = example.lines.to_a
-              
-              # was this debuggin? had to be...
-              # pp lines
-              
-              on_args << ((index + 1).to_s + '.').ljust(4) + lines.first.chomp
-              
-              lines[1..-1].each {|line|
-                on_args << (" ".ljust(4) + line.chomp)
-              }
+              option.type.from_s value
             }
+          }
+          
+          # don't use short names when included (for now)
+          if include_path.empty? && option.meta['short']
+            on_args << "-#{ option.meta['short'] } #{ option.meta_name.upcase }"
           end
           
-          on_args << SPACER
-          
-          QB.debug "adding option", option: option, on_args: on_args
-          
-          opts.on(*on_args) do |value|
-            QB.debug  "setting option",
-                      option: option,
-                      value: value
-            
-            option.value = value
-          end
-          
-          options[option.cli_name] = option
-        end
-      end # each var
-    end # add
-    
-    # destructively removes options from `@argv` and populates ansible, role,
-    # and qb option hashes.
-    # 
-    # @param [QB::Role] role
-    #   the role to parse the options for.
-    # 
-    # @param [Array<String>] args
-    #   CLI args -- `ARGV` with the role arg shifted off.
-    # 
-    # @return [Array<Hash<String, Option|Object>>]
-    #   a two-element array:
-    #   
-    #   1.  the options for the role, hash of Option#cli_name to Option
-    #       instances.
-    #       
-    #   2.  the general qb options, hash of String key to option values.
-    #   
-    # @raise if bad options are found.
-    # 
-    def self.parse! role, argv
-      options = self.new role, argv
-      [options.role_options, options.qb]
-    end
-    
-    # constructor
-    # =======================================================================
-    
-    # @param [Role] role
-    #   the role to parse the args for.
-    # 
-    def initialize role, argv
-      @role = role
-      @argv = argv
-      @qb = QB_DEFAULTS.dup
-      
-      parse!
-    end
-    
-    
-    
-    # @todo Document ask? method.
-    # 
-    # @param [type] arg_name
-    #   @todo Add name param description.
-    # 
-    # @return [return_type]
-    #   @todo Document return value.
-    # 
-    def ask?
-      @qb['ask']
-    end # #ask?
-    
-    
-    
-    private
-    # =======================================================================
-    
-    # destructively removes options from `@argv` and populates ansible, role,
-    # and qb option hashes.
-    def parse!
-      parse_ansible!
-      
-      @role_options = {}
-      
-      if @role.meta['default_user']
-        @qb['user'] = @role.meta['default_user']
-      end
-      
-      opt_parser = OptionParser.new do |opts|
-        opts.accept(QB::Package::Version) do |string|
-          QB::Package::Version.from( string ).to_h
-        end
-        
-        opts.banner = @role.banner
-        
-        opts.separator "Common options:"
-        
-        opts.on(
-          '-H',
-          '--HOSTS=HOSTS',
-          Array,
-          "set playbook host",
-          "DEFAULT: localhost",
-          SPACER
-        ) do |value|
-          @qb['hosts'] = value
-        end
-        
-        opts.on(
-          '-I',
-          '--INVENTORY=FILEPATH',
-          String,
-          "set inventory file",
-          SPACER
-        ) do |value|
-          @qb['inventory'] = value
-        end
-        
-        opts.on(
-          '-U',
-          '--USER=USER',
-          String,
-          "ansible become user for the playbook",
-          SPACER
-        ) do |value|
-          @qb['user'] = value
-        end
-        
-        opts.on(
-          '-T',
-          '--TAGS=TAGS',
-          Array,
-          "playbook tags",
-          SPACER
-        ) do |value|
-          @qb['tags'] = value
-        end
-        
-        opts.on(
-          '-V[LEVEL]',
-          "run playbook in verbose mode. use like -VVV or -V3.",
-          SPACER
-        ) do |value|
-          # QB.debug "verbose", value: value
-          
-          @qb['verbose'] = if value.nil?
-            1
+          if option.meta['accept_false']
+            on_args << "--[no-]#{ option.cli_name }=#{ option.meta_name.upcase }"
           else
-            case value
-            when '0'
-              false
-            when /^[1-4]$/
-              value.to_i
-            when /^[V]{1,3}$/i
-              value.length + 1
+            on_args << "--#{ option.cli_name }=#{ option.meta_name.upcase }"
+          end
+          
+          on_args << ruby_type
+          
+        end # case option.meta['type']
+        
+        on_args << option.description
+        
+        if option.required?
+          on_args << "REQUIRED."
+        end
+        
+        if role.defaults.key? option.var_name
+          if option.meta['type'] == 'boolean'
+            on_args << if role.defaults[option.var_name]
+              "DEFAULT: --#{ option.cli_name }"
             else
-              raise "bad verbose value: #{ value.inspect }"
+              "DEFAULT: --no-#{ option.cli_name }"
             end
+          elsif !role.defaults[option.var_name].nil?
+            on_args << "DEFAULT: #{ role.defaults[option.var_name] }"
           end
         end
         
-        opts.on(
-          '--NO-FACTS',
-          "don't gather facts",
-          SPACER
-        ) do |value|
-          @qb['facts'] = false
+        if option.has_examples?
+          on_args << 'examples:'
+          
+          option.examples.each_with_index {|example, index|
+            lines = example.lines.to_a
+            
+            on_args << ((index + 1).to_s + '.').ljust(4) + lines.first.chomp
+            
+            lines[1..-1].each {|line|
+              on_args << (" ".ljust(4) + line.chomp)
+            }
+          }
         end
         
-        opts.on(
-          '--PRINT=FLAGS',
-          Array,
-          "set what to print before running: options, env, cmd, playbook",
-          SPACER
-        ) do |value|
-          @qb['print'] = value
+        on_args << SPACER
+        
+        logger.debug "adding option",
+          option: option.cli_name,
+          on_args: on_args
+        
+        opts.on(*on_args) do |value|
+          logger.debug "setting option",
+            option: option.cli_name,
+            value: value
+          
+          option.value = value
         end
         
-        opts.on(
-          '--NO-RUN',
-          "don't run the playbook (useful to just print stuff)",
-          SPACER
-        ) do |value|
-          @qb['run'] = false
-        end
+        options[option.cli_name] = option
+      end
+    end # each var
+  end # add
+  
+  # destructively removes options from `@argv` and populates ansible, role,
+  # and qb option hashes.
+  # 
+  # @param [QB::Role] role
+  #   the role to parse the options for.
+  # 
+  # @param [Array<String>] args
+  #   CLI args -- `ARGV` with the role arg shifted off.
+  # 
+  # @return [Array<Hash<String, Option|Object>>]
+  #   a two-element array:
+  #   
+  #   1.  the options for the role, hash of Option#cli_name to Option
+  #       instances.
+  #       
+  #   2.  the general qb options, hash of String key to option values.
+  #   
+  # @raise if bad options are found.
+  # 
+  def self.parse! role, argv
+    options = self.new role, argv
+    [options.role_options, options.qb]
+  end
+  
+  
+  # Constructor
+  # =======================================================================
+  
+  # @param [Role] role
+  #   the role to parse the args for.
+  # 
+  def initialize role, argv
+    @role = role
+    @argv = argv
+    @qb = QB_DEFAULTS.dup
+    
+    parse!
+  end
+  
+  
+  # @todo Document ask? method.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def ask?
+    @qb['ask']
+  end # #ask?
+  
+  
+  
+  private
+  # =======================================================================
+  
+  # destructively removes options from `@argv` and populates ansible, role,
+  # and qb option hashes.
+  def parse!
+    parse_ansible!
+    
+    @role_options = {}
+    
+    if @role.meta['default_user']
+      @qb['user'] = @role.meta['default_user']
+    end
+    
+    opt_parser = OptionParser.new do |opts|
+      opts.accept(QB::Package::Version) do |string|
+        QB::Package::Version.from( string ).to_h
+      end
+      
+      opts.banner = @role.banner
+      
+      opts.separator "Common options:"
+      
+      opts.on(
+        '-H',
+        '--HOSTS=HOSTS',
+        Array,
+        "set playbook host",
+        "DEFAULT: localhost",
+        SPACER
+      ) do |value|
+        @qb['hosts'] = value
+      end
+      
+      opts.on(
+        '-I',
+        '--INVENTORY=FILEPATH',
+        String,
+        "set inventory file",
+        SPACER
+      ) do |value|
+        @qb['inventory'] = value
+      end
+      
+      opts.on(
+        '-U',
+        '--USER=USER',
+        String,
+        "ansible become user for the playbook",
+        SPACER
+      ) do |value|
+        @qb['user'] = value
+      end
+      
+      opts.on(
+        '-T',
+        '--TAGS=TAGS',
+        Array,
+        "playbook tags",
+        SPACER
+      ) do |value|
+        @qb['tags'] = value
+      end
+      
+      opts.on(
+        '-V[LEVEL]',
+        "run playbook in verbose mode. use like -VVV or -V3.",
+        SPACER
+      ) do |value|
+        # QB.debug "verbose", value: value
         
-        opts.on(
-          '-A',
-          '--ASK',
-          "interactively ask for argument and option values",
-          SPACER
-        ) do |value|
-          if value && !$stdin.isatty
-            raise ArgumentError.squished <<-END
-              Interactive args & options only works with TTY $stdin.
-            END
+        @qb['verbose'] = if value.nil?
+          1
+        else
+          case value
+          when '0'
+            false
+          when /^[1-4]$/
+            value.to_i
+          when /^[V]{1,3}$/i
+            value.length + 1
+          else
+            raise "bad verbose value: #{ value.inspect }"
           end
-          
-          @qb['ask'] = value
-        end
-        
-        opts.separator "Role options:"
-        
-        self.class.add opts, @role_options, @role
-        
-        opts.on_tail("-h", "--help", "Show this message") do
-          puts opts
-          
-          @role.puts_examples
-          
-          exit
         end
       end
       
-      opt_parser.parse! @argv
-    end # parse!
-    
-    
-    protected
-    # ========================================================================
+      opts.on(
+        '--NO-FACTS',
+        "don't gather facts",
+        SPACER
+      ) do |value|
+        @qb['facts'] = false
+      end
       
-      # Pull options that start with
-      #
-      # 1.  `--ANSIBLE_`
-      # 1.  `--ANSIBLE-`
-      # 2.  `---`
-      # 
-      # out of `@argv` and stick them in `@ansible`.
-      # 
-      # @return [nil]
-      #   **Mutates** `@argv`.
-      # 
-      def parse_ansible!
-        logger.debug "Parsing Ansible options...",
-          argv: @argv.dup
+      opts.on(
+        '--PRINT=FLAGS',
+        Array,
+        "set what to print before running: options, env, cmd, playbook",
+        SPACER
+      ) do |value|
+        @qb['print'] = value
+      end
+      
+      opts.on(
+        '--NO-RUN',
+        "don't run the playbook (useful to just print stuff)",
+        SPACER
+      ) do |value|
+        @qb['run'] = false
+      end
+      
+      opts.on(
+        '-A',
+        '--ASK',
+        "interactively ask for argument and option values",
+        SPACER
+      ) do |value|
+        if value && !$stdin.isatty
+          raise ArgumentError.squished <<-END
+            Interactive args & options only works with TTY $stdin.
+          END
+        end
         
-        @ansible = @role.default_ansible_options.clone
+        @qb['ask'] = value
+      end
+      
+      opts.separator "Role options:"
+      
+      self.class.add opts, @role_options, @role
+      
+      opts.on_tail("-h", "--help", "Show this message") do
+        puts opts
         
-        reg_exs = [
-          /\A\-\-ANSIBLE[\-\_]/,
-          /\A\-\-\-/,
-        ]
+        @role.puts_examples
         
-        @argv.reject! {|shellword|
-          if re = reg_exs.find {|re| re =~ shellword}
-            name = shellword.sub re, ''
-            
-            value = true
-            
-            if name.include? '='
-              name, value = name.split('=', 2)
-            end
-            
-            @ansible[name] = value
-            
-            true
+        exit
+      end
+    end
+    
+    opt_parser.parse! @argv
+  end # parse!
+  
+  
+  protected
+  # ========================================================================
+    
+    # Pull options that start with
+    #
+    # 1.  `--ANSIBLE_`
+    # 1.  `--ANSIBLE-`
+    # 2.  `---`
+    # 
+    # out of `@argv` and stick them in `@ansible`.
+    # 
+    # @return [nil]
+    #   **Mutates** `@argv`.
+    # 
+    def parse_ansible!
+      logger.debug "Parsing Ansible options...",
+        argv: @argv.dup
+      
+      @ansible = @role.default_ansible_options.clone
+      
+      reg_exs = [
+        /\A\-\-ANSIBLE[\-\_]/,
+        /\A\-\-\-/,
+      ]
+      
+      @argv.reject! {|shellword|
+        if re = reg_exs.find {|re| re =~ shellword}
+          name = shellword.sub re, ''
+          
+          value = true
+          
+          if name.include? '='
+            name, value = name.split('=', 2)
           end
-        }
-        
-        nil
-      end # #parse_ansible!
+          
+          @ansible[name] = value
+          
+          true
+        end
+      }
       
-    # end protected
+      nil
+    end # #parse_ansible!
     
-  end # Options
-end # QB
+  # end protected
+  
+end # class QB::Options

@@ -1,0 +1,4 @@
+---
+qb/role/qb:
+  modules:
+  - qb.docker.image.get_args

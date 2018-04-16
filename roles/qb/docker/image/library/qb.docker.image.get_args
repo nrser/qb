@@ -14,14 +14,22 @@ end
 require 'qb'
 require 'nrser'
 
-class {{ role_module_class }} < QB::Ansible::Module
+using NRSER::Types
+
+module QB; end
+module QB::Docker; end
+module QB::Docker::Image; end
+
+class QB::Docker::Image::GetArgs < QB::Ansible::Module
   
   # Arguments
   # ==========================================================================
-  # 
-  # Define arguments using the {NRSER::Props} system.
-  # 
   
+  arg :x, type: t.non_empty_str?, default: nil
+  
+  arg :vars, type: t.hash_, default: -> { {} }
+  
+  arg :vars2, type: t.hash_, default: -> { {} }
   
   # entry point for the module. invoked by {\#run}.
   # 
@@ -35,8 +43,13 @@ class {{ role_module_class }} < QB::Ansible::Module
   #       the module will exit successfully.
   #       
   def main
+    logger.info "HERE!",
+      vars: vars,
+      vars2: vars2
+      # args_source: args_source
+    
     return nil
   end # #main
-end # {{ role_module_class }}
+end # QbDockerImageGetArgs
 
-{{ role_module_class }}.new.run
+QB::Docker::Image::GetArgs.run!

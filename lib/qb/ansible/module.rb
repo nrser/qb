@@ -1,12 +1,25 @@
+# encoding: UTF-8
+# frozen_string_literal: true
+
+# Requirements
+# =======================================================================
+
+# Stdlib
+# -----------------------------------------------------------------------
+
 require 'json'
 require 'pp'
 
+# Deps
+# ----------------------------------------------------------------------------
 
-# Refinements
-# =======================================================================
+require 'nrser'
 
-using NRSER
-using NRSER::Types
+
+# Project / Package
+# -----------------------------------------------------------------------
+
+require 'qb/util/resource'
 
 
 # Declarations
@@ -16,39 +29,193 @@ module QB; end
 module QB::Ansible; end
 
 
+# Refinements
+# =======================================================================
+
+using NRSER::Types
+
+
 # Definitions
 # =====================================================================
 
-class QB::Ansible::Module
+class QB::Ansible::Module < QB::Util::Resource
   
-  # Class Variables
-  # =====================================================================
+  # Sub-Tree Requirements
+  # ============================================================================
+
+  require_relative './module/response'
   
-  @@arg_types = {}
+  
+  # Mixins
+  # ============================================================================
+  
+  include NRSER::Log::Mixin
   
   
   # Class Methods
   # =====================================================================
   
-  def self.stringify_keys hash
-    hash.map {|k, v| [k.to_s, v]}.to_h
-  end
+  # @todo Document setup_logging method.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def self.setup_logging!
+    if ENV['QB_STDIO_ERR']
+      $stderr = UNIXSocket.new ENV['QB_STDIO_ERR']
+    end
+    
+    if ENV['QB_STDIO_OUT']
+      $stdout = UNIXSocket.new ENV['QB_STDIO_OUT']
+    end
+    
+    if ENV['QB_STDIO_IN']
+      $stdin = UNIXSocket.new ENV['QB_STDIO_IN']
+    end
+    
+    if $stderr.is_a?( UNIXSocket )
+      NRSER::Log.setup! application: 'qb', dest: $stderr
+      
+      [
+        ['in', $stdin],
+        ['out', $stdout],
+        ['err', $stderr],
+      ].each do |name, io|
+        if io.is_a? UNIXSocket
+          env_var_name = "QB_STDIO_#{ name.upcase }"
+          logger.trace "Connected to QB process std#{ name } stream",
+            env_var_name => ENV[env_var_name],
+            path: io.path
+        end
+      end
+    end
+  end # .setup_logging
   
   
-  def self.arg name, type
-    @@arg_types[name.to_sym] = type
-  end
+  # Is the module being run from Ansible via it's "WANT_JSON" mode?
+  # 
+  # Tests if `argv` is a single string argument that is a file path.
+  # 
+  # @see http://docs.ansible.com/ansible/latest/dev_guide/developing_program_flow_modules.html#non-native-want-json-modules
+  # 
+  # @param [Array<String>] argv
+  #   The CLI argument strings.
+  # 
+  # @return [Boolean]
+  #   `true` if `argv` looks like it came from Ansible's "WANT_JSON" mode.
+  # 
+  def self.want_json_mode? argv = ARGV
+    ARGV.length == 1 && File.file?( ARGV[0] )
+  end # .want_json_mode?
+  
+  
+  # @todo Document run! method.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def self.run!
+    setup_logging!
+    
+    if want_json_mode?
+      run_from_json_args_file! ARGV[0]
+    else
+      run_from_cli_options!
+    end
+  end # .run!
+  
+  
+  # Create and run an instance and populate it's args by loading JSON from a
+  # file path.
+  # 
+  # Used to run via Ansible's "WANT_JSON" mode.
+  # 
+  # @see http://docs.ansible.com/ansible/latest/dev_guide/developing_program_flow_modules.html#non-native-want-json-modules
+  # 
+  # @param [String | Pathname] file_path
+  #   Path to the JSON file containing the args.
+  # 
+  # @return (see #run!)
+  # 
+  def self.run_from_json_args_file! file_path
+    file_contents = File.read file_path
+    
+    args = JSON.load file_contents
+    
+    t.hash_( keys: t.str ).check( args ) do |type:, value:|
+      binding.erb <<~END
+        JSON file contents must load into a `Hash<String, *>`
+        
+        Loaded value (of class <%= value.class %>):
+        
+            <%= value.pretty_inspect %>
+        
+      END
+    end
+    
+    run_from_args!  args,
+                    args_source: {
+                      type: :file,
+                      path: file_path,
+                      contents: file_contents,
+                    }
+  end # .run_from_json_args_file!
+  
+  
+  # Run from a hash-like of argument names mapped to values, with optional
+  # info about the source of the arguments.
+  # 
+  # @param [#each_pair] args
+  #   Argument names (String or Symbol) mapped to their value data.
+  # 
+  # @return (see #run!)
+  # 
+  def self.run_from_args! args, args_source: nil
+    instance = self.from_data args
+    instance.args_source = args_source
+    instance.run!
+  end # .run_from_args!
+  
+  
+  # Alias for defining args as props
+  
+  # @todo Document arg method.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def self.arg *args, &block
+    prop *args, &block
+  end # .arg
+  
+  
+  # Attributes
+  # ==========================================================================
+  
+  # Optional information on the source of the arguments.
+  # 
+  # @return [nil | Hash<Symbol, Object>]
+  #     
+  attr_accessor :args_source
   
   
   # Construction
   # =====================================================================
   
-  def initialize
+  def initialize values = {}
+    super values
+    
     @changed = false
-    # @input_file = ARGV[0]
-    # @input = File.read @input_file
-    # @args = JSON.load @input
-    init_set_args!
+    # init_set_args!
     
     @facts = {}
     @warnings = []
@@ -57,61 +224,7 @@ class QB::Ansible::Module
     @qb_stdio_err = nil
     @qb_stdio_in = nil
     
-    # debug "HERE!"
-    # debug ENV
-    
-    # if QB_STDIO_ env vars are set send stdout and stderr
-    # to those sockets to print in the parent process
-    
-    if ENV['QB_STDIO_ERR']
-      @qb_stdio_err = $stderr = UNIXSocket.new ENV['QB_STDIO_ERR']
-      
-      debug "Connected to QB stderr stream at #{ ENV['QB_STDIO_ERR'] } #{ @qb_stdio_err.path }."
-    end
-    
-    if ENV['QB_STDIO_OUT']
-      @qb_stdio_out = $stdout = UNIXSocket.new ENV['QB_STDIO_OUT']
-      
-      debug "Connected to QB stdout stream at #{ ENV['QB_STDIO_OUT'] }."
-    end
-    
-    if ENV['QB_STDIO_IN']
-      @qb_stdio_in = UNIXSocket.new ENV['QB_STDIO_IN']
-      
-      debug "Connected to QB stdin stream at #{ ENV['QB_STDIO_IN'] }."
-    end
-    
-    @@arg_types.each {|key, type|
-      var_name = "@#{ key.to_s }"
-      
-      unless instance_variable_get(var_name).nil?
-        raise ArgumentError.new NRSER.squish <<-END
-          an instance variable named #{ var_name } exists
-          with value #{ instance_variable_get(var_name).inspect }
-        END
-      end
-      
-      value = type.check( @args[key.to_s] ) do |type:, value:|
-        all_args = @args
-        
-        binding.erb <<-END
-          Value
-          
-              <%= value.pretty_inspect %>
-          
-          for argument <%= key.inspect %> is not valid for type
-          
-              <%= type %>
-          
-          Arguments:
-          
-              <%= all_args.pretty_inspect %>
-          
-        END
-      end
-      
-      instance_variable_set var_name, value
-    }
+    logger.info "ARGV", argv: ARGV
   end
   
   
@@ -210,7 +323,7 @@ class QB::Ansible::Module
   end
   
   
-  def run
+  def run!
     result = main
     
     case result
@@ -233,24 +346,24 @@ class QB::Ansible::Module
   
   def done
     exit_json changed: @changed,
-              ansible_facts: self.class.stringify_keys(@facts),
+              ansible_facts: @facts.stringify_keys,
               warnings: @warnings
   end
   
   def exit_json hash
     # print JSON response to process' actual STDOUT (instead of $stdout,
     # which may be pointing to the qb parent process)
-    STDOUT.print JSON.pretty_generate(self.class.stringify_keys(hash))
+    STDOUT.print JSON.pretty_generate(hash.stringify_keys)
     
     [
-      [:stdin, @qb_stdio_in],
-      [:stdout, @qb_stdio_out],
-      [:stderr, @qb_stdio_err],
+      [:stdin, $stdin],
+      [:stdout, $stdout],
+      [:stderr, $stderr],
     ].each do |name, socket|
-      if socket
-        debug "Flushing socket #{ name }."
+      if socket && socket.is_a?( UNIXSocket )
+        logger.trace "Flushing socket #{ name }."
         socket.flush
-        debug "Closing #{ name } socket at #{ socket.path.to_s }."
+        logger.debug "Closing #{ name } socket at #{ socket.path.to_s }."
         socket.close
       end
     end

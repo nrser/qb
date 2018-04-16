@@ -12,13 +12,20 @@ names = Dir.chdir(GITIGNORE_DIR) do
 end
 
 puts JSON.pretty_generate({
+  requirements: {
+    gems: {
+      # The `type: {in: ...}` syntax for the `name` option requires QB 0.4
+      qb: '>= 0.4.0.dev',
+    }
+  },
+  
   save_options: false,
   
   default_dir: {
     find_up: '.gitignore',
   },
   
-  # TODO  added this to preserve prefix from when role was named 
+  # TODO  added this to preserve prefix from when role was named
   #       `qb.gitignore`, might want to change once we sort all that out.
   #     
   var_prefix: 'gitignore',
@@ -29,7 +36,7 @@ puts JSON.pretty_generate({
       description: "name of gitignore.",
       required: true,
       type: {
-        one_of: names,
+        in: names,
       },
       short: 'n',
     },
