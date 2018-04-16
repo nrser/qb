@@ -48,9 +48,18 @@ class QB::Ansible::Env
   attr_reader :filter_plugins
   
   
-  # @!attribute [r] lookup_plugins
-  #   @return [Array<Pathname>]
+  # Paths to search for Ansible/Jinja2 "Lookup Plugins"
+  # 
+  # @return [Array<Pathname>]
+  # 
   attr_reader :lookup_plugins
+  
+  
+  # Paths to search for Ansible/Jinja2 "Test Plugins"
+  # 
+  # @return [Array<Pathname>]
+  # 
+  attr_reader :test_plugins
   
   
   # `ANSIBLE_CONFIG_<name>=<value>` ENV var values.
@@ -80,11 +89,15 @@ class QB::Ansible::Env
     ]
     
     @filter_plugins = [
-      QB::ROOT.join('plugins', 'filter_plugins'),
+      QB::ROOT.join('plugins', 'filter'),
     ]
     
     @lookup_plugins = [
-      QB::ROOT.join('plugins', 'lookup_plugins'),
+      QB::ROOT.join('plugins', 'lookup'),
+    ]
+    
+    @test_plugins = [
+      QB::ROOT.join( 'plugins', 'test' ),
     ]
     
     @config = {}
@@ -97,7 +110,7 @@ class QB::Ansible::Env
   # @todo Document to_h method.
   # 
   # @param [type] arg_name
-  #   @todo Add name param description.
+  #   @todo Add name param description.''
   # 
   # @return [return_type]
   #   @todo Document return value.
@@ -107,7 +120,8 @@ class QB::Ansible::Env
       :roles_path,
       :library,
       :filter_plugins,
-      :lookup_plugins
+      :lookup_plugins,
+      :test_plugins,
     ].map { |name|
       value = self.send name
       
