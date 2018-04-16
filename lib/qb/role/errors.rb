@@ -1,9 +1,3 @@
-# Refinements
-# =======================================================================
-
-require 'nrser/refinements'
-using NRSER
-
 
 # Definitions
 # =======================================================================
@@ -40,7 +34,7 @@ module QB
       end
     end
     
-    # raised when there's bad metadata 
+    # raised when there's bad metadata
     class MetadataError < QB::StateError
     end
   end # Role
