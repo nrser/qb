@@ -98,79 +98,49 @@ class QB::Options::Option
       type_meta = meta[:type]
       
       if type_meta.nil?
-        raise QB::Role::MetadataError.new(
+        raise QB::Role::MetadataError.new \
           "Option", meta_name, "for role", role.name, "missing `type`",
           role_meta_path: role.meta_path,
-          option_meta: meta,
-        )
+          option_meta: meta
       end
       
-      type = t.match type_meta,
+      message = t.match type_meta,
         t.non_empty_str, ->( str ) {
-          type = [
-            QB::Options::Types,
-            t,
-          ].find_map { |mod|
-            if mod.respond_to? str
-              begin
-                type = mod.public_send( str )
-              rescue
-                nil
-              else
-                type if type.is_a? t::Type
-              end
-            end
-          }
-          
-          if type.nil?
-            raise QB::Role::MetadataError.new \
-              "Unable to find type factory for", type_meta,
-              role_meta_path: role.meta_path,
-              option_meta: meta
-          else
-            type
-          end
+          NRSER::Message.new str
         },
-      
-      t.pair( value: (t.hash_ | t.array) ), ->( pair ) {
-        name, params = pair.first
         
-        message = NRSER::Message.from(
-          name, params
-        ).symbolize_options
-        
-        type = [
-          QB::Options::Types,
-          t,
-        ].find_map { |mod|
-          if mod.respond_to? message.symbol
-            begin
-              type = message.send_to mod
-            rescue Exception => error
-              logger.warn "Type factory failed",
-                { message: message },
-                error
-              
-              nil
-            else
-              type if type.is_a?( t::Type )
-            end
-          end
+        t.pair( value: (t.hash_ | t.array) ), ->( pair ) {
+          name, params = pair.first
+          
+          NRSER::Message.from( name, params ).symbolize_options
         }
-        
-        if type.nil?
-          raise QB::Role::MetadataError.new(
-            "Unable to find type factory for", type_meta,
-            role_meta_path: role.meta_path,
-            option_meta: meta,
-            message: message
-          )
-        else
-          type
+      
+      @type = [
+        QB::Options::Types,
+        t,
+      ].find_map { |mod|
+        if mod.respond_to? message.symbol
+          begin
+            type = message.send_to mod
+          rescue Exception => error
+            logger.warn "Type factory failed",
+              { message: message },
+              error
+            
+            nil
+          else
+            type if type.is_a?( t::Type )
+          end
         end
       }
       
-      @type = type
+      if @type.nil?
+        raise QB::Role::MetadataError.new \
+          "Unable to find type factory for", type_meta,
+          role_meta_path: role.meta_path,
+          option_meta: meta,
+          message: message
+      end
       
     end # #init_type!
     
