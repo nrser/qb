@@ -19,10 +19,10 @@ if ENV['QB_DEV_ENV']
   require 'bundler/setup'
 end
 
+require 'nrser'
 require 'qb'
+require 'qb/ansible/module'
 require 'cmds'
-
-using NRSER
 
 class Stream < QB::Ansible::Module
   def main
@@ -82,4 +82,4 @@ class Stream < QB::Ansible::Module
   end
 end
 
-Stream.new.run
+Stream.run!

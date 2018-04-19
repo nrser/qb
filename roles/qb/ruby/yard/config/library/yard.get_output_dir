@@ -11,12 +11,14 @@ if ENV['QB_DEV_ENV']
   require 'bundler/setup'
 end
 
-require 'qb'
 require 'nrser'
+require 'qb'
+require 'qb/ansible/module'
+
 
 class YardGetOutputDir < QB::Ansible::Module
 
-  arg :bundle_root, NRSER::Types.abs_path
+  arg :bundle_root, type: NRSER::Types.abs_path
   
   def facts_for rel_dir
     {
@@ -41,7 +43,7 @@ class YardGetOutputDir < QB::Ansible::Module
   #       the module will exit successfully.
   #       
   def main
-    path = File.join @bundle_root, '.yardopts'
+    path = File.join bundle_root, '.yardopts'
     
     if File.exists?  path
       contents = File.read path
@@ -56,4 +58,4 @@ class YardGetOutputDir < QB::Ansible::Module
   end # #main
 end # YardGetOutputDir
 
-YardGetOutputDir.new.run
+YardGetOutputDir.run!

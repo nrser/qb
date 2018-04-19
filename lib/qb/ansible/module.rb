@@ -14,12 +14,12 @@ require 'pp'
 # ----------------------------------------------------------------------------
 
 require 'nrser'
-
+require 'nrser/props/immutable/instance_variables'
 
 # Project / Package
 # -----------------------------------------------------------------------
 
-require 'qb/util/resource'
+require 'qb/ipc/stdio/client'
 
 
 # Declarations
@@ -38,7 +38,7 @@ using NRSER::Types
 # Definitions
 # =====================================================================
 
-class QB::Ansible::Module < QB::Util::Resource
+class QB::Ansible::Module
   
   # Sub-Tree Requirements
   # ============================================================================
@@ -49,50 +49,74 @@ class QB::Ansible::Module < QB::Util::Resource
   # Mixins
   # ============================================================================
   
+  include NRSER::Props::Immutable::InstanceVariables
+  
   include NRSER::Log::Mixin
   
   
   # Class Methods
   # =====================================================================
   
-  # @todo Document setup_logging method.
-  # 
-  # @param [type] arg_name
-  #   @todo Add name param description.
-  # 
-  # @return [return_type]
-  #   @todo Document return value.
-  # 
-  def self.setup_logging!
-    if ENV['QB_STDIO_ERR']
-      $stderr = UNIXSocket.new ENV['QB_STDIO_ERR']
-    end
+  def self.setup_io!
+    # Initialize
+    $qb_stdio_client ||= QB::IPC::STDIO::Client.new.connect!
     
-    if ENV['QB_STDIO_OUT']
-      $stdout = UNIXSocket.new ENV['QB_STDIO_OUT']
-    end
-    
-    if ENV['QB_STDIO_IN']
-      $stdin = UNIXSocket.new ENV['QB_STDIO_IN']
-    end
-    
-    if $stderr.is_a?( UNIXSocket )
-      NRSER::Log.setup! application: 'qb', dest: $stderr
-      
-      [
-        ['in', $stdin],
-        ['out', $stdout],
-        ['err', $stderr],
-      ].each do |name, io|
-        if io.is_a? UNIXSocket
-          env_var_name = "QB_STDIO_#{ name.upcase }"
-          logger.trace "Connected to QB process std#{ name } stream",
-            env_var_name => ENV[env_var_name],
-            path: io.path
-        end
-      end
+    if $qb_stdio_client.log.connected?
+      NRSER::Log.setup! \
+        application: 'qb',
+        sync: true,
+        dest: {
+          io: $qb_stdio_client.log.socket,
+          formatter: SemanticLogger::Formatters::Json.new,
+        }
     end
   end # .setup_logging
+  
+  
+  # Wrap a "run" call with error handling.
+  # 
+  # @private
+  # 
+  # @param [Proc<() => RESULT] &block
+  # 
+  # @return [RESULT]
+  #   On success, returns the result of `&block`.
+  # 
+  # @raise [SystemExit]
+  #   Any exception raised in `&block` is logged at `fatal` level, then
+  #   `exit false` is called, raising a {SystemExit} error.
+  #   
+  #   The only exception: if `&block` raises a {SystemExit} error, that error
+  #   is simply re-raised without any logging. This should allow nesting
+  #   {.handle_run_error} calls, since the first `rescue` will log any
+  #   error and raise {SystemExit}, which will then simply be bubbled-up
+  #   by {.handle_run_error} wrappers further up the call chain.
+  # 
+  def self.handle_run_error &block
+    begin
+      block.call
+    rescue SystemExit => error
+      # Bubble {SystemExit} up to exit normally
+      raise
+    rescue Exception => error
+      # Everything else is unexpected, and needs to be logged in a way that's
+      # more useful than the JSON-ified crap Ansible would normally print
+      
+      # If we don't have a logger setup, log to real `STDERR` so we get
+      # *something* back in the Ansible output, even if it's JSON mess
+      if NRSER::Log.appender.nil?
+        NRSER::Log.setup! application: 'qb', dest: STDERR
+      end
+      
+      # Log it out
+      logger.fatal error
+      
+      # And GTFO
+      exit false
+    end
+  end # .handle_run_error
+  
+  private_class_method :handle_run_error
   
   
   # Is the module being run from Ansible via it's "WANT_JSON" mode?
@@ -121,12 +145,14 @@ class QB::Ansible::Module < QB::Util::Resource
   #   @todo Document return value.
   # 
   def self.run!
-    setup_logging!
-    
-    if want_json_mode?
-      run_from_json_args_file! ARGV[0]
-    else
-      run_from_cli_options!
+    handle_run_error do
+      setup_io!
+      
+      if want_json_mode?
+        run_from_json_args_file! ARGV[0]
+      else
+        run_from_cli_options!
+      end
     end
   end # .run!
   
@@ -177,13 +203,16 @@ class QB::Ansible::Module < QB::Util::Resource
   # @return (see #run!)
   # 
   def self.run_from_args! args, args_source: nil
+    logger.trace "Running from args",
+      args: args,
+      args_source: args_source
+    
     instance = self.from_data args
     instance.args_source = args_source
+    instance.args = args
     instance.run!
   end # .run_from_args!
   
-  
-  # Alias for defining args as props
   
   # @todo Document arg method.
   # 
@@ -193,8 +222,15 @@ class QB::Ansible::Module < QB::Util::Resource
   # @return [return_type]
   #   @todo Document return value.
   # 
-  def self.arg *args, &block
-    prop *args, &block
+  def self.arg *args, **opts
+    name, opts = t.match args.length,
+      # Normal {.prop} form
+      1, ->( _ ){ [ args[0], opts ] },
+      
+      # Backwards-compatible form
+      2, ->( _ ){ [ args[0], opts.merge( type: args[1] ) ]  }
+    
+    prop name, **opts
   end # .arg
   
   
@@ -208,68 +244,35 @@ class QB::Ansible::Module < QB::Util::Resource
   attr_accessor :args_source
   
   
+  # The raw parsed arguments. Used for backwards-compatibility with how
+  # {QB::Ansible::Module} used to work before {NRSER::Props} and {#arg}.
+  # 
+  # @todo
+  #   May want to get rid of this once using props is totally flushed out.
+  #   
+  #   It should at least be deal with in the constructor somehow so this
+  #   can be changed to an `attr_reader`.
+  # 
+  # @return [Hash<String, VALUE>]
+  #     
+  attr_accessor :args
+  
+  
+  # The response that will be returned to Ansible (JSON-encoded and written
+  # to `STDOUT`).
+  # 
+  # @return [QB::Ansible::Module::Response]
+  #     
+  attr_reader :response
+  
+  
   # Construction
   # =====================================================================
   
   def initialize values = {}
-    super values
-    
-    @changed = false
-    # init_set_args!
-    
-    @facts = {}
-    @warnings = []
-    
-    @qb_stdio_out = nil
-    @qb_stdio_err = nil
-    @qb_stdio_in = nil
-    
-    logger.info "ARGV", argv: ARGV
+    initialize_props values
+    @response = QB::Ansible::Module::Response.new
   end
-  
-  
-  protected
-  # ========================================================================
-    
-  def init_set_args!
-    if ARGV.length == 1 && File.file?( ARGV[0] )
-      # "Standard" Ansible-invoked mode, where the args written in JSON format
-      # to a file and the path is provided as the only CLI argument
-      # 
-      @input_file = ARGV[0]
-      @input = File.read @input_file
-      @args = JSON.load @input
-      
-    else
-      # QB-specific "fiddle-mode": if we don't have a single valid file path
-      # as CLI arguments, parse the CLI options we have in the common
-      # 
-      #     `--name=value`
-      # 
-      # format into the `@args` hash.
-      # 
-      # This lets us run the module file **directly** from the terminal, which
-      # is just a quick and dirty way of flushing things out.
-      # 
-      @fiddle_mode = true
-      @args = {}
-      
-      ARGV.each do |arg|
-        if arg.start_with? '--'
-          key, value = arg[2..-1].split( '=', 2 )
-          
-          @args[key] = begin
-            JSON.load value
-          rescue
-            value
-          end
-        end
-      end
-    end
-  end # #init_set_args!
-    
-  # end protected
-  public
   
   
   # Instance Methods
@@ -289,7 +292,7 @@ class QB::Ansible::Module < QB::Util::Resource
   # listen to, and we provide those file paths via environment variables
   # so modules can pick those up and interact with those streams, allowing
   # them to act like regular scripts inside Ansible-world (see
-  # QB::Util::STDIO for details and implementation).
+  # QB::IPC::STDIO for details and implementation).
   # 
   # We use those channels if present to provide logging mechanisms.
   # 
@@ -300,26 +303,43 @@ class QB::Ansible::Module < QB::Util::Resource
   # @param args see QB.debug
   # 
   def debug *args
-    if @qb_stdio_err
-      header = "<QB::Ansible::Module #{ self.class.name }>"
-      
-      if args[0].is_a? String
-        header += " " + args.shift
-      end
-      
-      QB.debug header, *args
-    end
+    logger.debug payload: args
   end
   
+  
+  # Old logging function - use `#logger.info` instead.
+  # 
+  # @deprecated
+  # 
   def info msg
-    if @qb_stdio_err
-      $stderr.puts msg
-    end
+    logger.info msg
   end
   
-  # Append a warning message to @warnings.
+  
+  # Append a warning message to the {#response}'s {Response#warnings}
+  # array and log it.
+  # 
+  # @todo
+  #   Should be incorporated into {#logger}? Seems like it would need one of:
+  #   
+  #   1.  `on_...` hooks, like `Logger#on_warn`, etc.
+  #       
+  #       This might be nice but I'd rather hold off on throwing more shit
+  #       into {NRSER::Log::Logger} for the time being if possible.
+  #       
+  #   2.  Adding a custom appender when we run a module that has a ref to
+  #       the module instance and so it's {Response}.
+  #       
+  # 
+  # @param [String] msg
+  #   Non-empty string.
+  # 
+  # @return [nil]
+  # 
   def warn msg
-    @warnings << msg
+    logger.warn msg
+    response.warnings << msg
+    nil
   end
   
   
@@ -330,7 +350,7 @@ class QB::Ansible::Module < QB::Util::Resource
     when nil
       # pass
     when Hash
-      @facts.merge! result
+      response.facts.merge! result
     else
       raise "result of #main should be nil or Hash, found #{ result.inspect }"
     end
@@ -338,40 +358,37 @@ class QB::Ansible::Module < QB::Util::Resource
     done
   end
   
+  
   def changed! facts = {}
-    @changed = true
-    @facts.merge! facts
+    response.changed = true
+    
+    unless facts.empty?
+      response.facts.merge! facts
+    end
+    
     done
   end
   
+  
   def done
-    exit_json changed: @changed,
-              ansible_facts: @facts.stringify_keys,
-              warnings: @warnings
+    exit_json response.to_h
   end
+  
   
   def exit_json hash
     # print JSON response to process' actual STDOUT (instead of $stdout,
     # which may be pointing to the qb parent process)
-    STDOUT.print JSON.pretty_generate(hash.stringify_keys)
+    STDOUT.print JSON.pretty_generate( hash.stringify_keys )
     
-    [
-      [:stdin, $stdin],
-      [:stdout, $stdout],
-      [:stderr, $stderr],
-    ].each do |name, socket|
-      if socket && socket.is_a?( UNIXSocket )
-        logger.trace "Flushing socket #{ name }."
-        socket.flush
-        logger.debug "Closing #{ name } socket at #{ socket.path.to_s }."
-        socket.close
-      end
-    end
-    
-    exit 0
+    exit true
   end
   
+  
+  # FIXME
   def fail msg
-    exit_json failed: true, msg: msg, warnings: @warnings
+    response.failed = true
+    response.msg = msg
+    done
   end
+  
 end # class QB::Ansible::Module

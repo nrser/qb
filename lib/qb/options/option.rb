@@ -109,8 +109,8 @@ class QB::Options::Option
           NRSER::Message.new str
         },
         
-        t.pair( value: (t.hash_ | t.array) ), ->( pair ) {
-          name, params = pair.first
+        t.pair( value: (t.hash_ | t.array) ), ->( hash_pair ) {
+          name, params = hash_pair.first
           
           NRSER::Message.from( name, params ).symbolize_options
         }

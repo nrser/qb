@@ -9,7 +9,7 @@ require 'cmds'
 
 # package
 require 'qb/util/bundler'
-require 'qb/util/stdio'
+require 'qb/ipc/stdio/server'
 
 
 module QB; end
@@ -225,22 +225,13 @@ class QB::Ansible::Cmds::Playbook < ::Cmds
       before_spawn
       
       QB::Util::Bundler.with_clean_env do
-        # boot up stdio out services so that ansible modules can stream to our
-        # stdout and stderr to print stuff (including debug lines) in real-time
-        stdio_out_services = {'out' => $stdout, 'err' => $stderr}.
-          map {|name, dest|
-            QB::Util::STDIO::OutService.new(name, dest).tap { |s| s.open! }
-          }
-        
-        # and an in service so that modules can prompt for user input
-        user_in_service = QB::Util::STDIO::InService.new('in', $stdin).
-          tap { |s| s.open! }
+        # Start the STDIO server
+        stdio_server = QB::IPC::STDIO::Server.new.start!
         
         status = super *args, **kwds, &input_block
         
-        # close the stdio services
-        stdio_out_services.each {|s| s.close! }
-        user_in_service.close!
+        # ...and stop it
+        stdio_server.stop!
         
         # and return the status
         status

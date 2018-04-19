@@ -78,8 +78,6 @@ require 'qb/repo'
 require 'qb/cli'
 
 require 'qb/ansible'
-# Depreciated namespace:
-require 'qb/ansible_module'
 
 require 'qb/package'
 

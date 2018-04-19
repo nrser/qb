@@ -4,4 +4,11 @@
 #     count: "{{ stdio_count }}"
 #     raise: "{{ stdio_raise }}"
 
-- chat:
+- when: stdio_log
+  name: >-
+    Test sending log messages from a module
+  scratch.stdio.test_log:
+    names: >-
+      {{ stdio_log }}
+
+# - chat:

@@ -4,25 +4,16 @@
 # Requirements
 # =======================================================================
 
-# Stdlib
-# -----------------------------------------------------------------------
-
 # Deps
 # -----------------------------------------------------------------------
 
-# Project / Package
-# -----------------------------------------------------------------------
-
-require 'qb/util/resource'
+require 'nrser/props/mutable/instance_variables'
 
 
 # Refinements
 # =======================================================================
 
 using NRSER::Types
-
-# Declarations
-# =======================================================================
 
 
 # Definitions
@@ -35,18 +26,16 @@ using NRSER::Types
 # 
 # @see http://docs.ansible.com/ansible/latest/reference_appendices/common_return_values.html
 # 
-class QB::Ansible::Module::Response < QB::Util::Resource
+class QB::Ansible::Module::Response
   
-  # Constants
-  # ======================================================================
+  # Mixins
+  # ========================================================================
   
-  
-  # Class Methods
-  # ======================================================================
+  include NRSER::Props::Mutable::InstanceVariables
   
   
-  # Props
-  # ======================================================================
+  # @!group Props
+  # ==========================================================================
   
   # "Common" Values
   # --------------------------------------------------------------------------
@@ -100,14 +89,20 @@ class QB::Ansible::Module::Response < QB::Util::Resource
         type: t.unsigned?
   
   
-  
   # "Internal Use" (Consumed by Ansible)
   # --------------------------------------------------------------------------
   
+  # This key should contain a dictionary which will be appended to the facts
+  # assigned to the host.
+  # 
+  # These will be directly accessible and don’t require using a registered
+  # variable.
+  # 
   prop  :ansible_facts,
-        # aliases: [ :facts ],
+        aliases: [ :facts ],
         type: t.hash_( keys: t.non_empty_str ),
-        default: -> { HashWithIndifferentAccess.new }
+        default: -> { HashWithIndifferentAccess.new },
+        from_data: :with_indifferent_access.to_proc
   
   
   # This key can contain traceback information caused by an exception in a
@@ -119,16 +114,23 @@ class QB::Ansible::Module::Response < QB::Util::Resource
         type: t.str?
   
   
-  # This key contains a list of strings that will be presented to the user.
+  # @!attribute [rw] warnings
+  #   This key contains a list of strings that will be presented to the user.
+  #   
+  #   @return [Array<String>]
+  #     Non-empty string warning messages to return to Ansible.
   # 
   prop  :warnings,
         type: t.array( t.non_empty_str ),
         default: -> { [] }
   
   
-  # This key contains a list of dictionaries that will be presented to the
-  # user. Keys of the dictionaries are msg and version, values are string,
-  # value for the version key can be an empty string.
+  # @!attribute [rw] depreciations
+  #   This key contains a list of dictionaries that will be presented to the
+  #   user. Keys of the dictionaries are msg and version, values are string,
+  #   value for the version key can be an empty string.
+  #   
+  #   @return [Array<{ msg: String, version: String }>]
   # 
   prop  :depreciations,
         type: t.array(
@@ -136,12 +138,16 @@ class QB::Ansible::Module::Response < QB::Util::Resource
         ),
         default: ->{ [] }
   
+  
+  # @!endgroup Props # *******************************************************
+  
+  
   # Constructor
   # ======================================================================
   
   # Instantiate a new `QB::Ansible::Module::Response`.
   def initialize values = {}
-    super values
+    initialize_props values
   end # #initialize
   
   

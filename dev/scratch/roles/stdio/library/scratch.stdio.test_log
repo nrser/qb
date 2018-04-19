@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+# WANT_JSON
+
+# init bundler in dev env
+if ENV['QB_DEV_ENV']
+  ENV.each {|k, v|
+    if k.start_with? 'QB_DEV_ENV_'
+      ENV[k.sub('QB_DEV_ENV_', '')] = v
+    end
+  }
+  require 'bundler/setup'
+end
+
+require 'qb'
+require 'qb/ansible/module'
+
+using NRSER::Types
+
+module Scratch
+  module Stdio; end
+end
+
+
+# Log a buncha stuff.
+# 
+class Scratch::Stdio::TestLog < QB::Ansible::Module
+  
+  arg :names, type: t.array, default: -> { [] }
+  
+  def log_message
+    logger.info "Just a message"
+  end
+  
+  def log_payload
+    logger.info "Message and payload",
+      hey: 'ho',
+      lets: 'go'
+  end
+  
+  def log_tagged
+    logger.tagged :sym_tag, "string tag" do
+      logger.info "Has tags!"
+    end
+  end
+  
+  def log_named_tagged
+    logger.tagged k1: 'v1', k2: 'v2' do
+      logger.info "Should have 'named' tags..."
+    end
+  end
+  
+  def log_error
+    error = begin
+      raise RuntimeError, "We have a problem!"
+    rescue Exception => error
+      error
+    end
+    
+    logger.error "Logging error...", error
+  end
+  
+  def main
+    names.each do |name|
+      send "log_#{ name }"
+    end
+    nil
+  end
+end
+
+Scratch::Stdio::TestLog.run!

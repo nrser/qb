@@ -12,11 +12,11 @@ if ENV['QB_DEV_ENV']
 end
 
 require 'qb'
-require 'pp'
+require 'qb/ansible/module'
 
 class Test < QB::Ansible::Module
   def main
-    QB.debug args: @args
+    logger.debug "args", args: args
     
     if @args['count']
       (1..10).each {|i|
@@ -25,10 +25,10 @@ class Test < QB::Ansible::Module
       }
     end
     
-    raise "HERE" if @args['raise']
+    raise "HERE" if args['raise']
     
     nil
   end
 end
 
-Test.new.run
+Test.run!

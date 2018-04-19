@@ -27,7 +27,7 @@ class QB::Util::Resource
   # =====================================================================
   
   include NRSER::Props::Immutable::InstanceVariables
-    
+  
   
   def initialize values = {}
     initialize_props values

@@ -25,7 +25,7 @@ var_prefix: null
 # -   cwd
 #     -   use the directory the `qb` command is invoked form.
 # -   {exe: PATH}
-#     -   invoke an execuable, passing a JSON serialization of the options 
+#     -   invoke an execuable, passing a JSON serialization of the options
 #         mapping their CLI names to values. path can be relative to role
 #         directory.
 default_dir: cwd
@@ -42,6 +42,13 @@ options:
 #   required: false
 #   type: boolean # boolean (default) | string
 #   short: e
+
+- name: log
+  description:
+  type: array
+  required: false
+  short: l
+
 - name: raise
   description: raise an error in main.
   required: false
