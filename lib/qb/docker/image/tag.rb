@@ -12,38 +12,45 @@
 
 # Project / Package
 # -----------------------------------------------------------------------
+
+require 'qb/data'
+
 require 'qb/package/version'
 
 
 # Refinements
 # =======================================================================
 
+require 'nrser/refinements/types'
 using NRSER::Types
-
-
-# Declarations
-# =======================================================================
-
-module QB; end
-module QB::Docker; end
 
 
 # Definitions
 # =======================================================================
 
-# @todo document QB::Docker::Tag class.
-class QB::Docker::Tag < QB::Util::Resource
-  
-  # Constants
-  # ======================================================================
-  
-  
-  # Class Methods
-  # ======================================================================
+# A Docker image tag, with support for paring versions.
+# 
+module  QB
+module  Docker
+class   Image < QB::Data::Immutable
+class   Tag   < QB::Data::Immutable
   
   
-  # Schema
-  # ======================================================================
+  # @todo Document from_s method.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def self.from_s string
+    new source: string
+  end # .from_s
+  
+  
+  # @!group Props
+  # ==========================================================================
   
   prop  :string,
         type: t.non_empty_str,
@@ -65,6 +72,9 @@ class QB::Docker::Tag < QB::Util::Resource
           end
         }
   
+  # @!endgroup Props # *******************************************************
+  
+  
   invariant t.or  t.attrs( source:  t.not( t.nil ) ),
                   t.attrs( version: t.not( t.nil ) )
   
@@ -76,4 +86,4 @@ class QB::Docker::Tag < QB::Util::Resource
   end
   
   
-end # class QB::Docker::Tag
+end; end; end; end # class QB::Docker::Image::Tag

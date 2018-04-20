@@ -44,11 +44,6 @@ ansible_options: {}
 
 # Role CLI options that become Ansible vars
 options:
-# - name: example
-#   description: an example of a variable.
-#   required: false
-#   type: boolean # boolean (default) | string
-#   short: e
 
 - name: api_version
   type: str
@@ -133,5 +128,29 @@ options:
     Timeout for HTTP requests during the image build operation (in seconds).
   required: false
 
-# - name: key_path
-#   type: file_path
+- name: key_path
+  description: |-
+    Path to the client's TLS key file.
+  type: file_path
+  required: false
+
+- name: load_path
+  description: |-
+    Use with state `present` to load an image from a .tar file.
+  type: file_path
+  required: false
+
+- name: name
+  description: |-
+    Image name.
+    
+    Name format will be one of:
+    
+    1.  name
+    2.  repository/name
+    3.  registry_server:port/name
+    
+    When pushing or pulling an image the name can optionally include the tag
+    by appending ':tag_name'.
+  type: QB::Docker::Image::Name
+  required: true

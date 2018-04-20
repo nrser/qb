@@ -2,7 +2,7 @@ require 'qb/docker'
 
 describe_spec_file(
   spec_path: __FILE__,
-  class: QB::Docker::Tag,
+  class: QB::Docker::Image::Tag,
 ) do
   
   describe_section "accepts" do
@@ -70,7 +70,7 @@ describe_spec_file(
       # end
       it do
         expect {
-          QB::Docker::Tag.new
+          QB::Docker::Image::Tag.new
         }.to raise_error TypeError
       end
     end # no source or version

@@ -5,10 +5,7 @@
 load ENV['QB_AM_AUTORUN_PATH']
 
 
-module QB
-module Docker
-module Image
-class GetArgs < QB::Ansible::Module
+class QBDockerImageGetArgs < QB::Ansible::Module
 # class QB::Docker::Image::GetArgs < QB::Ansible::Module
   
   # Arguments
@@ -39,4 +36,4 @@ class GetArgs < QB::Ansible::Module
     return nil
   end # #main
   
-end; end; end; end # class QB::Docker::Image::GetArgs
+end # class

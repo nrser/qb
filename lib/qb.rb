@@ -16,6 +16,7 @@ require 'qb/python'
 require 'qb/version'
 require 'qb/util'
 require 'qb/path'
+require 'qb/data'
 
 
 # Refinements

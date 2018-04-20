@@ -1,1 +1,1 @@
-require 'qb/docker/tag'
+require 'qb/docker/image'

@@ -13,55 +13,184 @@
 # Project / Package
 # -----------------------------------------------------------------------
 
+require_relative './tag'
+
 
 # Refinements
-# =======================================================================
+# ========================================================================
 
-
-# Declarations
-# =======================================================================
-
-module QB; end
-module QB::Docker; end
-module QB::Docker::Image; end
+require 'nrser/refinements/types'
+using NRSER::Types
 
 
 # Definitions
 # =======================================================================
 
-# @todo document QB::Docker::Image::Name class.
-class QB::Docker::Image::Name < QB::Util::Resource
+# Image name.
+#  
+# Input format will be one of:
+#  
+# 1.  name[:tag]
+# 2.  repository/name[:tag]
+# 3.  registry_server:port/name[:tag]
+#   
+module  QB
+module  Docker
+class   Image < QB::Data::Immutable
+class   Name  < QB::Data::Immutable
   
-  # Constants
-  # ======================================================================
+  # Mixins
+  # ========================================================================
+  
+  include NRSER::Log::Mixin
   
   
   # Class Methods
   # ======================================================================
   
+  # Load from a {String}.
+  # 
+  # @param [String] string
+  # @return [self]
+  # 
+  def self.from_s string
+    strings = {}
+    segments = string.split '/'
+    
+    if segments[-1].include? ':'
+      rest, _, tag = segments[-1].rpartition ':'
+      strings[:tag] = tag
+      segments[-1] = rest
+    else
+      rest = string
+    end
+    
+    case segments.length
+    when 0
+      # Pass - construction will error
+    when 1
+      # Just a name
+      strings[:name] = segments[0]
+    else
+      if segments[0].include? ':'
+        # segments = [s_0, s_1, ... s_n]
+        #   =>  repository = s_0
+        #       segments = [s_1, s_2, ... s_n]
+        # 
+        # like
+        # 
+        # segments = ['docker.beiarea.com:8888', 'beiarea', 'wall']
+        #   =>  registry_server = 'docker.beiarea.com'
+        #       port            = '8888'
+        #       segments        = ['beiarea', 'wall']
+        # 
+        registry_server, _, port = segments.shift.rpartition ':'
+        strings[:registry_server] = registry_server
+        strings[:port] = port
+      end
+      
+      if segments.length > 1
+        # segments = [s_0, s_1, ... s_m]
+        #   =>  repository  = s_0
+        #       segments    = [s_1, s_2, ... s_m]
+        # 
+        # like
+        # 
+        # segments = ['beiarea', 'wall']
+        #   =>  repository  = 'beiarea'
+        #       segments    = ['wall']
+        # 
+        repository = segments.shift
+        strings[:repository] = repository
+      end
+      
+      # I think Docker image names *can* have more than just a repo and name
+      # segment, though it's poorly supported from what I recall... though
+      # we will handle it by just re-joining whatever's left into the name.
+      # 
+      # segments = [s_0, s_1, ... s_p]
+      #   =>  name = "s_0/s_1/.../s_p"
+      # 
+      # like
+      # 
+      # segments = ['wall']
+      #   =>  name = 'wall'
+      # 
+      # or
+      # 
+      # segments = ['www_rails', 'web']
+      #   =>  name = 'www_rails/web'
+      # 
+      strings[:name] = segments.join '/'
+    end
+    
+    logger.debug "strings", strings
+    
+    # Now turn them into value using their prop types
+    values = strings.transform_values_with_keys { |name, string|
+      prop = metadata[name]
+      
+      if prop.type.respond_to? :from_s
+        prop.type.from_s string
+      else
+        string
+      end
+    }
+    
+    logger.debug "values", values
+    
+    # And construct!
+    new values
+  end # .from_s
+  
   
   # Props
   # ======================================================================
   
+  # @!attribute [r] name
+  #   For lack of a better name, the part of the name that's not anything
+  #   else. It's also the only required part.
+  #   
+  #   @return [String]
+  #     Can't be empty.
+  # 
+  prop  :name,
+        type: t.non_empty_str
+  
+  
+  # @!attribute [r] repository
+  #   The repository name, if any.
+  #   
+  #   @return [String?]
+  #     String is non-empty.
+  prop  :repository,
+        type: t.non_empty_str?
+  
+  
+  # @!attribute [r] registry_server
+  #   Registry server, if any.
+  #   
+  #   @return [String?]
+  #     String is non-empty.
+  prop  :registry_server,
+        type: t.non_empty_str?
+  
+  
+  # @!attribute [r] port
+  #   Registry server port, if any.
+  #   
+  #   @return [Integer?]
+  #     In range [1, 2**16 - 1]
+  prop  :port,
+        type: t.port?
   
   
   prop  :tag,
-        type: QB::Docker::Image::Tag,
-        default: -> {
-          QB::Docker::Image::Tag.new source: 'latest'
-        }
-  
-  # Constructor
-  # ======================================================================
-  
-  # Instantiate a new `QB::Docker::Image::Name`.
-  def initialize
-    
-  end # #initialize
+        type: t.maybe( QB::Docker::Image::Tag )
   
   
   # Instance Methods
   # ======================================================================
   
   
-end # class QB::Docker::Image::Name
+end; end; end; end # class QB::Docker::Image::Name

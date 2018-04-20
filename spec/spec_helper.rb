@@ -25,13 +25,6 @@ require 'support/ext'
 require 'support/shared'
 
 
-# Refinements
-# =======================================================================
-
-require 'nrser/refinements'
-using NRSER
-
-
 # Paths
 # =====================================================================
 
@@ -62,6 +55,11 @@ FileUtils.mkdir_p TEMP_GEMS_DIR
 
 # Add the test roles dir to the roles path
 QB::Role::PATH.unshift TEST_ROLES_DIR
+
+NRSER::Log.setup! \
+  dest: (TEMP_DIR / 'rspec.log'),
+  application: 'qb',
+  sync: true
 
 
 RSpec.configure do |config|
