@@ -180,7 +180,7 @@ module QB::CLI
     }
     
     set_options.values.each do |option|
-      playbook_role[option.var_name] = option.value
+      playbook_role[option.var_name] = option.value_data
     end
     
     play =
@@ -212,7 +212,7 @@ module QB::CLI
           'vars' => {
             'role' => role.name,
             'args' => set_options.map { |option|
-              [option.var_name, option.value]
+              [option.var_name, option.value_data]
             }.to_h,
           }
         }

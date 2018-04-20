@@ -134,6 +134,21 @@ class Option
           option_meta: meta
       end
       
+      if  t.non_empty_str === type_meta &&
+          type_meta.include?( '::' )
+        
+        const = type_meta.safe_constantize
+        
+        if  const &&
+            const.is_a?( Class ) &&
+            ( const < NRSER::Types::Type ||
+              const < NRSER::Props )
+          @type = const
+          return
+        end
+        
+      end
+      
       message = t.match type_meta,
         t.non_empty_str, ->( str ) {
           NRSER::Message.new str
@@ -193,6 +208,15 @@ class Option
   
   def meta? *keys
     keys.any? { |key| @meta.key? key }
+  end
+  
+  
+  def value_data
+    if value.respond_to? :to_data
+      value.to_data
+    else
+      value
+    end
   end
   
   
@@ -274,7 +298,11 @@ class Option
   # @return [Boolean]
   # 
   def accept_false?
-    type.test?( false ) || meta[:accept_false]
+    return true if meta[:accept_false]
+    
+    return false if type.is_a?( Class ) && type < NRSER::Props
+    
+    type.test?( false )
   end
   
   

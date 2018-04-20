@@ -17,6 +17,7 @@ require 'qb/version'
 require 'qb/util'
 require 'qb/path'
 require 'qb/data'
+require 'qb/docker'
 
 
 # Refinements
