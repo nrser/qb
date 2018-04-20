@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+# WANT_JSON
+
+##
+# What you need to do to run via the "autorun" loader, which does more
+# than the "rebundle" one (so you have to do less).
+##
+
+load ENV['QB_AM_AUTORUN_PATH']
+
+module Scratch
+  module AnsibleModule; end
+end
+
+class Scratch::AnsibleModule::Autorun < QB::Ansible::Module
+  arg :x, type: t.str
+  
+  def main
+    response[:x] = "You said #{ x }"
+    nil
+  end
+end

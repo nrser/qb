@@ -7,7 +7,11 @@
 # Deps
 # -----------------------------------------------------------------------
 
-require 'nrser/props/mutable/instance_variables'
+require 'nrser/props/mutable/stash'
+
+# Need the experimental {NRSER::Stash} class that lets us intercept hash
+# writes.
+require 'nrser/labs/stash'
 
 
 # Refinements
@@ -26,12 +30,12 @@ using NRSER::Types
 # 
 # @see http://docs.ansible.com/ansible/latest/reference_appendices/common_return_values.html
 # 
-class QB::Ansible::Module::Response
+class QB::Ansible::Module::Response < NRSER::Stash
   
   # Mixins
   # ========================================================================
   
-  include NRSER::Props::Mutable::InstanceVariables
+  include NRSER::Props::Mutable::Stash
   
   
   # @!group Props
@@ -139,6 +143,8 @@ class QB::Ansible::Module::Response
         default: ->{ [] }
   
   
+  metadata.freeze
+  
   # @!endgroup Props # *******************************************************
   
   
@@ -147,12 +153,43 @@ class QB::Ansible::Module::Response
   
   # Instantiate a new `QB::Ansible::Module::Response`.
   def initialize values = {}
+    super()
     initialize_props values
   end # #initialize
   
   
   # Instance Methods
   # ======================================================================
+  
+  # Uses {Symbol} keys, and they can not be empty. Will convert non-empty
+  # strings to their symbols.
+  # 
+  # @param [Symbol | String] key
+  # @return [Symbol]
+  #   
+  def convert_key key
+    t.match key,
+      t.non_empty_str, :to_sym.to_proc,
+      t.non_empty_sym, key
+  end
+  
+  
+  # Create a new response to represent a failure, copying the stuff that makes
+  # sense to keep from this one.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def to_failure msg:, warnings: [], depreciations: [], **values
+    self.class.new \
+      failed: true,
+      msg: msg,
+      warnings: (self.warnings + warnings),
+      depreciations: (self.depreciations + depreciations)
+  end # #to_failure
   
   
 end # class QB::Ansible::Module::Response

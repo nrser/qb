@@ -228,6 +228,10 @@ Gem::Specification.new do |spec|
   # 
   spec.add_dependency 'semver2', '~> 3.4.2'
   
+  # Trying out a method decoration gem, aimed to be like Python (which I did
+  # really like, once you got past the confusion of it)
+  spec.add_dependency 'method_decorators', '~> 0.9.6'
+  
   
   # Development-Only Extra Metadata
   # ============================================================================

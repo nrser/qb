@@ -1,24 +1,13 @@
 #!/usr/bin/env ruby
 # WANT_JSON
 
-# init bundler in dev env
-if ENV['QB_DEV_ENV']
-  ENV.each {|k, v|
-    if k.start_with? 'QB_DEV_ENV_'
-      ENV[k.sub('QB_DEV_ENV_', '')] = v
-    end
-  }
-  require 'bundler/setup'
-end
-
-require 'nrser'
-require 'qb'
-require 'qb/ansible/module'
+# Load QB's Ansible module autorun harness
+load ENV['QB_AM_AUTORUN_PATH']
 
 
 class YardGetOutputDir < QB::Ansible::Module
 
-  arg :bundle_root, type: NRSER::Types.abs_path
+  arg :bundle_root, type: t.abs_path
   
   def facts_for rel_dir
     {
@@ -56,6 +45,5 @@ class YardGetOutputDir < QB::Ansible::Module
     
     default_facts
   end # #main
+  
 end # YardGetOutputDir
-
-YardGetOutputDir.run!

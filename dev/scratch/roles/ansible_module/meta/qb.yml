@@ -8,7 +8,7 @@
 description: null
 
 # prefix for role variables
-var_prefix: null
+var_prefix: false
 
 # how to get a default for `dir` if it's not provided as the only
 # positional argument. if a positional argument is provided it will
@@ -25,7 +25,7 @@ var_prefix: null
 # -   cwd
 #     -   use the directory the `qb` command is invoked form.
 # -   {exe: PATH}
-#     -   invoke an execuable, passing a JSON serialization of the options 
+#     -   invoke an execuable, passing a JSON serialization of the options
 #         mapping their CLI names to values. path can be relative to role
 #         directory.
 default_dir: cwd
@@ -36,9 +36,20 @@ default_user: null
 # set to false to not save options in .qb-options.yml files
 save_options: false
 
-options: []
+options:
 # - name: example
 #   description: an example of a variable.
 #   required: false
 #   type: boolean # boolean (default) | string
 #   short: e
+- name: rebundle
+  description: Run the "rebundle" module
+  type: boolean
+
+- name: autorun
+  description: Run the "autorun" module
+  type: boolean
+
+- name: script
+  description: Run the "script" module
+  type: boolean

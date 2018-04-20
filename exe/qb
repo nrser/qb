@@ -26,6 +26,9 @@ require 'cmds'
 require 'qb'
 
 
+# QB::IPC.is_master_process!
+
+
 # Refinements
 # =======================================================================
 

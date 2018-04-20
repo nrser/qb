@@ -34,6 +34,16 @@ module QB
   # Class Methods
   # =====================================================================
   
+  # Are we running in local development? Looks for the `//dev` directory's
+  # presence.
+  # 
+  # @return [Boolean]
+  # 
+  def self.local_dev?
+    (QB::ROOT / 'dev').directory?
+  end
+  
+  
   def self.gemspec
     Gem.loaded_specs[GEM_NAME]
   end

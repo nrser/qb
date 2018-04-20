@@ -8,15 +8,8 @@
 #   not gonna right now. At least it's not a string in the Python file anymore.
 # 
 
-# init bundler in dev env
-if ENV['QB_DEV_ENV']
-    ENV.each {|k, v|
-        if k.start_with? 'QB_DEV_ENV_'
-            ENV[k.sub('QB_DEV_ENV_', '')] = v
-        end
-    }
-    require 'bundler/setup'
-end
+# Reinstate Bundler ENV vars if they have been moved
+load ENV['QB_REBUNDLE_PATH'] if ENV['QB_REBUNDLE_PATH']
 
 # Set the thread name so that logs make sense.
 require 'thread'

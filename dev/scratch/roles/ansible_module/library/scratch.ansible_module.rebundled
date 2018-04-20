@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+# WANT_JSON
+
+##
+# What you need to do to run via the "rebundle" loader
+##
+
+# Reinstate Bundler ENV vars if they have been moved
+load ENV['QB_REBUNDLE_PATH'] if ENV['QB_REBUNDLE_PATH']
+
+require 'qb/ansible/module'
+
+require 'nrser/refinements/types'
+using NRSER::Types
+
+module Scratch
+  module AnsibleModule; end
+end
+
+class Scratch::AnsibleModule::Rebundled < QB::Ansible::Module
+  arg :x, type: t.str
+  
+  def main
+    changed! rebundled_says: "you sent x = #{ x }"
+  end
+end
+
+Scratch::AnsibleModule::Rebundled.run!

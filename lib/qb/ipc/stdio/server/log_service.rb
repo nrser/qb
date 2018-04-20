@@ -104,8 +104,9 @@ class QB::IPC::STDIO::Server::LogService < QB::IPC::STDIO::Server::Service
     # 
     # @return [void]
     # 
-    def log log
+    def write_log log
       logger = logger_for log.name
+      logger.level = :trace
       logger.log( log ) if logger.should_log?( log )
     end
     
@@ -133,7 +134,7 @@ class QB::IPC::STDIO::Server::LogService < QB::IPC::STDIO::Server::Service
           logger.trace "Constructed {Log}",
             log: log
           
-          self.log log
+          write_log log
         end # logger.catch.warn
       end # logger.with_level :trace
     end

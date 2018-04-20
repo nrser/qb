@@ -1,23 +1,8 @@
 #!/usr/bin/env ruby
 # WANT_JSON
 
-# init bundler in dev env
-
-# HACK  Keep track of the ENV vars we overwrite so we can swap them back in
-#       later when we need to run the command.
-#       
-$replaced_env_vars = {}
-
-if ENV['QB_DEV_ENV']
-  ENV.each {|k, v|
-    if k.start_with? 'QB_DEV_ENV_'
-      key = k.sub('QB_DEV_ENV_', '')
-      $replaced_env_vars[key] = [ENV[key], v]
-      ENV[key] = v
-    end
-  }
-  require 'bundler/setup'
-end
+# Reinstate Bundler ENV vars if they have been moved
+load ENV['QB_REBUNDLE_PATH'] if ENV['QB_REBUNDLE_PATH']
 
 require 'nrser'
 require 'qb'
@@ -71,12 +56,7 @@ class Stream < QB::Ansible::Module
       END
     end
     
-    # HACK  Swap any ENV vars we replaced at the top back in
-    $replaced_env_vars.each do |key, (original, replacement)|
-      ENV[key] = original
-    end
-      
-    cmd.stream!
+    qb_unbundle! { cmd.stream! }
     
     changed!
   end

@@ -134,6 +134,12 @@ class QB::Ansible::Env
       hash[ self.class.to_var_name( "CONFIG_#{ name }" ) ] = value.to_s
     }
     
+    hash[ 'QB_AM_AUTORUN_PATH' ] = \
+      (QB::ROOT / 'load' / 'ansible' / 'module' / 'autorun.rb').to_s
+    
+    hash[ 'QB_AM_SCRIPT_PATH' ] = \
+      (QB::ROOT / 'load' / 'ansible' / 'module' / 'script.rb').to_s
+    
     hash
   end # #to_h
   

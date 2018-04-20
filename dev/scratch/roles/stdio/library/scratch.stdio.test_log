@@ -1,15 +1,8 @@
 #!/usr/bin/env ruby
 # WANT_JSON
 
-# init bundler in dev env
-if ENV['QB_DEV_ENV']
-  ENV.each {|k, v|
-    if k.start_with? 'QB_DEV_ENV_'
-      ENV[k.sub('QB_DEV_ENV_', '')] = v
-    end
-  }
-  require 'bundler/setup'
-end
+# Reinstate Bundler ENV vars if they have been moved
+load ENV['QB_REBUNDLE_PATH'] if ENV['QB_REBUNDLE_PATH']
 
 require 'qb'
 require 'qb/ansible/module'
@@ -58,6 +51,14 @@ class Scratch::Stdio::TestLog < QB::Ansible::Module
     
     logger.error "Logging error...", error
   end
+  
+  # Raises an error, which should turn into a `FATAL` log in the master
+  # process.
+  # 
+  def log_raise
+    raise RuntimeError, "Uncaught exception"
+  end
+  
   
   def main
     names.each do |name|

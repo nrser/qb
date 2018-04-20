@@ -1,8 +1,8 @@
 require_relative './util/interop'
 require_relative './util/bundler'
+require_relative './util/decorators'
 
 require 'nrser'
-using NRSER
 
 module QB
   module Util

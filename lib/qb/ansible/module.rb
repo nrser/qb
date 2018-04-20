@@ -61,7 +61,7 @@ class QB::Ansible::Module
     # Initialize
     $qb_stdio_client ||= QB::IPC::STDIO::Client.new.connect!
     
-    if $qb_stdio_client.log.connected?
+    if $qb_stdio_client.log.connected? && NRSER::Log.appender.nil?
       NRSER::Log.setup! \
         application: 'qb',
         sync: true,
@@ -131,28 +131,68 @@ class QB::Ansible::Module
   # @return [Boolean]
   #   `true` if `argv` looks like it came from Ansible's "WANT_JSON" mode.
   # 
-  def self.want_json_mode? argv = ARGV
+  def self.WANT_JSON_mode? argv = ARGV
     ARGV.length == 1 && File.file?( ARGV[0] )
-  end # .want_json_mode?
+  end # .WANT_JSON_mode?
   
   
-  # @todo Document run! method.
+  # Load args from a file in JSON format.
   # 
-  # @param [type] arg_name
-  #   @todo Add name param description.
+  # @param [String | Pathname] file_path
+  #   File path to load from.
   # 
-  # @return [return_type]
-  #   @todo Document return value.
+  # @return [Array<(Hash, Hash?)>]
+  #   Tuple of:
+  #   
+  #   1.  `args:`
+  #       -   `Hash<String, *>`
+  #   2.  `args_source:`
+  #       -   `nil | Hash{ type: :file, path: String, contents: String }`
+  # 
+  def self.load_args_from_JSON_file file_path
+    file_contents = File.read file_path
+
+    args = JSON.load( file_contents ).with_indifferent_access
+
+    t.hash_( keys: t.str ).check( args ) do |type:, value:|
+      binding.erb <<~END
+        JSON file contents must load into a `Hash<String, *>`
+        
+        Loaded value (of class <%= value.class %>):
+        
+            <%= value.pretty_inspect %>
+        
+      END
+    end
+    
+    [ args, { type: :file,
+              path: file_path.to_s,
+              contents: file_contents,
+            } ]
+  end
+  
+  
+  # Load the raw arguments.
+  # 
+  def self.load_args
+    if WANT_JSON_mode?
+      load_args_from_JSON_file ARGV[0]
+    else
+      load_args_from_CLI_options
+    end
+  end
+  
+  
+  # Run the module!
+  # 
+  # @return (see #run!)
   # 
   def self.run!
     handle_run_error do
       setup_io!
       
-      if want_json_mode?
-        run_from_json_args_file! ARGV[0]
-      else
-        run_from_cli_options!
-      end
+      args, args_source = load_args
+      run_from_args! args, args_source: args_source
     end
   end # .run!
   
@@ -169,7 +209,7 @@ class QB::Ansible::Module
   # 
   # @return (see #run!)
   # 
-  def self.run_from_json_args_file! file_path
+  def self.run_from_JSON_args_file! file_path
     file_contents = File.read file_path
     
     args = JSON.load file_contents
@@ -191,7 +231,7 @@ class QB::Ansible::Module
                       path: file_path,
                       contents: file_contents,
                     }
-  end # .run_from_json_args_file!
+  end # .run_from_JSON_args_file!
   
   
   # Run from a hash-like of argument names mapped to values, with optional
@@ -371,7 +411,7 @@ class QB::Ansible::Module
   
   
   def done
-    exit_json response.to_h
+    exit_json response.to_data( add_class: false ).compact
   end
   
   
@@ -384,11 +424,17 @@ class QB::Ansible::Module
   end
   
   
-  # FIXME
-  def fail msg
-    response.failed = true
-    response.msg = msg
-    done
+  def fail msg, **values
+    fail_response = QB::Ansible::Module::Response.new \
+      failed: true,
+      msg: msg.to_s,
+      warnings: response.warnings,
+      depreciations: response.depreciations
+    
+    STDOUT.print \
+      JSON.pretty_generate( fail_response.to_data( add_class: false ).compact )
+    
+    exit false
   end
   
 end # class QB::Ansible::Module

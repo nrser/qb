@@ -1,34 +1,12 @@
 #!/usr/bin/env ruby
 # WANT_JSON
 
-# init bundler in dev env
-if ENV['QB_DEV_ENV']
-  ENV.each {|k, v|
-    if k.start_with? 'QB_DEV_ENV_'
-      ENV[k.sub('QB_DEV_ENV_', '')] = v
-    end
-  }
-  require 'bundler/setup'
-end
-
-require 'qb'
-require 'qb/ansible/module'
+load ENV['QB_AM_AUTORUN_PATH']
 
 class Test < QB::Ansible::Module
   def main
-    logger.debug "args", args: args
-    
-    if @args['count']
-      (1..10).each {|i|
-        puts i
-        sleep 1
-      }
-    end
-    
-    raise "HERE" if args['raise']
+    logger.info payload: {exe: $0}
     
     nil
   end
 end
-
-Test.run!

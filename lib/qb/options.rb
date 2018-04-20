@@ -128,6 +128,7 @@ class QB::Options
     add opts, options, role, new_include_path
   end
   
+  
   # Add the options from a role to the OptionParser
   # 
   # @param [OptionParser] opts
@@ -144,96 +145,15 @@ class QB::Options
         # create an option
         option = Option.new role, option_meta, include_path
         
-        on_args = []
-        
-        if option.type == t.bool
-          # don't use short names when included (for now)
-          if include_path.empty? && option.meta['short']
-            on_args << "-#{ option.meta['short'] }"
-          end
-          
-          on_args << "--[no-]#{ option.cli_name }"
-          
-        else
-          ruby_type = Class.new.tap { |klass|
-            
-            opts.accept( klass ) { |value|
-              logger.trace "accepting value",
-                value: value,
-                option: option,
-                klass: klass
-              
-              option.type.from_s value
-            }
-          }
-          
-          # don't use short names when included (for now)
-          if include_path.empty? && option.meta['short']
-            on_args << "-#{ option.meta['short'] } #{ option.meta_name.upcase }"
-          end
-          
-          if option.meta['accept_false']
-            on_args << "--[no-]#{ option.cli_name }=#{ option.meta_name.upcase }"
-          else
-            on_args << "--#{ option.cli_name }=#{ option.meta_name.upcase }"
-          end
-          
-          on_args << ruby_type
-          
-        end # case option.meta['type']
-        
-        on_args << option.description
-        
-        if option.required?
-          on_args << "REQUIRED."
-        end
-        
-        if role.defaults.key? option.var_name
-          if option.meta['type'] == 'boolean'
-            on_args << if role.defaults[option.var_name]
-              "DEFAULT: --#{ option.cli_name }"
-            else
-              "DEFAULT: --no-#{ option.cli_name }"
-            end
-          elsif !role.defaults[option.var_name].nil?
-            on_args << "DEFAULT: #{ role.defaults[option.var_name] }"
-          end
-        end
-        
-        if option.has_examples?
-          on_args << 'examples:'
-          
-          option.examples.each_with_index {|example, index|
-            lines = example.lines.to_a
-            
-            on_args << ((index + 1).to_s + '.').ljust(4) + lines.first.chomp
-            
-            lines[1..-1].each {|line|
-              on_args << (" ".ljust(4) + line.chomp)
-            }
-          }
-        end
-        
-        on_args << SPACER
-        
-        logger.debug "adding option",
-          option: option.cli_name,
-          on_args: on_args
-        
-        opts.on(*on_args) do |value|
-          logger.debug "setting option",
-            option: option.cli_name,
-            value: value
-          
-          option.value = value
-        end
+        option.option_parser_add opts, included: !include_path.empty?
         
         options[option.cli_name] = option
       end
     end # each var
   end # add
   
-  # destructively removes options from `@argv` and populates ansible, role,
+  
+  # Destructively removes options from `@argv` and populates ansible, role,
   # and qb option hashes.
   # 
   # @param [QB::Role] role

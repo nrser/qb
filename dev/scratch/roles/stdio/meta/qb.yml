@@ -49,14 +49,8 @@ options:
   required: false
   short: l
 
-- name: raise
-  description: raise an error in main.
+- name: test
+  description: Run the test module (temp/scratch shit)
   required: false
   type: boolean
-  short: r
-
-- name: count
-  description: count to 10 on stdout with 1 sec sleeps between
-  required: false
-  type: boolean
-  short: c
+  short: t

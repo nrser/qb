@@ -1,18 +1,8 @@
 #!/usr/bin/env ruby
 # WANT_JSON
 
-# init bundler in dev env
-if ENV['QB_DEV_ENV']
-  ENV.each {|k, v|
-    if k.start_with? 'QB_DEV_ENV_'
-      ENV[k.sub('QB_DEV_ENV_', '')] = v
-    end
-  }
-  require 'bundler/setup'
-end
-
-require 'qb'
-require 'nrser'
+# Load QB's Ansible module autorun harness
+load ENV['QB_AM_AUTORUN_PATH']
 
 class {{ role_module_class }} < QB::Ansible::Module
   
@@ -22,8 +12,10 @@ class {{ role_module_class }} < QB::Ansible::Module
   # Define arguments using the {NRSER::Props} system.
   # 
   
+  # Execution
+  # ==========================================================================
   
-  # entry point for the module. invoked by {\#run}.
+  # Entry point for the module. invoked by {\#run}.
   # 
   # @return [nil | {Symbol => #to_json}]
   #   when returning:
@@ -37,6 +29,6 @@ class {{ role_module_class }} < QB::Ansible::Module
   def main
     return nil
   end # #main
+  
 end # {{ role_module_class }}
 
-{{ role_module_class }}.new.run

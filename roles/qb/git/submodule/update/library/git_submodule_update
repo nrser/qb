@@ -1,23 +1,13 @@
 #!/usr/bin/env ruby
-
-#!/usr/bin/env ruby
 # WANT_JSON
 
-# init bundler in dev env
-if ENV['QB_DEV_ENV']
-  ENV.each {|k, v|
-    if k.start_with? 'QB_DEV_ENV_'
-      ENV[k.sub('QB_DEV_ENV_', '')] = v
-    end
-  }
-  require 'bundler/setup'
-end
+# Load QB's Ansible module autorun harness
+load ENV['QB_AM_AUTORUN_PATH']
 
 require 'qb'
 require 'cmds'
 require 'nrser'
 
-using NRSER
 
 class GitSubmoduleUpdate < QB::Ansible::Module
   def main_dir
@@ -193,5 +183,3 @@ class GitSubmoduleUpdate < QB::Ansible::Module
     nil
   end
 end
-
-GitSubmoduleUpdate.new.run

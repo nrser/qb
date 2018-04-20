@@ -18,10 +18,6 @@
 # in {QB::Ansible::Module} and not a part of the scripting DSL / API
 # 
 
-# init bundler in dev env
-if ENV['QB_DEV_ENV']; ENV.each {|k, v| if k.start_with? 'QB_DEV_ENV_' then \
-  ENV[k.sub('QB_DEV_ENV_', '')] = v; end }; require 'bundler/setup'; end
-
 require 'qb'
 
 # This would do all the magic

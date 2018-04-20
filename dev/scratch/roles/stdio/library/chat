@@ -1,21 +1,13 @@
 #!/usr/bin/env ruby
 # WANT_JSON
 
-# init bundler in dev env
-if ENV['QB_DEV_ENV']
-  ENV.each {|k, v|
-    if k.start_with? 'QB_DEV_ENV_'
-      ENV[k.sub('QB_DEV_ENV_', '')] = v
-    end
-  }
-  require 'bundler/setup'
-end
+# Reinstate Bundler ENV vars if they have been moved
+load ENV['QB_REBUNDLE_PATH'] if ENV['QB_REBUNDLE_PATH']
 
 require 'qb'
-require 'pp'
 
 class Chat < QB::Ansible::Module
-  def main    
+  def main
     puts "Starting chat..."
     puts
     puts(
@@ -28,7 +20,7 @@ class Chat < QB::Ansible::Module
         stdout_tty: $stdout.tty?,
       }.inspect
     )
-    puts 
+    puts
     puts
     puts "Let's get chatting!"
     puts

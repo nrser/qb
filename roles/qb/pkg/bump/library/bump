@@ -1,15 +1,8 @@
 #!/usr/bin/env ruby
 # WANT_JSON
 
-# init bundler in dev env
-if ENV['QB_DEV_ENV']
-  ENV.each {|k, v|
-    if k.start_with? 'QB_DEV_ENV_'
-      ENV[k.sub('QB_DEV_ENV_', '')] = v
-    end
-  }
-  require 'bundler/setup'
-end
+# Load QB's Ansible module autorun harness
+load ENV['QB_AM_AUTORUN_PATH']
 
 require 'json'
 require 'pathname'
@@ -17,9 +10,6 @@ require 'pathname'
 require 'qb'
 require 'cmds'
 require 'nrser'
-require 'nrser/refinements'
-
-using NRSER
 
 class Version
   # raw version string if available (version was read from file or whatever),
@@ -91,7 +81,7 @@ class Version
 end # Version
 
 
-# abstract base class for bumpers - classes that implement reading and 
+# abstract base class for bumpers - classes that implement reading and
 # writing Version objects to a package directory.
 class Bumper
   # absolute path to the root directory of the package.
@@ -205,7 +195,7 @@ class Bump < QB::Ansible::Module
   end # #next_rc
   
   
-  def bump_rc    
+  def bump_rc
     @next_version = @bumper.bump! prerelease: ['rc', next_rc]
     @next_version_formatted = @bumper.class.format @next_version
     
@@ -268,5 +258,3 @@ class Bump < QB::Ansible::Module
   end
   
 end # Bump
-
-Bump.new.run

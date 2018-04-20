@@ -122,7 +122,7 @@ options:
     
     -   Use with state `absent` to un-tag and remove all images matching the
         specified name.
-    
+  
     -   Use with state `present` to build, load or pull an image when the
         image already exists.
   required: false

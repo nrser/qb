@@ -1,10 +1,41 @@
-require 'nrser/refinements/types'
+# encoding: UTF-8
+# frozen_string_literal: true
 
+# Requirements
+# ========================================================================
+
+# Deps
+# ------------------------------------------------------------------------
+
+# Need {Module#concerning}
+require 'active_support/core_ext/module/concerning'
+
+# Project / Package
+# ------------------------------------------------------------------------
+
+# Need additional {QB::Options::Types} for option type loading
 require_relative './types'
 
+# Need {OptionParserConcern} to handle fucking {OptionParser} :(
+require_relative './option/option_parser_concern'
+
+
+# Refinements
+# ========================================================================
+
+require 'nrser/refinements/types'
 using NRSER::Types
 
-class QB::Options::Option
+require 'nrser/refinements/sugar'
+using NRSER::Sugar
+
+
+# Definitions
+# ========================================================================
+
+module QB
+class Options
+class Option
   
   # Constants
   # ========================================================================
@@ -17,15 +48,14 @@ class QB::Options::Option
   
   include NRSER::Log::Mixin
   
+  include OptionParserConcern
+  
   
   # Attributes
   # ========================================================================
   
   # the role that this option is for
   attr_reader :role
-  
-  # the entry from the qb metadata for this option
-  attr_reader :meta
   
   # array of strings representing how this option was included
   # empty for top-level options
@@ -44,13 +74,11 @@ class QB::Options::Option
   attr_accessor :value
   
   
-  
   # TODO document `type` attribute.
   # 
   # @return [attr_type]
   #     
   attr_reader :type
-  
   
   
   # Construction
@@ -69,20 +97,22 @@ class QB::Options::Option
       QB::Options.cli_ize_name "#{ @include_path.join('-') }-#{ @meta_name }"
     end
     
-    @var_name = if @meta['var_name']
+    @var_name = if meta[:var_name]
       # prefer an explicit, exact variable name if provided
-      @meta['var_name']
+      meta[:var_name]
     elsif role.var_prefix
-      QB::Options.var_ize_name "#{ role.var_prefix }_#{ @meta_name }"
+      QB::Options.var_ize_name "#{ role.var_prefix }_#{ meta_name }"
     else
-      QB::Options.var_ize_name @meta_name
+      QB::Options.var_ize_name meta_name
     end
     
+    # Will be set when we find it out!
     @value = nil
     
     # Initialize `@type` var
     init_type!
   end
+  
   
   protected
   # ========================================================================
@@ -150,36 +180,56 @@ class QB::Options::Option
   # Instance Methods
   # ========================================================================
   
-  # if the option is required in the cli
-  def required?
-    !!meta_or(['required', 'require'], false)
-  end
-  
-  # if we should save the option value in .qb-options.yml
-  def save?
-    !!meta_or('save', true)
-  end
-  
-  def description
-    value = meta_or 'description',
-      "set the #{ @var_name } role variable"
+  def meta *keys, type: t.any, default: nil
+    return @meta if keys.empty?
     
-    line_break = "\n" + "\t" * 5
-      
-    if @meta['type'].is_a?(Hash) && @meta['type'].key?('one_of')
-      value += " options:" +
-        "#{ line_break }#{ @meta['type']['one_of'].join(line_break) }"
+    keys.each do |key|
+      return type.check!( @meta[key] ) unless @meta[key].nil?
     end
     
-    value
+    type.check! default
   end
   
-  def boolean?
-    (
-      meta['type'].is_a?(String) &&
-      ['boolean', 'bool'].include?(meta['type'].downcase)
-    )
+  
+  def meta? *keys
+    keys.any? { |key| @meta.key? key }
   end
+  
+  
+  # Is the option is required in the CLI?
+  # 
+  # @return [Boolean]
+  # 
+  def required?
+    meta :required, :require, type: t.bool, default: false
+  end
+  
+  
+  # Should we save the option value in `./.qb-options.yml`?
+  # 
+  # @return [Boolean]
+  # 
+  def save?
+    meta :save, type: t.bool, default: true
+  end
+  
+  
+  # Description of the option.
+  # 
+  # @return [String]
+  # 
+  def description
+    meta(
+      :description,
+      default: "Set the #{ @var_name } role variable"
+    ).to_s
+  end
+  
+  
+  def boolean?
+    type == t.bool
+  end
+  
   
   def usage
     if boolean?
@@ -189,12 +239,13 @@ class QB::Options::Option
     end
   end
   
+  
   # test if the option has any examples.
   # 
   # @return [Boolean]
   # 
   def has_examples?
-    EXAMPLES_KEYS.any? {|key| meta.key? key}
+    meta? *EXAMPLES_KEYS
   end
   
   # get an array of examples for the option. returns `[]` if no examples
@@ -203,31 +254,28 @@ class QB::Options::Option
   # @return [Array<String>]
   # 
   def examples
-    value = meta_or EXAMPLES_KEYS, []
-    
-    if value.is_a? String then [value] else value end
+    Array meta( *EXAMPLES_KEYS, type: (t.nil | t.str | t.array( t.str )) )
   end
   
   
-  protected
-  # ========================================================================
-    
-  # Get the value at the first found of the keys or the default.
+  # Does the option accept `false` as value?
   # 
-  # `nil` (`null` in yaml files) are treated like they're not there at
-  # all. you need to use `false` if you want to tell QB not to do something.
+  # If it does, and is not a boolean option, we also accept a `--no-<name>`
+  # option format to set the value to `false`.
   # 
-  def meta_or keys, default
-    keys = [keys] if keys.is_a? String
-    
-    keys.map( &:to_s ).each do |key|
-      if meta.key?(key) && !meta[key].nil?
-        return meta[key]
-      end
-    end
-    default
+  # This is useful to explicitly tell QB "no, I don't want this", since we
+  # treat `nil`/`null` as the same as absent, which will cause a
+  # default value to be used (if available).
+  # 
+  # This feature does not apply to {#boolean?} options themselves, only options
+  # that accept other values (though this method will of course return `true`
+  # for {#boolean?} options, since they do accept `false`).
+  # 
+  # @return [Boolean]
+  # 
+  def accept_false?
+    type.test?( false ) || meta[:accept_false]
   end
-    
-  protected # end private ****************************************************
   
-end # class QB::Options::Option
+  
+end; end; end # class QB::Options::Option

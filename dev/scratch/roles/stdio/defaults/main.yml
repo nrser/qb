@@ -1,4 +1,3 @@
 ---
-stdio_raise: false
-stdio_count: false
+stdio_test: false
 stdio_log: null

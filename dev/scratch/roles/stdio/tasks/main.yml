@@ -1,8 +1,9 @@
 ---
 # tasks file for stdio
-# - test:
-#     count: "{{ stdio_count }}"
-#     raise: "{{ stdio_raise }}"
+
+- when: stdio_test
+  test:
+    
 
 - when: stdio_log
   name: >-
