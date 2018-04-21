@@ -29,7 +29,31 @@ class QB::IPC::STDIO::Server::LogService < QB::IPC::STDIO::Server::Service
         klass = kwds[:exception]["name"].safe_constantize
         
         if klass
-          error = klass.new( kwds[:exception]["message"] || '(none)' )
+          # HACK  Good God...
+          #       
+          #       What we're doing is constructing an instance of the
+          #       exception class so that SemLog is happy with it... so we
+          #       take the class name, load that constant, then we *don't*
+          #       create an instance, because that could require args, and
+          #       all we need is something that holds the message and
+          #       backtrace, so we add the message as the response from
+          #       dynamically-created `#to_s` and `#message` methods added
+          #       *to that instance only*. Then we set the backtrace using
+          #       the regular instance API.
+          #       
+          #       ...and it kinda seems to work. But I suspect it will fuck
+          #       me/us/someone at some point if left like this...
+          #       
+          
+          message = kwds[:exception]["message"] || '(none)'
+          
+          error = klass.allocate
+          
+          metaclass = class << error; self; end
+          
+          [:to_s, :message].each do |name|
+            metaclass.send( :define_method, name ){ message }
+          end
           
           if kwds[:exception]["stack_trace"]
             error.set_backtrace kwds[:exception]["stack_trace"]
@@ -114,7 +138,7 @@ class QB::IPC::STDIO::Server::LogService < QB::IPC::STDIO::Server::Service
     # Try to load the line into a {SemanticLogger::Log} instance.
     # 
     def load_log_in_thread line
-      logger.with_level :trace do
+      # logger.with_level :trace do
         decoded = logger.catch.warn(
           "Unable to decode log message",
           line: line,
@@ -136,7 +160,7 @@ class QB::IPC::STDIO::Server::LogService < QB::IPC::STDIO::Server::Service
           
           write_log log
         end # logger.catch.warn
-      end # logger.with_level :trace
+      # end # logger.with_level :trace
     end
   
   public # end protected ***************************************************

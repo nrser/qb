@@ -1,6 +1,10 @@
 #!/usr/bin/env ruby
 
-require "bundler/setup"
+# So that this script can be called from places other than the Gemfile dir,
+# like when it's in `//dev/bin/console` and the Gemfile is at `//dev/Gemfile`
+Dir.chdir __dir__ do
+  require "bundler/setup"
+end
 
 # Load `nrser` gem and use refinements if it's available
 begin
@@ -9,11 +13,13 @@ rescue LoadError => error
   puts "WARN -- Failed to load `nrser` gem."
   puts "WARN -- Add it do your dependencies or edit #{ __FILE__ }"
 else
-  using NRSER
+  require 'nrser/refinements/types'
   using NRSER::Types
 end
 
+{% if qb_gem_info is defined %}
 require '{{ qb_gem_info.name }}'
+{% endif %}
 
 # You can add fixtures and/or initialization code here to make experimenting
 # with your gem easier. You can also use a different console, if you like.

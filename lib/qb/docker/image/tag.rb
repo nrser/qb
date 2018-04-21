@@ -75,8 +75,8 @@ class   Tag   < QB::Data::Immutable
   # @!endgroup Props # *******************************************************
   
   
-  invariant t.or  t.attrs( source:  t.not( t.nil ) ),
-                  t.attrs( version: t.not( t.nil ) )
+  invariant t.attrs( source:  ~t.nil ) |
+            t.attrs( version: ~t.nil )
   
   # Instance Methods
   # ======================================================================

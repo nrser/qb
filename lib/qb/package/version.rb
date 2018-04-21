@@ -421,22 +421,21 @@ class   Version < QB::Util::Resource
   # 
   # @return [QB::Package::Version]
   # 
-  def build_version branch: nil, ref: nil, time: nil, dirty: nil
-    time = self.class.to_time_segment(time) unless time.nil?
+  def build_version *build, branch: nil, ref: nil, time: nil, dirty: nil
     
-    segments = [
+    repo_segments = [
       branch,
       ref,
       ('dirty' if dirty),
-      time,
-    ].reject &:nil?
+      (self.class.to_time_segment(time) if dirty && time),
+    ].compact
     
-    if segments.empty?
+    if repo_segments.empty?
       raise ArgumentError,
-            "Need to provide at least one of branch, ref, time."
+            "Need to provide at least one of branch, ref, dirty."
     end
     
-    merge raw: nil, build: segments
+    merge raw: nil, build: [*build, repo_segments.join( '-' )]
   end
   
   

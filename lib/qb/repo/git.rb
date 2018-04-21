@@ -17,15 +17,7 @@ require 'qb/util/resource'
 # Refinements
 # =======================================================================
 
-using NRSER
 using NRSER::Types
-
-
-# Declarations
-# =======================================================================
-
-module QB; end
-class QB::Repo < QB::Util::Resource; end
 
 
 # Definitions
@@ -36,6 +28,8 @@ class QB::Repo < QB::Util::Resource; end
 # 
 # The main entry point is {QB::Repo::Git.from_path}, which creates a
 # 
+module QB
+class QB::Repo < QB::Util::Resource
 class QB::Repo::Git < QB::Repo
   autoload :User, 'qb/repo/git/user'
   autoload :GitHub, 'qb/repo/git/github'
@@ -58,78 +52,6 @@ class QB::Repo::Git < QB::Repo
   prop :full_name,  type: t.maybe(t.str), source: :full_name
   prop :is_github,  type: t.bool,         source: :github?
   prop :is_clean,   type: t.bool,         source: :clean?
-  
-  
-
-  
-  
-  # class GitHubRemote < NRSER::Meta::Props::Base
-  #   SSH_URL_RE = /^git@github\.com\:(?<owner>.*)\/(?<name>.*)\.git$/
-  #   HTTPS_URL_RE = /^https:\/\/github\.com\/(?<owner>.*)\/(?<name>.*)\.git$/
-  #   
-  #   prop :owner,  type: t.str
-  #   prop :name,   type: t.str
-  #   prop :api_response, type: t.maybe(t.hash)
-  #   
-  #   prop :full_name,    type: t.str,  source: :full_name
-  #   
-  #   
-  #   # Class Methods
-  #   # =====================================================================
-  #   
-  #   # Test if a Git SSH or HTTPS remote url points to GitHub.
-  #   #
-  #   # @param [String] url
-  #   #
-  #   # @return [Boolean]
-  #   #
-  #   def self.url? url
-  #     SSH_URL_RE.match(url) || HTTPS_URL_RE.match(url)
-  #   end # .url?
-  #   
-  #   
-  #   # Instantiate an instance from a Git SSH or HTTPS remote url that points
-  #   # to GitHub.
-  #   #
-  #   # @param [type] arg_name
-  #   #   @todo Add name param description.
-  #   #
-  #   # @return [QB::Repo::Git::GitHubRemote]
-  #   #   @todo Document return value.
-  #   #
-  #   def self.from_url url, use_api: false
-  #     match = SSH_URL_RE.match(git.origin) ||
-  #             HTTPS_URL_RE.match(git.origin)
-  #             
-  #     unless match
-  #       raise ArgumentError.new NRSER.squish <<-END
-  #         url #{ url.inspect } does not match GitHub SSH or HTTPS patterns.
-  #       END
-  #     end
-  #     
-  #     owner = match['owner']
-  #     name = match['name']
-  #     
-  #     if use_api
-  #       
-  #     end
-  #   end # .from_url
-  #   
-  #   
-  #   
-  #   # @todo Document full_name method.
-  #   #
-  #   # @param [type] arg_name
-  #   #   @todo Add name param description.
-  #   #
-  #   # @return [return_type]
-  #   #   @todo Document return value.
-  #   #
-  #   def full_name arg_name
-  #     "#{ owner }/#{ name }"
-  #   end # #full_name
-  #   
-  # end
   
   
   # Class Methods
@@ -340,8 +262,10 @@ class QB::Repo::Git < QB::Repo
   end
   
   
-  def api
-    @api ||= ::Git.open root_path
+  def lib
+    lazy_var :@lib do
+      ::Git.open root_path
+    end
   end
   
   
@@ -374,7 +298,7 @@ class QB::Repo::Git < QB::Repo
   
   
   def tags
-    api.tags.map &:name
+    lib.tags.map &:name
   end
   
-end # class QB::Repo::Git
+end; end; end # class QB::Repo::Git

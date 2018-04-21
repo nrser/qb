@@ -140,12 +140,21 @@ class   Name  < QB::Data::Immutable
     logger.debug "values", values
     
     # And construct!
-    new values
+    new source: string, **values
   end # .from_s
   
   
   # Props
   # ======================================================================
+  
+  # @!attribute [r] source
+  #   Source string this name was loaded from, if any.
+  #   
+  #   @return [String?]
+  #   
+  prop  :source,
+        type: t.non_empty_str?
+  
   
   # @!attribute [r] name
   #   For lack of a better name, the part of the name that's not anything
@@ -189,8 +198,41 @@ class   Name  < QB::Data::Immutable
         type: t.maybe( QB::Docker::Image::Tag )
   
   
+  prop  :string,
+        type: t.non_empty_str,
+        source: :to_s
+  
+  
+  invariant t.attrs( registry_server: t.nil, port: t.nil ) |
+            t.attrs( registry_server: ~t.nil, port: ~t.nil )
+  
+  
   # Instance Methods
   # ======================================================================
+  
+  def host
+    "#{ registry_server }:#{ port }" if registry_server && port
+  end
+  
+  
+  def formatted
+    [
+      host,
+      repository,
+      name,
+    ].compact.join( '/' ).thru { |without_tag|
+      if tag
+        "#{ without_tag }:#{ tag }"
+      else
+        without_tag
+      end
+    }
+  end
+  
+  
+  def to_s
+    source || formatted
+  end
   
   
 end; end; end; end # class QB::Docker::Image::Name
