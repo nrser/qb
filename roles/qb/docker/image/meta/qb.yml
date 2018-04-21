@@ -42,8 +42,15 @@ save_options: false
 # Options to pass to `ansible-playbook`
 ansible_options: {}
 
-# Role CLI options that become Ansible vars
+
 options:
+# ============================================================================
+
+# `docker_image` Ansible Module Options
+# ----------------------------------------------------------------------------
+# 
+# See http://docs.ansible.com/ansible/latest/modules/docker_image_module.html
+# 
 
 - name: api_version
   type: str
@@ -51,32 +58,30 @@ options:
     The version of the Docker API running on the Docker Host.
     
     Defaults to the latest version of the API supported by docker-py.
-  required: false
 
 - name: archive_path
   type: path
   description: |-
     Use with state present to archive an image to a .tar file.
-  required: false
   
 - name: buildargs
+  # TODO  Not implemented, and not sure if/how to do it with {OptionParser}...
+  aliases:
+  - build_args
   type: dict
   description: |-
     Name and values for Dockerfile ARGs.
-  required: false
 
 - name: cacert_path
   type: file_path
   description: |-
     Use a CA certificate when performing server verification by providing the
     path to a CA certificate file.
-  required: false
 
 - name: cert_path
   type: file_path
   description: |-
     Path to the client's TLS certificate file.
-  required: false
 
 - name: container_limits
   type:
@@ -90,7 +95,6 @@ options:
     process.
     
     See http://docs.ansible.com/ansible/latest/modules/docker_image_module.html
-  required: false
 
 - name: docker_host
   type: str
@@ -101,14 +105,12 @@ options:
     
     If TLS is used to encrypt the connection, the module will automatically
     replace 'tcp' in the connection URL with 'https'.
-  required: false
 
 - name: dockerfile
   type: file_path
   description: |-
     Use with state present to provide an alternate name for the Dockerfile
     to use when building an image.
-  required: false
 
 - name: force
   type: bool
@@ -120,25 +122,21 @@ options:
   
     -   Use with state `present` to build, load or pull an image when the
         image already exists.
-  required: false
 
 - name: http_timeout
   type: int
   description: |-
     Timeout for HTTP requests during the image build operation (in seconds).
-  required: false
 
 - name: key_path
   description: |-
     Path to the client's TLS key file.
   type: file_path
-  required: false
 
 - name: load_path
   description: |-
     Use with state `present` to load an image from a .tar file.
   type: file_path
-  required: false
 
 - name: name
   description: |-
@@ -154,3 +152,47 @@ options:
     by appending ':tag_name'.
   type: QB::Docker::Image::Name
   required: true
+  
+- name: nocache
+  description: |-
+    Do not use cache when building an image.
+  type: boolean
+
+- name: path
+  description: |-
+    Use with state 'present' to build an image.
+    
+    Will be the path to a directory containing the context and Dockerfile
+    for building an image.
+  type: dir_path
+
+- name: pull
+  description: |-
+    When building an image downloads any updates to the FROM image in
+    Dockerfile.
+  type: boolean
+
+- name: push
+  description: |-
+    Push the image to the registry.
+    
+    Specify the registry as part of the `name` or `repository` parameter.
+
+- name: repository
+  description: |-
+    Full path to a repository. Use with state present to tag the image into
+    the repository.
+    
+    Expects format repository:tag. If no tag is provided, will use the value
+    of the tag parameter or latest.
+  examples:
+    - dcoppenhagan/myimage
+    - localhost:5000/centos
+
+- name: rm
+  description: |-
+    Remove intermediate containers after build.
+  
+    
+    
+    

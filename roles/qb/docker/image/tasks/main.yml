@@ -3,10 +3,8 @@
 # Main tasks for `qb/docker/image` role
 ##############################################################################
 
-- qb.docker.image.get_args:
-    vars: >-
-      {{ vars | select_by_keys( 'startswith', 'docker_image' ) }}
-      
+- qb.docker.image.get_args: >-
+    {{ vars | select_by_keys( 'startswith', 'docker_image' ) }}  
   register: response
 
 - debug: var=response

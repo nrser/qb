@@ -30,7 +30,7 @@ class QBDockerImageGetArgs < QB::Ansible::Module
   #       
   def main
     logger.info "HERE!",
-      vars: vars
+      args: args
       # args_source: args_source
     
     return nil

@@ -20,18 +20,8 @@ require 'qb/util/resource'
 # Refinements
 # =======================================================================
 
-require 'nrser/refinements'
-using NRSER
-
 require 'nrser/refinements/types'
 using NRSER::Types
-
-
-# Declarations
-# =======================================================================
-
-module QB; end
-class QB::Package < QB::Util::Resource; end
 
 
 # Definitions
@@ -130,7 +120,16 @@ class QB::Package < QB::Util::Resource; end
 # 
 # A non-empty build segment may follow those, separated by a `+` character.
 # 
-class QB::Package::Version < QB::Util::Resource
+module  QB
+class   Package < QB::Util::Resource
+class   Version < QB::Util::Resource
+  
+  # Sub-Tree Requirements
+  # ========================================================================
+  
+  require_relative './version/leveled'
+  require_relative './version/from'
+  
   
   # Mixins
   # =====================================================================
@@ -149,6 +148,7 @@ class QB::Package::Version < QB::Util::Resource
   # 
   NUMBER_IDENTIFIER_RE = /\A(?:0|(?:[1-9]\d*))\z/
   
+  
   # What separates *identifiers* (the base undivided values).
   # 
   # @return [String]
@@ -156,7 +156,7 @@ class QB::Package::Version < QB::Util::Resource
   IDENTIFIER_SEPARATOR = '.'
   
   NUMBER_SEGMENT = t.non_neg_int
-  NAME_SEGMENT = t.non_empty_str
+  NAME_SEGMENT = t.str & /\A[0-9A-Za-z\-]+\z/
   MIXED_SEGMENT = t.xor NUMBER_SEGMENT, NAME_SEGMENT
   
   
@@ -193,27 +193,53 @@ class QB::Package::Version < QB::Util::Resource
   # Props
   # =====================================================================
 
-  prop :raw,            type: t.maybe(t.str),         default: nil
-  prop :major,          type: NUMBER_SEGMENT
-  prop :minor,          type: NUMBER_SEGMENT,         default: 0
-  prop :patch,          type: NUMBER_SEGMENT,         default: 0
-  prop :prerelease,     type: t.array(MIXED_SEGMENT), default: ->{ [] }
-  prop :build,          type: t.array(MIXED_SEGMENT), default: ->{ [] }
-
-  prop :release,        type: t.str,            source: :@release
-  prop :is_release,     type: t.bool,           source: :release?
-  prop :is_prerelease,  type: t.bool,           source: :prerelease?
-  prop :is_build,       type: t.bool,           source: :build?
-  prop :semver,         type: t.str,            source: :semver
-  prop :docker_tag,     type: t.str,            source: :docker_tag
-  prop :build_commit,   type: t.maybe(t.str),   source: :build_commit
-  prop :is_build_dirty, type: t.maybe(t.bool),  source: :build_dirty?
-
-
-  # Attributes
-  # =====================================================================
-
-  attr_reader :release
+  prop :raw,            type:     t.maybe(t.str),
+                        default:  nil
+  
+  prop :major,          type:     NUMBER_SEGMENT
+  
+  prop :minor,          type:     NUMBER_SEGMENT,
+                        default:  0
+  
+  prop :patch,          type:     NUMBER_SEGMENT,
+                        default:  0
+  
+  prop :revision,       type:     t.array( NUMBER_SEGMENT ),
+                        default:  ->{ [] }
+  
+  prop :prerelease,     type:     t.array( MIXED_SEGMENT ),
+                        default:  ->{ [] }
+  
+  prop :build,          type:     t.array( MIXED_SEGMENT ),
+                        default:  ->{ [] }
+  
+  
+  # Derived Props
+  # --------------------------------------------------------------------------
+  
+  prop :release,        type:     t.str,
+                        source:   :@release
+  
+  prop :is_release,     type:     t.bool,
+                        source:   :release?
+  
+  prop :is_prerelease,  type:     t.bool,
+                        source:   :prerelease?
+  
+  prop :is_build,       type:     t.bool,
+                        source:   :build?
+  
+  prop :semver,         type:     t.str,
+                        source:   :semver
+  
+  prop :docker_tag,     type:     t.str,
+                        source:   :docker_tag
+  
+  prop :build_commit,   type:     t.maybe(t.str),
+                        source:   :build_commit
+  
+  prop :is_build_dirty, type:     t.maybe(t.bool),
+                        source:   :build_dirty?
   
   
   # Class Methods
@@ -324,7 +350,7 @@ class QB::Package::Version < QB::Util::Resource
   # ---------------------------------------------------------------------
   
   def release
-    [major, minor, patch].join '.'
+    [major, minor, patch, *revision].join '.'
   end
   
   
@@ -471,6 +497,7 @@ class QB::Package::Version < QB::Util::Resource
       major,
       minor,
       patch,
+      revision,
       prerelease,
       build,
     ]
@@ -491,11 +518,4 @@ class QB::Package::Version < QB::Util::Resource
     "#<QB::Package::Version #{ @raw }>"
   end
   
-end # class QB::Package::Version
-
-
-# Post-Processing
-# =======================================================================
-
-require 'qb/package/version/leveled'
-require 'qb/package/version/from'
+end; end; end # class QB::Package::Version

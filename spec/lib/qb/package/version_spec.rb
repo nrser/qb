@@ -63,7 +63,8 @@ describe_class QB::Package::Version do
       include_context :version_everything_dev
       
       it do
-        expect(subject.to_a).to eq [0, 1, 2, ['dev', 3], ['master', '0a1b2c3d']]
+        expect(subject.to_a).
+          to eq [0, 1, 2, [], ['dev', 3], ['master', '0a1b2c3d']]
       end
     end # dev version with everything
     
@@ -71,7 +72,7 @@ describe_class QB::Package::Version do
       include_context :version_only_major
       
       it do
-        expect(subject.to_a).to eq [1, 0, 0, [], []]
+        expect(subject.to_a).to eq [1, 0, 0, [], [], []]
       end
     end # version with only major
     

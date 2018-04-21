@@ -97,10 +97,7 @@ describe "QB::Package::Version.extract" do
         web/v0.2.1-rc.0
       END
       
-    subject { super().call string }
-    
-    it "extracts and parses all the versions in order found" do
-      is_expected.to eq [
+      expected = [
         '0.1.0',
         '0.1.0',
         '0.1.0',
@@ -138,6 +135,13 @@ describe "QB::Package::Version.extract" do
         '0.2.0-rc.9',
         '0.2.1-rc.0',
       ].map { |s| QB::Package::Version.from s }
+      
+    subject { super().call string }
+    
+    it "extracts and parses all the versions in order found" do
+      expected.each_with_index do |expected, index|
+        expect( subject[index] ).to eq expected
+      end
     end
     
   end # section `git tag`-type output
