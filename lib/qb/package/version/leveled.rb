@@ -76,7 +76,7 @@ class QB::Package::Version::Leveled < QB::Package::Version
   #   If the values do have a level.
   # 
   def self.level_for prerelease: [], build: [], **etc
-    return RELEASE if prerelease.empty? && build.empty?
+    return RELEASE if prerelease.empty?
     
     return DEV if prerelease[0] == DEV
     
