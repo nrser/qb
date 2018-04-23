@@ -68,7 +68,15 @@ describe "Plugin Doctests" do
     ) do
       it "should exit with status 0" do
         expect(
-          Cmds.stream "<%= bin %> -m doctest -v <%= path %>",
+          Cmds.new(
+            "<%= bin %> -m doctest -v <%= path %>",
+            env: {
+              PYTHONPATH: [
+                QB::ROOT.join( 'lib', 'python' ),
+                *(ENV['PYTHONPATH'] || '').split( ':' ),
+              ].join( ':' ),
+            },
+          ).stream \
             bin: QB::Python.bin,
             path: path
         ).to be 0

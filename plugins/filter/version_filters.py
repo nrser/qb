@@ -8,27 +8,12 @@ import sys
 
 from ansible.errors import AnsibleError
 
-
-HERE = os.path.dirname(os.path.realpath(__file__))
-
-PROJECT_ROOT = os.path.realpath(
-    os.path.join(
-        HERE, # //plugins/filter_plugins
-        '..', # //plugins
-        '..', # //
-    )
-)
-
-LIB_PYTHON_DIR = os.path.join( PROJECT_ROOT, 'lib', 'python' )
-
-if not (LIB_PYTHON_DIR in sys.path):
-    sys.path.insert(0, LIB_PYTHON_DIR)
-
+import qb
 import qb.interop
 
 
 def get_semver_path():
-    bin_path = os.path.join(PROJECT_ROOT, 'node_modules', 'semver', 'bin', 'semver')
+    bin_path = os.path.join(qb.ROOT, 'node_modules', 'semver', 'bin', 'semver')
     
     if not os.path.isfile(bin_path):
         raise Exception("can't find semver at %s" % bin_path)
@@ -93,7 +78,7 @@ def semver_parse(version):
     
     out = subprocess.check_output(
         cmd,
-        cwd = PROJECT_ROOT
+        cwd = qb.ROOT
     )
     
     version = json.loads(out)

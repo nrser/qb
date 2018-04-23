@@ -62,6 +62,9 @@ class QB::Ansible::Env
   attr_reader :test_plugins
   
   
+  attr_reader :python_path
+  
+  
   # `ANSIBLE_CONFIG_<name>=<value>` ENV var values.
   # 
   # @see http://docs.ansible.com/ansible/latest/intro_configuration.html
@@ -98,6 +101,11 @@ class QB::Ansible::Env
     
     @test_plugins = [
       QB::ROOT.join( 'plugins', 'test' ),
+    ]
+    
+    @python_path = [
+      QB::ROOT.join( 'lib', 'python' ),
+      *(ENV['PYTHONPATH'] || '').split( ':' ),
     ]
     
     @config = {}
@@ -139,6 +147,8 @@ class QB::Ansible::Env
     
     hash[ 'QB_AM_SCRIPT_PATH' ] = \
       (QB::ROOT / 'load' / 'ansible' / 'module' / 'script.rb').to_s
+    
+    hash[ 'PYTHONPATH' ] = python_path.join ':'
     
     hash
   end # #to_h

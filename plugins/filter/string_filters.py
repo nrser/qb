@@ -30,25 +30,6 @@ import os
 
 from ansible.errors import AnsibleError
 
-
-# Project Imports Setup
-# ----------------------------------------------------------------------------
-
-PROJECT_ROOT = os.path.realpath(
-    os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), # //plugins/filter_plugins
-        '..', # //plugins
-        '..', # //
-    )
-)
-
-LIB_PYTHON_DIR = os.path.join( PROJECT_ROOT, 'lib', 'python' )
-
-if not (LIB_PYTHON_DIR in sys.path):
-    sys.path.insert(0, LIB_PYTHON_DIR)
-
-# Now we can import from `//lib/python`...
-
 import qb.strings
 
 
