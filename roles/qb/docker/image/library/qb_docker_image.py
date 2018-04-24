@@ -250,6 +250,8 @@ import os
 import re
 import json
 import socket
+import threading
+import logging
 
 from ansible.module_utils.docker_common import HAS_DOCKER_PY_2, AnsibleDockerClient, DockerBaseClass
 from ansible.module_utils._text import to_native
@@ -264,6 +266,14 @@ except ImportError:
     # missing docker-py handled in docker_common
     pass
 
+
+import qb.ipc.stdio
+import qb.ipc.stdio.logging_
+# from qb.ipc.stdio import client as io_client, logging_ as stdio_logging
+# import qb.ipc.stdio.logging_
+# from qb.ipc.stdio import
+
+logger = qb.ipc.stdio.logging_.getLogger('qb_docker_image')
 
 class QBAnsibleDockerClient( AnsibleDockerClient ):
     def try_pull_image(self, name, tag="latest"):
@@ -283,12 +293,8 @@ class QBAnsibleDockerClient( AnsibleDockerClient ):
 
         return self.find_image(name=name, tag=tag)
 
-    def log( self, msg, pretty_print=False ):
-        global qb_stdout_sock
-        
-        if qb_stdout_sock:
-            # TODO  Clean up... msg is dict when coming from client
-            qb_stdout_sock.sendall( str( msg ) + u'\n' )
+    def log(self, msg, pretty_print=False):
+        qb_log(msg)
 
 class ImageManager(DockerBaseClass):
 
@@ -320,6 +326,11 @@ class ImageManager(DockerBaseClass):
         
         # QB additions
         self.try_to_pull = parameters.get('try_to_pull')
+        
+        self.logger = qb.ipc.stdio.logging_.getLogger(
+            'qb_docker_image:ImageManager',
+            level = logging.DEBUG
+        )
 
         # If name contains a tag, it takes precedence over tag parameter.
         repo, repo_tag = parse_repository_tag(self.name)
@@ -337,17 +348,20 @@ class ImageManager(DockerBaseClass):
 
     def present(self):
         '''
-        Handles state = 'present', which includes building, loading or pulling an image,
-        depending on user provided parameters.
+        Handles state = 'present', which includes building, loading or pulling
+        an image, depending on user provided parameters.
 
         :returns None
         '''
+        self.logger.info("Starting state=present...")
+        
         image = self.client.find_image(name=self.name, tag=self.tag)
         pulled_image = None
         
         if not image or self.force:
             if self.try_to_pull:
-                # Try to pull the image
+                self.log("Try to pull the image")
+                
                 self.results['actions'].append(
                     'Tried to pull image %s:%s' % (self.name, self.tag)
                 )
@@ -406,20 +420,42 @@ class ImageManager(DockerBaseClass):
         # 
         # 1.  We didn't pull the image (if we did pull it we have no need to
         #     then push it).
-        # 2.  We didn't find an image initally or the image we just got is
-        #     different.
+        # 2.  We have a local image or image result (or what are we pushing)
+        # have_image = image or len(self.result['image']) > 0
+        # 3.  Either:
+        #     A.  We didn't find any image before doing anything
+        #     B.  The resulting image is different
         # 
-        if pulled_image is None and (image or image != self.results['image']):
-            if self.push and not self.repository:
-                self.push_image(self.name, self.tag)
-            elif self.repository:
-                self.tag_image(
-                    self.name,
-                    self.tag,
-                    self.repository,
-                    force=self.force,
-                    push=self.push
-                )
+        # image_is_different = (
+        #     (not image) or (
+        #         len(self.results image[u'Id'] != self.results['image'][u'Id']
+        
+        self.logger.debug("Deciding to push...")
+        
+        if (
+            pulled_image is None and (
+                image or self.result['image']
+            ) and (
+                ((not image) and self.results['image']) or
+                (image and self.results['image'] and image['Id'] != self.results['Id'])
+            )
+        ):
+            self.logger.debug("Into push section!")
+            # self.log("have_image: {}".format(have_image))
+            # self.log("image_is_different: {}".format(image_is_different))
+            
+            self.logger.debug("Image", image)
+            
+            # if self.push and not self.repository:
+            #     self.push_image(self.name, self.tag)
+            # elif self.repository:
+            #     self.tag_image(
+            #         self.name,
+            #         self.tag,
+            #         self.repository,
+            #         force=self.force,
+            #         push=self.push
+            #     )
 
     def absent(self):
         '''
@@ -633,56 +669,14 @@ class ImageManager(DockerBaseClass):
         return self.client.find_image(self.name, self.tag)
 
 
-    def log( self, msg, pretty_print=False ):
-        qb_log( msg )
+    def log(self, msg, pretty_print=False):
+        return qb_log(msg)
     
     def warn( self, warning ):
         self.results['warnings'].append( str(warning) )
 
-qb_stdout_path = None
-qb_stdout_sock = None
-qb_stdout_attempted = False
-
-def qb_stdio_connect( results ):
-    global qb_stdout_path
-    global qb_stdout_sock
-    global qb_stdout_attempted
-    
-    if qb_stdout_attempted:
-        return qb_stdout_sock
-    
-    qb_stdout_attempted = True
-    
-    if 'QB_STDIO_OUT' not in os.environ:
-        return False
-    
-    qb_stdout_path = os.environ['QB_STDIO_OUT']
-    
-    qb_stdout_sock = socket.socket(
-        socket.AF_UNIX,
-        socket.SOCK_STREAM
-    )
-    
-    try:
-        qb_stdout_sock.connect( qb_stdout_path )
-        
-    except socket.error, msg:
-        results['warnings'].append(
-            'Failed to connect to QB STDOUT stream at {}: {}'.format(
-                qb_stdout_path,
-                msg
-            )
-        )
-        
-        qb_stdout_sock = None
-        return False
-    
-    return True
-
 def qb_log( msg ):
-    global qb_stdout_sock
-    
-    if qb_stdout_sock is None:
+    if not qb.ipc.stdio.client.stdout.connected:
         return False
     
     string = None
@@ -703,7 +697,31 @@ def qb_log( msg ):
     if string is not None:
         if not string.endswith( u"\n" ):
             string = string + u"\n"
-        qb_stdout_sock.sendall( string )
+        qb.ipc.stdio.client.stdout.socket.sendall(string)
+    
+    return True
+
+def qb_debug(name, message, **payload):
+    if not qb.ipc.stdio.client.log.connected:
+        return False
+    
+    struct = dict(
+        level='debug',
+        name=name,
+        pid=os.getpid(),
+        thread=threading.current_thread().name,
+        message=message,
+        payload=payload,
+    )
+    
+    string = json.dumps(struct)
+    
+    if not string.endswith( u"\n" ):
+        string = string + u"\n"
+    
+    qb.ipc.stdio.client.log.socket.sendall(string)
+    
+    return True
 
 def main():
     argument_spec = dict(
@@ -741,7 +759,9 @@ def main():
         warnings=[],
     )
     
-    qb_stdio_connect( results )
+    qb.ipc.stdio.client.connect(results['warnings'])
+    
+    logger.info("HERERERERE", extra=dict(payload=dict(x='ex', y='why?')))
     
     ImageManager(client, results)
     client.module.exit_json(**results)
