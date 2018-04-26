@@ -141,9 +141,6 @@ class QBAnsibleDockerClient(AnsibleDockerClient):
         :return:        See :class:`AnsibleDockerClient.fail`
         '''
         
-        if values:
-            msg = msg.format(**values)
-        
         self.logger.critical(msg, payload=values)
         
         return super(QBAnsibleDockerClient, self).fail(msg)

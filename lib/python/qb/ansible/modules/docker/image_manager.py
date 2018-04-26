@@ -658,7 +658,7 @@ class ImageManager(DockerBaseClass):
             tag=self.name,
             rm=self.rm,
             nocache=self.nocache,
-            stream=True,
+            # stream=True,
             timeout=self.http_timeout,
             pull=self.pull,
             forcerm=self.rm,
@@ -674,17 +674,26 @@ class ImageManager(DockerBaseClass):
             for key, value in self.buildargs.items():
                 self.buildargs[key] = to_native(value)
             params['buildargs'] = self.buildargs
-
-        for line in self.client.build(**params):
+        
+        self.logger.info(
+            "Building",
+            payload=params,
+        )
+        
+        logs = self.client.build(**params)
+        
+        # self.logger.info("build result", payload=dict(result=result))
+        
+        for log in logs:
             
-            self.out(line)
+            self.out(log)
             
-            if "stream" in line:
-                build_output.append(line["stream"])
+            if "stream" in log:
+                build_output.append(log["stream"])
                 
-            if line.get('error'):
-                if line.get('errorDetail'):
-                    errorDetail = line.get('errorDetail')
+            if log.get('error'):
+                if log.get('errorDetail'):
+                    errorDetail = log.get('errorDetail')
                     self.fail(
                         "Error building %s - code: %s, message: %s, logs: %s" % (
                             self.name,
@@ -697,7 +706,7 @@ class ImageManager(DockerBaseClass):
                     self.fail(
                         "Error building %s - message: %s, logs: %s" % (
                             self.name,
-                            line.get('error'),
+                            log.get('error'),
                             build_output
                         )
                     )

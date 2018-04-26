@@ -71,7 +71,7 @@ class Connection:
     def println(self, line):
         if not line.endswith( u"\n" ):
             line = line + u"\n"
-        self.socket.sendall(line)
+        self.socket.sendall(line.encode("utf-8"))
         
 
 class Client:

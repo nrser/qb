@@ -18,15 +18,21 @@ def getLogger(name, level=logging.DEBUG, io_client=qb.ipc.stdio.client):
 
 class Adapter(logging.LoggerAdapter):
     def process(self, msg, kwds):
+        payload = None
         if 'payload' in kwds:
-            msg = msg.format(**kwds['payload'])
+            payload = kwds['payload']
+            del kwds['payload']
+        
+        if payload:
+            try:
+                msg = msg.format(**payload)
+            except:
+                pass
             
             if 'extra' not in kwds:
                 kwds['extra'] = {}
-                
-            kwds['extra']['payload'] = kwds['payload']
             
-            del kwds['payload']
+            kwds['extra']['payload'] = payload
             
         return msg, kwds
 
