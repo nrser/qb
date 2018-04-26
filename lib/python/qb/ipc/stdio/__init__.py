@@ -7,8 +7,12 @@ import socket
 def path_env_var_name(name):
     return "QB_STDIO_{}".format(name.upper())
 
-# Port of Ruby {QB::IPC::STDIO::Client::Connection} class.
+
 class Connection:
+    '''
+    Port of Ruby `QB::IPC::STDIO::Client::Connection` class.
+    '''
+    
     def __init__(self, name, type):
         self.name = name
         self.type = type
@@ -57,11 +61,17 @@ class Connection:
         if not self.connected:
             raise RuntimeError("{} is not connected!".format(self))
         
-        if self.type == 'out':
-            self.socket.flush()
+        # if self.type == 'out':
+        #     self.socket.flush()
         
         self.socket.close()
         self.socket = None
+        self.connected = False
+        
+    def println(self, line):
+        if not line.endswith( u"\n" ):
+            line = line + u"\n"
+        self.socket.sendall(line)
         
 
 class Client:

@@ -130,7 +130,7 @@ class QB::IPC::STDIO::Server::LogService < QB::IPC::STDIO::Server::Service
     # 
     def write_log log
       logger = logger_for log.name
-      logger.level = :trace
+      # logger.level = :trace
       logger.log( log ) if logger.should_log?( log )
     end
     
@@ -138,7 +138,7 @@ class QB::IPC::STDIO::Server::LogService < QB::IPC::STDIO::Server::Service
     # Try to load the line into a {SemanticLogger::Log} instance.
     # 
     def load_log_in_thread line
-      logger.with_level :trace do
+      # logger.with_level :trace do
         decoded = logger.catch.warn(
           "Unable to decode log message",
           line: line,
@@ -160,7 +160,7 @@ class QB::IPC::STDIO::Server::LogService < QB::IPC::STDIO::Server::Service
           
           write_log log
         end # logger.catch.warn
-      end # logger.with_level :trace
+      # end # logger.with_level :trace
     end
   
   public # end protected ***************************************************
