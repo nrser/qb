@@ -76,4 +76,24 @@ module QB; module Util; module Decorators
     end
   end # EnumFor
   
+  
+  # Don't all {NRSER::Props} arguments in last position to become keyword
+  # options.
+  # 
+  # Since {NRSER::Props} objects can be subclasses of {Hash}, etc., they can
+  # erroneously end up being considered keyword options.
+  # 
+  # This decorator prevents that. If you want to pass an {NRSER::Props} as the
+  # keywords, calling `#to_h` or something on it first should work.
+  # 
+  class NoPropsInKwds < MethodDecorators::Decorator
+    def call target, receiver, *args, &block
+      if args.last.is_a? NRSER::Props
+        target.call *args, {}, &block
+      else
+        target.call *args, &block
+      end
+    end
+  end # class NoPropsInKwds
+  
 end; end; end # module QB::Util::Decorators

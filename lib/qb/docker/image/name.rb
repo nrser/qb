@@ -42,6 +42,8 @@ class   Name  < QB::Data::Immutable
   # Mixins
   # ========================================================================
   
+  extend ::MethodDecorators
+  
   include NRSER::Log::Mixin
   
   
@@ -144,6 +146,39 @@ class   Name  < QB::Data::Immutable
   end # .from_s
   
   
+  # Get an instance from a source.
+  # 
+  # @param [self | String | Hash] source
+  # @return [self]
+  # 
+  def self.from source
+    t.match source,
+      self,     source,
+      t.str,    method( :from_s ),
+      t.hash_,  method( :from_data )
+  end # .from
+  
+  
+  # Queries
+  # --------------------------------------------------------------------------
+  
+  # @see QB::Docker::CLI.image_named?
+  # 
+  def self.exists? name
+    QB::Docker::CLI.image_named? name
+  end # .exists?
+  
+  
+  # @see QB::Docker::CLI.image_names
+  # 
+  +QB::Util::Decorators::NoPropsInKwds
+  def self.list *args, **opts
+    QB::Docker::CLI.image_names *args, **opts
+  end # .list
+  
+  singleton_class.send :alias_method, :all, :list
+  
+  
   # Props
   # ======================================================================
   
@@ -210,6 +245,32 @@ class   Name  < QB::Data::Immutable
   # Instance Methods
   # ======================================================================
   
+  # Does the name exist in the local daemon?
+  # 
+  # @see QB::Docker::CLI.image_named?
+  # 
+  # @return [Boolean]
+  # 
+  def exists?
+    QB::Docker::CLI.image_named? self
+  end # #exist?
+  
+  alias_method :exist?, :exists?
+  
+  
+  # @todo Document dirty? method.
+  # 
+  # @param [type] arg_name
+  #   @todo Add name param description.
+  # 
+  # @return [return_type]
+  #   @todo Document return value.
+  # 
+  def dirty?
+    !!tag.try( :dirty? )
+  end # #dirty?
+  
+  
   def host
     "#{ registry_server }:#{ port }" if registry_server && port
   end
@@ -232,6 +293,16 @@ class   Name  < QB::Data::Immutable
   
   def to_s
     source || formatted
+  end
+  
+  
+  def inspect
+    "#<#{ self.class.safe_name } #{ to_s }>"
+  end
+  
+  
+  def pretty_print q
+    q.text inspect
   end
   
   

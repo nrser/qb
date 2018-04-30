@@ -215,12 +215,12 @@ class QB::Docker::Image::Module < QB::Ansible::Module
         fact_name: fact_name
         
       
-      QB::Docker::Image.ensure \
+      QB::Docker::Image.ensure_present! \
         name: image_name,
         pull: !image_version.dev?,
         build: {
           path: path,
-          args: {
+          build_arg: {
             from_image: from_image.string,
             image_version: image_version.semver,
           },

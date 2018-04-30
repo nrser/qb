@@ -331,19 +331,17 @@ class   Version < QB::Util::Resource
   end
   
   
-  # @todo Document build_dirty? method.
+  # Is the build "dirty"?
   # 
-  # @param [type] arg_name
-  #   @todo Add name param description.
-  # 
-  # @return [return_type]
-  #   @todo Document return value.
+  # @return [Boolean]
   # 
   def build_dirty?
     if build?
-      build.include? 'dirty'
+      build.any? { |seg| seg.is_a?( String ) && seg.include?( 'dirty' ) }
     end
   end # #build_dirty?
+  
+  alias_method :dirty?, :build_dirty?
   
   
   # Derived Properties

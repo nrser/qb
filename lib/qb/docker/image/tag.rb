@@ -86,4 +86,9 @@ class   Tag   < QB::Data::Immutable
   end
   
   
+  def dirty?
+    version && version.build_dirty?
+  end
+  
+  
 end; end; end; end # class QB::Docker::Image::Tag
