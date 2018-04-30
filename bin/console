@@ -1,22 +1,47 @@
 #!/usr/bin/env ruby
 
-require "bundler/setup"
-require 'nrser'
-require "qb"
+Dir.chdir __dir__ do
+  require "bundler/setup"
+end
 
 
-require 'nrser/refinements/types'
-using NRSER::Types
-
-NRSER::Log.setup_for_console! application: 'qb'
-
+# Load `nrser` gem and use refinements if it's available
+begin
+  require 'nrser'
+rescue LoadError => error
+  puts "WARN -- Failed to load `nrser` gem."
+  puts "WARN -- Add it do your dependencies or edit #{ __FILE__ }"
+else
+  require 'nrser/core_ext'
+  require 'nrser/refinements/types'
+  using NRSER::Types
+end
 
 # You can add fixtures and/or initialization code here to make experimenting
 # with your gem easier. You can also use a different console, if you like.
 
-# (If you use this, don't forget to add pry to your Gemfile!)
-require "pry"
-Pry.start
+require 'qb'
 
-# require "irb"
-# IRB.start
+NRSER::Log.setup_for_console! application: 'qb'
+
+Pathname.
+  glob( QB::ROOT / 'dev' / 'scratch' / 'console' / '**' / '*.rb' ).
+  each { |path|
+    puts "[Loading #{ path }]"
+    load path.to_s
+  }
+
+
+# Load `pry` if it's available, falling back to `irb`
+begin
+  require "pry"
+rescue LoadError => error
+  puts "WARN -- Failed to load `pry` gem."
+  puts "WARN -- Add it do your dependencies or edit #{ __FILE__ }"
+  puts "INFO -- Starting `IRB`..."
+  
+  require "irb"
+  IRB.start
+else
+  Pry.start
+end
