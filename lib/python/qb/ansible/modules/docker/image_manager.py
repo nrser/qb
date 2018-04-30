@@ -658,6 +658,7 @@ class ImageManager(DockerBaseClass):
             tag=self.name,
             rm=self.rm,
             nocache=self.nocache,
+            # Docker Pythong client v3 doesn't support
             # stream=True,
             timeout=self.http_timeout,
             pull=self.pull,
