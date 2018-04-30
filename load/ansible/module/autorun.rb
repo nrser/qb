@@ -16,7 +16,7 @@ at_exit do
   if $!
     QB::Ansible::Module.logger.fatal "Error raised pre-execution", $!
   else
-    QB::Ansible::Module.subclasses.find_only { |klass|
+    QB::Ansible::Module.descendants.find_only { |klass|
       begin
         klass.instance_method( :main ).source_location[0] == $0
       rescue; end
