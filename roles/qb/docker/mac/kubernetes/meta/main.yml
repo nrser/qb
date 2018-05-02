@@ -1,0 +1,10 @@
+---
+##############################################################################
+# Ansible metadata for `qb/docker/mac/kubernetes` role
+##############################################################################
+
+allow_duplicates: yes
+
+dependencies: []
+# - role: role-name
+

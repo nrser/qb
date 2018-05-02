@@ -1,0 +1,45 @@
+---
+##############################################################################
+# Main tasks for `qb/docker/mac/kubernetes` role
+##############################################################################
+
+- name: |-
+    Use the `docker-for-desktop` kubectl context
+  command: >-
+    kubectl config use-context docker-for-desktop
+
+
+- name: |-
+    Install the Kubernetes dashboard
+    
+    https://rominirani.com/tutorial-getting-started-with-kubernetes-with-docker-on-mac-7f58467203fd
+  
+  command: >-
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+
+
+- name: |-
+    Tap `nrser/versions` in Homebrew to get `kubernetes-helm@2.8.2`
+    
+    2.9 is busted: https://github.com/kubernetes/helm/issues/2520
+  
+  homebrew_tap:
+    name: nrser/versions
+
+
+- name: |-
+    Make sure `kubernetes-helm` is not linked in Homebrew
+  homebrew:
+    name: kubernetes-helm
+    state: unlinked
+
+
+- name: |-
+    Install `kubernetes-helm@2.8.2`
+  homebrew:
+    name: kubernetes-helm@2.8.2
+
+
+- name: |-
+    Init Helm
+  command: helm init

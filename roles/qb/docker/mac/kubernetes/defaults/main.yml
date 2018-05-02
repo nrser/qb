@@ -1,0 +1,7 @@
+---
+##############################################################################
+# Variable defaults for `qb/docker/mac/kubernetes` role
+#
+# @see http://docs.ansible.com/ansible/latest/playbooks_reuse_roles.html#role-default-variables
+# 
+##############################################################################
