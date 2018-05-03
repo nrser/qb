@@ -1,46 +1,44 @@
-# Spec for {QB::Package::Version}
+describe_spec_file(
+  spec_path: __FILE__,
+  class: QB::Package::Version,
+) do
 
-require 'spec_helper'
+  RSpec.shared_context :version_everything_dev do
+    let(:raw) { '0.1.2-dev.3+master.0a1b2c3d' }
+    let(:version) { QB::Package::Version.from raw }
+    subject { version }
+  end
 
-RSpec.shared_context :version_everything_dev do
-  let(:raw) { '0.1.2-dev.3+master.0a1b2c3d' }
-  let(:version) { QB::Package::Version.from raw }
-  subject { version }
-end
-
-RSpec.shared_context "Version 0.1.2-dev.3+master.0a1b2c3d" do
-  let(:raw) { '0.1.2-dev.3+master.0a1b2c3d' }
-  let(:version) { QB::Package::Version.from raw }
-  subject { version }
-end
-
-
-RSpec.shared_context :version_only_major do
-  let(:raw) { '1' }
-  let(:version) { QB::Package::Version.from raw }
-  subject { version }
-end # version with only major
+  RSpec.shared_context "Version 0.1.2-dev.3+master.0a1b2c3d" do
+    let(:raw) { '0.1.2-dev.3+master.0a1b2c3d' }
+    let(:version) { QB::Package::Version.from raw }
+    subject { version }
+  end
 
 
-RSpec.shared_context :version_gem_style do
-  let(:raw) { '0.1.2.dev.3' }
-  let(:version) { QB::Package::Version.from raw }
-  subject { version }
-end #:version_gem_style
-
-RSpec.shared_context :version_bad_gem_style do
-  let(:raw) { '0.1.2.3.dev.4' }
-end #:version_gem_style
+  RSpec.shared_context :version_only_major do
+    let(:raw) { '1' }
+    let(:version) { QB::Package::Version.from raw }
+    subject { version }
+  end # version with only major
 
 
-RSpec.shared_context :version_with_build_info do
-  let(:raw) { '0.1.2-dev.0+master.aaabbbc.20170101T000000Z' }
-  let(:version) { QB::Package::Version.from raw }
-  subject { version }
-end #:version_with_build_info
+  RSpec.shared_context :version_gem_style do
+    let(:raw) { '0.1.2.dev.3' }
+    let(:version) { QB::Package::Version.from raw }
+    subject { version }
+  end #:version_gem_style
+
+  RSpec.shared_context :version_bad_gem_style do
+    let(:raw) { '0.1.2.3.dev.4' }
+  end #:version_gem_style
 
 
-describe_class QB::Package::Version do
+  RSpec.shared_context :version_with_build_info do
+    let(:raw) { '0.1.2-dev.0+master.aaabbbc.20170101T000000Z' }
+    let(:version) { QB::Package::Version.from raw }
+    subject { version }
+  end #:version_with_build_info
   
   # Bad prop values
   # ========================================================================
@@ -120,7 +118,7 @@ describe_class QB::Package::Version do
   end # #release_version
   
   
-  describe "#build_version" do
+  describe_instance_method :build_version do
     context "dev version with everything" do
       include_context :version_everything_dev
       
@@ -131,8 +129,8 @@ describe_class QB::Package::Version do
                                 time: Time.new(2017, 1, 1, 0, 0, 0, '+00:00')
         }
         
-        it "replaces build info" do
-          expect(subject.build).to eq ['blah', 'aaabbbc', "20170101T000000Z"]
+        it "replaces build info but does *not* add build time" do
+          expect(subject.build).to eq ['blah-aaabbbc']
         end
       end # clean
       
@@ -144,9 +142,9 @@ describe_class QB::Package::Version do
                                 dirty: true
         }
         
-        it "replaces build info" do
+        it "replaces build info and includes build time" do
           expect(subject.build).to eq(
-            ['blah', 'aaabbbc', 'dirty', "20170101T000000Z"]
+            ['blah-aaabbbc-dirty-20170101T000000Z']
           )
         end
       end # dirty
@@ -261,4 +259,4 @@ describe_class QB::Package::Version do
   end # Language Integration
   
   
-end # QB::Package::Version
+end # spec file for QB::Package::Version
