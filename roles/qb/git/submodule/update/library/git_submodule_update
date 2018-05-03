@@ -36,7 +36,7 @@ class GitSubmoduleUpdate < QB::Ansible::Module
         detached: detached?(dir),
         dirty: dirty?(dir),
       }
-    }.tap {|subs| QB.debug submodules: subs}
+    }.tap { |subs| logger.debug payload: { submodules: subs } }
   end
   
   def dirty? repo_dir
@@ -75,7 +75,7 @@ class GitSubmoduleUpdate < QB::Ansible::Module
   end
   
   def attach! submodule
-    QB.debug "attaching submodule #{ submodule[:rel_dir] }..."
+    logger.debug "attaching submodule #{ submodule[:rel_dir] }..."
     
     branch_heads = branch_heads_for_commit submodule
     branch_head = nil
@@ -97,17 +97,17 @@ class GitSubmoduleUpdate < QB::Ansible::Module
       return false
       
     when 1
-      QB.debug "commit is head of only one branch: #{ branch_heads[0][:ref] }"
+      logger.debug "commit is head of only one branch: #{ branch_heads[0][:ref] }"
       branch_head = branch_heads[0]
       
     else
-      QB.debug "commit is head of multiple branches..."
+      logger.debug "commit is head of multiple branches..."
       
       local = branch_heads.select {|bh| bh[:ref].start_with? 'refs/heads'}
       
       case local.length
       when 0
-        QB.debug "commit is head of multiple remote branches..."
+        logger.debug "commit is head of multiple remote branches..."
         
         # see if one is master
         branch_head = branch_heads.find {|bh| bh[:ref].end_with? 'master'}
@@ -123,15 +123,15 @@ class GitSubmoduleUpdate < QB::Ansible::Module
           return false
         end
         
-        QB.debug "commit is head of local master, using that."
+        logger.debug "commit is head of local master, using that."
         
       when 1
-        QB.debug "the commit is head of one local branch, using it."
+        logger.debug "the commit is head of one local branch, using it."
         
         branch_head = local[0]
       
       else
-        QB.debug "the commit heads multiple local branches..."
+        logger.debug "the commit heads multiple local branches..."
         
         # again, see if one is master
         branch_head = local.find {|b| b[:ref].end_with? 'master'}
@@ -147,28 +147,30 @@ class GitSubmoduleUpdate < QB::Ansible::Module
           return false
         end
         
-        QB.debug "commit is head of remote master, using that."
+        logger.debug "commit is head of remote master, using that."
       end # case local.length
     end # case branch_heads.length
     
-    QB.debug "attaching #{ submodule[:rel_dir] } to #{ branch_head[:ref] }..."
+    logger.debug \
+      "attaching #{ submodule[:rel_dir] } to #{ branch_head[:ref] }..."
     
     branch = branch_head[:ref].split('/')[-1]
     
     Dir.chdir submodule[:dir] do
-      QB.debug "checking out branch #{ branch } for #{ submodule[:rel_dir] }..."
+      logger.debug \
+        "checking out branch #{ branch } for #{ submodule[:rel_dir] }..."
       
       Cmds! "git checkout <%= branch %>", branch: branch
       
       # do a pull if the head was on the remote
       if branch_head[:ref].start_with? 'refs/remotes'
-        QB.debug "commit is head of remote branch, pulling..."
+        logger.debug "commit is head of remote branch, pulling..."
         
         Cmds! "git pull origin <%= branch %>", branch: branch
       end
     end
     
-    QB.debug "attached."
+    logger.debug "attached."
     @changed = true
     true
   end
