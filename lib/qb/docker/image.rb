@@ -77,7 +77,7 @@ class   Image < QB::Data::Immutable
     cmd = QB::Docker::CLI.build_cmd path, tag: name.to_s, **build_opts
     
     logger.info "building...",
-      name: name,
+      name: name.to_s,
       path: path,
       push: push,
       _cmd_stream: _cmd_stream,
