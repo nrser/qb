@@ -41,6 +41,15 @@ class QB::Docker::Image::Module < QB::Ansible::Module
     arg :fact_name,
         type: t.non_empty_str?
     
+    arg :build_arg,
+        type: t.hash_,
+        aliases: [ :build_args, :buildargs ],
+        default: ->{ {} }
+    
+    arg :include_from_image_build,
+        type: t.bool,
+        default: true
+    
     # @!attribute [r] now
     #   The time to use as now. Defaults to get the current time, but here so
     #   that it can be provided externally so if you're doing a bunch of work
@@ -74,6 +83,8 @@ class QB::Docker::Image::Module < QB::Ansible::Module
     #       <semver>_openresty.openresty.1.11.2.4.xenial.<build_info?>
     # 
     def build_segments_for_from_image
+      return [] unless include_from_image_build
+      
       [
         [
           (from_image.repository == 'beiarea' ? nil : from_image.repository),
@@ -212,6 +223,7 @@ class QB::Docker::Image::Module < QB::Ansible::Module
         "Starting `_image`...",
         path: path,
         from_image: from_image.to_s,
+        build_arg: build_arg,
         fact_name: fact_name
         
       
@@ -223,6 +235,7 @@ class QB::Docker::Image::Module < QB::Ansible::Module
           build_arg: {
             from_image: from_image.string,
             image_version: image_version.semver,
+            **build_arg,
           },
         },
         # Don't push dev images
