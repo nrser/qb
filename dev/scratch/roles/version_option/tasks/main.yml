@@ -1,5 +1,0 @@
----
-# tasks file for version_option
-
-- debug:
-    var: version_option_version
