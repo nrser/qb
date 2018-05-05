@@ -38,6 +38,8 @@ using NRSER::Types
 # Definitions
 # =====================================================================
 
+module QB
+module Ansible
 class QB::Ansible::Module
   
   # Sub-Tree Requirements
@@ -57,19 +59,85 @@ class QB::Ansible::Module
   # Class Methods
   # =====================================================================
   
+  module Formatters
+    class Processor < SemanticLogger::Formatters::Default
+      
+      def backtrace_to_s
+        lines = log.backtrace_to_s.lines
+        
+        if lines.length > 42
+          lines = [
+            *lines[0..21],
+            "\n# ...\n\n",
+            *lines[-21..-1]
+          ]
+        end
+        
+        lines.join
+      end
+      
+      # Exception
+      def exception
+        "-- Exception: #{log.exception.class}: #{log.exception.message}\n#{backtrace_to_s}" if log.exception
+      end
+    end
+    
+    class JSON < SemanticLogger::Formatters::Raw
+      # Default JSON time format is ISO8601
+      def initialize  time_format: :iso_8601,
+                      log_host: true,
+                      log_application: true,
+                      time_key: :timestamp
+        super(
+          time_format: time_format,
+          log_host: log_host,
+          log_application: log_application,
+          time_key: time_key,
+        )
+      end
+      
+      def call log, logger
+        raw = super( log, logger )
+        
+        begin
+          raw.to_json
+        rescue Exception => error
+          # SemanticLogger::Processor.instance.appender.logger.warn \
+          #   "Unable to JSON encode for logging", raw: raw
+          
+          $stderr.puts "Unable to JSON encode log"
+          $stderr.puts raw.pretty_inspect
+          
+          raise
+        end
+      end
+    end
+  end
+  
+  
   def self.setup_io!
     # Initialize
     $qb_stdio_client ||= QB::IPC::STDIO::Client.new.connect!
     
     if $qb_stdio_client.log.connected? && NRSER::Log.appender.nil?
+      # SemanticLogger::Processor.logger = \
+      
+      SemanticLogger::Processor.instance.appender.logger = \
+        SemanticLogger::Appender::File.new(
+          io: $stderr,
+          level: :warn,
+          formatter: Formatters::Processor.new,
+        )
+      
       NRSER::Log.setup! \
         application: 'qb',
         sync: true,
         dest: {
           io: $qb_stdio_client.log.socket,
-          formatter: SemanticLogger::Formatters::Json.new,
+          formatter: Formatters::JSON.new,
         }
     end
+    
   end # .setup_logging
   
   
@@ -437,4 +505,4 @@ class QB::Ansible::Module
     exit false
   end
   
-end # class QB::Ansible::Module
+end; end; end # class QB::Ansible::Module

@@ -68,9 +68,32 @@ class   Image < QB::Data::Immutable
   end
   
   
+  def self.run_cmd cmd, stream: true, raise_on_fail: false
+    if stream
+      if raise_on_fail
+        cmd.stream!
+      else
+        cmd.stream
+      end
+    else
+      cmd.capture.tap { |result|
+        if raise_on_fail && result.error?
+          raise QB::Docker::CLI::Error.from_result result
+        end
+      }
+    end
+  end
+  
+  
+  def self.run_cmd! cmd, stream: true
+    run_cmd cmd, stream: stream, raise_on_fail: true
+  end
+  
+  
   def self.build! name:,
                   path:,
                   push: false,
+                  tags: [],
                   _cmd_stream: true,
                   **build_opts
     
@@ -83,19 +106,29 @@ class   Image < QB::Data::Immutable
       _cmd_stream: _cmd_stream,
       cmd: cmd.prepare
     
-    rtn = if _cmd_stream
-      cmd.stream!
-    else
-      cmd.capture.tap { |result|
-        unless result.ok?
-          raise QB::Docker::CLI::Error.from_result result
-        end
-      }
+    result = run_cmd! cmd, stream: _cmd_stream
+    
+    tags.each do |tag_arg|
+      cmd = QB::Docker::CLI.tag_cmd name, tag_arg
+      tag = cmd.args[1]
+      logger.debug "Tagging #{ name } as #{ tag }",
+        tag_arg: tag_arg
+      
+      result = run_cmd cmd, stream: _cmd_stream
+      
+      if result.ok?
+        logger.info "Tagged #{ name } as #{ tag }.",
+          cmd: cmd.last_prepared_cmd
+      else
+        logger.error "Failed to tag #{ name } as #{ tag }",
+          tag_arg: tag_arg,
+          cmd: cmd.last_prepared_cmd
+      end
     end
     
     QB::Docker::CLI.push( name ) if push
     
-    rtn
+    result
   end
   
   

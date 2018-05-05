@@ -3,9 +3,8 @@
 # Requirements
 # =======================================================================
 
-# stdlib
-
 # deps
+require 'nrser'
 
 # package
 require_relative './cli/help'
@@ -15,23 +14,11 @@ require_relative './cli/setup'
 require_relative './cli/list'
 
 
-# Requirements
-# =======================================================================
-
-require 'nrser/refinements'
-using NRSER
-
-
-# Declarations
-# =======================================================================
-
-module QB; end
-
-
 # Definitions
 # =======================================================================
 
-module QB::CLI
+module QB
+module CLI
   
   
   # Constants
@@ -55,7 +42,7 @@ module QB::CLI
   # ============================================================================
   
   # Add {.logger} and {#logger} methods
-  include SemanticLogger::Loggable
+  include NRSER::Log::Mixin
   
   
   # Module (Static) Methods
@@ -202,4 +189,4 @@ module QB::CLI
   end
 
   
-end # module QB::CLI
+end; end # module QB::CLI

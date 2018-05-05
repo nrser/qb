@@ -329,6 +329,29 @@ module CLI
   # end
   
   
+  def self.tag_cmd current_name, new_name_or_tag
+    # Load whatever we have
+    current_name = QB::Docker::Image::Name.from current_name
+    
+    new_name_or_tag = [
+      QB::Docker::Image::Name,
+      QB::Docker::Image::Tag,
+    ].try_find { |klass| klass.from new_name_or_tag }
+    
+    new_name = if new_name_or_tag.is_a?( QB::Docker::Image::Name )
+      if new_name_or_tag.tag
+        new_name_or_tag
+      else
+        new_name_or_tag.merge tag: current_name.tag
+      end
+    else
+      current_name.merge tag: new_name_or_tag
+    end
+    
+    sub_cmd :tag, current_name, new_name_or_tag
+  end
+  
+  
   # @!endgroup Sub-Command Class Methods # ***********************************
   
   

@@ -27,7 +27,9 @@ using NRSER::Types
 
 # Custom types, available by factory name in QB metadata. Neat huh?!
 # 
-module QB::Options::Types
+module  QB
+class   Options
+module  Types
   extend t::Factory
   
   def_factory :glob do
@@ -68,4 +70,4 @@ module QB::Options::Types
       **options
   end
   
-end # module QB::Options::Types
+end; end; end # module QB::Options::Types
