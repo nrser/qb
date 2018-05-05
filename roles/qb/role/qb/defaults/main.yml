@@ -4,3 +4,5 @@
 # default the encapsulated qb.role's `role-dest` to `qb_dir` so we can be
 # sure to be able to use it here... not sure if needed.
 role_dest: "{{ qb_dir }}"
+
+qb_role_default_dir: null

@@ -25,8 +25,8 @@ using NRSER::Types
 # Definitions
 # =======================================================================
 
-
-# @todo document QB::Options::Types module.
+# Custom types, available by factory name in QB metadata. Neat huh?!
+# 
 module QB::Options::Types
   extend t::Factory
   
@@ -38,6 +38,34 @@ module QB::Options::Types
       
       Dir[glob]
     }
+  end
+  
+  
+  def_factory(
+    :qb_default_dir_strategy,
+    aliases: [ :default_dir_strategy ],
+  ) do |name: 'QBDefaultDirStrategy', **options|
+    t.one_of \
+      t.nil,
+      t.false,
+      'cwd',
+      'git_root',
+      t.shape( 'exe'        => t.path ),
+      t.shape( 'find_up'    => t.rel_path ),
+      t.shape( 'from_role'  => t.non_empty_str ),
+      name: name,
+      **options
+  end
+  
+  
+  def_factory(
+    :qb_default_dir,
+    aliases: [ :default_dir ],
+  ) do |name: 'QBDefaultDir', **options|
+    t.one_of \
+      qb_default_dir_strategy,
+      t.array( qb_default_dir_strategy ),
+      **options
   end
   
 end # module QB::Options::Types

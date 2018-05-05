@@ -5,11 +5,16 @@
 #
 
 # prefix for role variables
-var_prefix: null
+var_prefix: qb_role
 
-# how to get a default for `dir` if it's not provided as the 
+# how to get a default for `dir` if it's not provided as the
 default_dir: null
 
-options:  
-- include: qb/role
-  as: false
+options:
+  - include: qb/role
+    as: false
+  
+  - name: default_dir
+    description: >-
+      Optional `default_dir` value for QB metadata (meta/qb.yml).
+    type: default_dir
