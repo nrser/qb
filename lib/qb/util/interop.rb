@@ -1,12 +1,11 @@
-require 'nrser/refinements'
+require 'nrser'
+require 'nrser/props'
 
-using NRSER
-
-module QB 
-module Util 
+module QB
+module Util
 
 module Interop
-  include SemanticLogger::Loggable
+  include NRSER::Log::Mixin
   
   class << self
     
@@ -14,8 +13,8 @@ module Interop
       logger.debug "Starting #send_to_instance..."
       
       obj = if  data.is_a?( Hash ) &&
-                data.key?( NRSER::Meta::Props::DEFAULT_CLASS_KEY )
-        NRSER::Meta::Props.UNSAFE_load_instance_from_data data
+                data.key?( NRSER::Props::DEFAULT_CLASS_KEY )
+        NRSER::Props.UNSAFE_load_instance_from_data data
       else
         data
       end

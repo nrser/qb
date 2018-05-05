@@ -8,6 +8,7 @@ load ENV['QB_REBUNDLE_PATH'] if ENV['QB_REBUNDLE_PATH']
 require 'ostruct'
 
 require 'qb'
+require 'qb/ansible/module'
 require 'qb/package/version'
 require 'cmds'
 require 'pathname'
@@ -277,4 +278,4 @@ class PathFacts < QB::Ansible::Module
   end
 end
 
-PathFacts.new.run
+PathFacts.run!
