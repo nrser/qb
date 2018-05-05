@@ -1,0 +1,12 @@
+---
+##############################################################################
+# Main tasks for `roles/temp` role
+##############################################################################
+
+- qb.module:
+    name: '::QB::Ansible::Modules::Tester'
+    args:
+      x: ex
+  register: result
+
+- debug: var=result
