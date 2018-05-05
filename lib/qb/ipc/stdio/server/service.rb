@@ -99,22 +99,22 @@ class QB::IPC::STDIO::Server::Service
     
     @path = socket_dir.join "#{ name }.sock"
     
-    init_logger!
+    self.logger = create_logger
     
     logger.debug "Initialized"
   end
   
   
-  private
+  protected
   # ========================================================================
     
     # Initialize the {#logger}.
     # 
-    # @private
+    # @protected
     # @return [nil]
     # 
-    def init_logger!
-      self.logger = NRSER::Log[ self ]
+    def create_logger
+      logger = NRSER::Log[ self ]
       
       # HACK
       # 
@@ -136,7 +136,7 @@ class QB::IPC::STDIO::Server::Service
         logger.level = :info
       end
       
-      nil
+      logger
     end
     
   public # end private *****************************************************
