@@ -5,7 +5,12 @@
 #
 
 # description of the role to show in it's help output.
-description: null
+description: |-
+  Run QB Ansible modules using the different types of loaders.
+  
+  1.  rebundle  - see `//load/rebundle.rb`
+  2.  autorun   - see `//load/ansible/module/autorun.rb`
+  3.  script    - see `//load/ansible/module/script.rb`
 
 # prefix for role variables
 var_prefix: false

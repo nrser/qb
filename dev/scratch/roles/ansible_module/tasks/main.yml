@@ -3,8 +3,7 @@
 
 - when: rebundle
   block:
-  - name: >-
-      Run a {QB::Ansible::Module} using the "rebundle" loader
+  - name: Run a {QB::Ansible::Module} using the "rebundle" loader
     scratch.ansible_module.rebundled:
       x: ex
 
@@ -13,8 +12,7 @@
 
 - when: autorun
   block:
-  - name: >-
-      Run a {QB::Ansible::Module} using the "autorun" loader
+  - name: Run a {QB::Ansible::Module} using the "autorun" loader
     scratch.ansible_module.autorun:
       x: ex
     register: autorun_result
@@ -24,8 +22,7 @@
 
 - when: script
   block:
-  - name: >-
-      Run a {QB::Ansible::Module} using the "script" loader
+  - name: Run a {QB::Ansible::Module} using the "script" loader
     scratch.ansible_module.script:
       x: why oh why?
     register: script_result

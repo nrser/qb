@@ -5,7 +5,8 @@
 #
 
 # description of the role to show in it's help output.
-description: null
+description: >-
+  This role does nothing. Used for debugging and timing QB init itself, etc.
 
 # Gemspec-style requirements. Right now only `gems:qb` is used, but plan to
 # generalize in the future.
