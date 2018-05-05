@@ -1,0 +1,14 @@
+---
+##############################################################################
+# Main tasks for `qb/docker/image` role
+##############################################################################
+
+- fail:
+    msg: |-
+      This role doesn't work. There's a problem with the `docker` Python lib.
+      It just won't build some things, don't know why.
+      
+      We've switched to a Ruby module, {QB::Docker::Image::Module} that wraps
+      the `docker` CLI. That works. Use that.
+      
+      It's exposed to Ansible 
