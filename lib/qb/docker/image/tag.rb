@@ -25,15 +25,22 @@ require 'nrser/refinements/types'
 using NRSER::Types
 
 
+
+# Namespace
+# ============================================================================
+
+module  QB
+module  Docker
+class   Image < QB::Data::Immutable
+
 # Definitions
 # =======================================================================
 
 # A Docker image tag, with support for paring versions.
 # 
-module  QB
-module  Docker
-class   Image < QB::Data::Immutable
-class   Tag   < QB::Data::Immutable
+class Tag   < QB::Data::Immutable
+  
+  include NRSER::Log::Mixin
   
   
   # @todo Document from_s method.
@@ -82,7 +89,11 @@ class   Tag   < QB::Data::Immutable
   # ======================================================================
   
   def to_s
-    source || version.docker_tag
+    if version
+      version.docker_tag
+    else
+      source
+    end
   end
   
   
@@ -91,4 +102,12 @@ class   Tag   < QB::Data::Immutable
   end
   
   
-end; end; end; end # class QB::Docker::Image::Tag
+end # class Tag
+
+
+# /Namespace
+# ============================================================================
+
+end # module  QB
+end # module  Docker
+end # class   Image < QB::Data::Immutable

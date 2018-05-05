@@ -292,7 +292,7 @@ class   Name  < QB::Data::Immutable
   
   
   def to_s
-    source || formatted
+    formatted
   end
   
   
