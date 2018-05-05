@@ -195,13 +195,13 @@ Gem::Specification.new do |spec|
   # ----------------------------------------------------------------------------
   
   # My guns
-  spec.add_dependency 'nrser',            '~> 0.3.1'
+  spec.add_dependency 'nrser',            '~> 0.3.2'
   
   # My favorite wrapper
-  spec.add_dependency "cmds",             '~> 0.2.10'
+  spec.add_dependency "cmds",             '~> 0.2.11'
   
   # My gem to help manage system state
-  spec.add_dependency "state_mate",       '~> 0.1.3'
+  spec.add_dependency "state_mate",       '~> 0.1.4'
   
   # Used to parse `ansible.cfg` files
   spec.add_dependency 'parseconfig',      '~> 1.0', '>= 1.0.8'
