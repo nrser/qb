@@ -512,7 +512,7 @@ class   Version < QB::Util::Resource
   
   
   def to_s
-    "#<QB::Package::Version #{ @raw }>"
+    "#<QB::Package::Version semver=#{ semver } raw=#{ @raw }>"
   end
   
 end; end; end # class QB::Package::Version
