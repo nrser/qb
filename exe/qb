@@ -65,6 +65,9 @@ def main *args
   when 'root'
     puts QB::ROOT.to_s
     exit true
+  when 'version'
+    puts QB::VERSION
+    exit true
   else
     # default to `run` on the full args
     [:run, args]
