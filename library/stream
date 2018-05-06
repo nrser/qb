@@ -56,7 +56,7 @@ class Stream < QB::Ansible::Module
       END
     end
     
-    qb_unbundle! { cmd.stream! }
+    QB::Util::Bundler.unbundle! { cmd.stream! }
     
     changed!
   end

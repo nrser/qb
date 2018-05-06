@@ -83,4 +83,42 @@ module QB::Util::Bundler
     end # ::Bundler.with_clean_env
   end # .with_clean_env
   
+  
+  def self.unbundle! &block
+    if $qb_replaced_env_vars.nil? || $qb_replaced_env_vars.empty?
+      if block
+        return block.call
+      else
+        return
+      end
+    end
+    
+    $qb_replaced_env_vars.each do |key, (original, replacement)|
+      ENV[key] = original
+    end
+    
+    $qb_replaced_env_vars = {}
+    
+    if block
+      block.call.tap { rebundle! }
+    end
+  end
+  
+  
+  def self.rebundle!
+    return if $qb_replaced_env_vars.nil?
+    
+    unless $qb_replaced_env_vars.empty?
+      raise "Looks like you're already unbundled: #{ $qb_replaced_env_vars }"
+    end
+    
+    ENV.each do |k, v|
+      if k.start_with? 'QB_BUNDLER_ENV_'
+        key = k.sub 'QB_BUNDLER_ENV_', ''
+        $qb_replaced_env_vars[key] = [ENV[key], v]
+        ENV[key] = v
+      end
+    end
+  end
+  
 end # module QB::Util::Bundler

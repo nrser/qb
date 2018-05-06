@@ -9,31 +9,13 @@
 $qb_replaced_env_vars = {}
 
 
-def qb_rebundle!
-  ENV.each do |k, v|
-    if k.start_with? 'QB_BUNDLER_ENV_'
-      key = k.sub 'QB_BUNDLER_ENV_', ''
-      $qb_replaced_env_vars[key] = [ENV[key], v]
-      ENV[key] = v
-    end
+ENV.each do |k, v|
+  if k.start_with? 'QB_BUNDLER_ENV_'
+    key = k.sub 'QB_BUNDLER_ENV_', ''
+    $qb_replaced_env_vars[key] = [ENV[key], v]
+    ENV[key] = v
   end
 end
-
-
-def qb_unbundle! &block
-  $qb_replaced_env_vars.each do |key, (original, replacement)|
-    ENV[key] = original
-  end
-  
-  $qb_replaced_env_vars = {}
-  
-  if block
-    block.call.tap { qb_rebundle! }
-  end
-end
-
-
-qb_rebundle!
 
 
 require 'bundler/setup'
