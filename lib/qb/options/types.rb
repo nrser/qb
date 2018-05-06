@@ -22,15 +22,31 @@ require 'nrser/refinements/types'
 using NRSER::Types
 
 
+# Namespace
+# ========================================================================
+
+module  QB
+class   Options
+
+
 # Definitions
 # =======================================================================
 
 # Custom types, available by factory name in QB metadata. Neat huh?!
 # 
-module  QB
-class   Options
 module  Types
   extend t::Factory
+  
+  # A valid variable name string.
+  # 
+  def_factory :var_name do |name: 'VarName', **options|
+    t.and \
+      t.str,
+      t.when( /\A[a-zA-Z][0-9a-zA-Z\_]*\z/ ),
+      name: name,
+      **options
+  end
+  
   
   def_factory :glob do
     t.array t.path, name: 'FileGlob', from_s: ->( glob ) {
@@ -70,4 +86,11 @@ module  Types
       **options
   end
   
-end; end; end # module QB::Options::Types
+end # module Types
+
+
+# /Namespace
+# ========================================================================
+
+end # class   Options
+end # module  QB

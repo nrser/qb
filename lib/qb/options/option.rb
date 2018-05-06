@@ -30,11 +30,16 @@ require 'nrser/refinements/sugar'
 using NRSER::Sugar
 
 
+# Namespace
+# ============================================================================
+
+module  QB
+class   Options
+
+
 # Definitions
 # ========================================================================
 
-module QB
-class Options
 class Option
   
   # Constants
@@ -97,9 +102,9 @@ class Option
       QB::Options.cli_ize_name "#{ @include_path.join('-') }-#{ @meta_name }"
     end
     
-    @var_name = if meta[:var_name]
+    @var_name = if self.meta?( :var_name )
       # prefer an explicit, exact variable name if provided
-      meta[:var_name]
+      self.meta( :var_name, type: Types.var_name )
     elsif role.var_prefix
       QB::Options.var_ize_name "#{ role.var_prefix }_#{ meta_name }"
     else
@@ -306,4 +311,11 @@ class Option
   end
   
   
-end; end; end # class QB::Options::Option
+end # class Option
+
+
+# /Namespace
+# ============================================================================
+
+end # class Options
+end # module QB
