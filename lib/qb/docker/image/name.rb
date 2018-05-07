@@ -169,14 +169,19 @@ class   Name  < QB::Data::Immutable
   end # .exists?
   
   
+  def self.all
+    QB::Docker::CLI.image_names load: true, only_named: true
+  end
+  
+  
   # @see QB::Docker::CLI.image_names
   # 
-  +QB::Util::Decorators::NoPropsInKwds
-  def self.list *args, **opts
-    QB::Docker::CLI.image_names *args, **opts
+  def self.list **attrs
+    return all if attrs.empty?
+    
+    type = t.attrs attrs
+    all.select { |name| type === name }
   end # .list
-  
-  singleton_class.send :alias_method, :all, :list
   
   
   # Props
@@ -208,6 +213,7 @@ class   Name  < QB::Data::Immutable
   #   @return [String?]
   #     String is non-empty.
   prop  :repository,
+        aliases: [ :repo ],
         type: t.non_empty_str?
   
   
@@ -217,6 +223,7 @@ class   Name  < QB::Data::Immutable
   #   @return [String?]
   #     String is non-empty.
   prop  :registry_server,
+        aliases: [ :reg ],
         type: t.non_empty_str?
   
   
@@ -238,8 +245,7 @@ class   Name  < QB::Data::Immutable
         source: :to_s
   
   
-  invariant t.attrs( registry_server: t.nil, port: t.nil ) |
-            t.attrs( registry_server: ~t.nil, port: ~t.nil )
+  invariant ~t.attrs( registry_server: t.nil, port: ~t.nil )
   
   
   # Instance Methods
@@ -272,7 +278,13 @@ class   Name  < QB::Data::Immutable
   
   
   def host
-    "#{ registry_server }:#{ port }" if registry_server && port
+    return unless registry_server
+    
+    if port
+      "#{ registry_server }:#{ port }"
+    else
+      registry_server
+    end
   end
   
   
