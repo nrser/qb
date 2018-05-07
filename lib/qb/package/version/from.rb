@@ -305,4 +305,40 @@ module QB::Package::Version::From
     end
   end
   
+  
+  # Load a {QB::Package::Version} from a file.
+  # 
+  # Just reads the file and passes the contents to {.string}.
+  # 
+  # @param [String | Pathname | IO] file
+  #   File path or handle to read from.
+  # 
+  # @return [QB::Package::Version]
+  # 
+  def self.file path
+    string File.read( path )
+  end
+  
+  
+  
+  def self.repo repo_or_path, add_build: true
+    repo = t.match repo_or_path,
+      QB::Repo, repo_or_path,
+      t.path,   QB::Repo.method( :from_path )
+    
+    version_path = repo.root_path / 'VERSION'
+    file_version = file version_path
+    
+    if  add_build &&
+        file_version.level? &&
+        file_version.dev?
+      file_version.build_version \
+        branch: repo.branch,
+        ref: repo.head_short,
+        dirty: !repo.clean?
+    else
+      file_version
+    end
+  end
+  
 end # module QB::Package::Version::From
