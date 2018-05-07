@@ -57,6 +57,23 @@ describe_spec_file(
     end
     
     
+    describe_called_with "0.2.1_ruby.2.3.6" do
+      it_behaves_like QB::Package::Version, and_is_expected: {
+        to: {
+          have_attributes: {
+            major: 0,
+            minor: 2,
+            patch: 1,
+            prerelease: [],
+            level: 'release',
+            build: ['ruby', 2, 3, 6],
+            release: '0.2.1',
+            semver: '0.2.1+ruby.2.3.6',
+          }
+        }
+      }
+    end
+    
   end # section accepts
   # ************************************************************************
   
