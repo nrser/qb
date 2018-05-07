@@ -344,6 +344,11 @@ class   Version < QB::Util::Resource
   alias_method :dirty?, :build_dirty?
   
   
+  def level?
+    is_a? QB::Package::Version::Leveled
+  end
+  
+  
   # Derived Properties
   # ---------------------------------------------------------------------
   
