@@ -5,7 +5,7 @@
 require 'pathname'
 
 # package
-require 'qb/ansible/cmds/playbook'
+require 'qb/ansible/cmd/playbook'
 
 
 # Refinements
@@ -24,7 +24,7 @@ module QB; end
 # Definitions
 # =======================================================================
 
-module QB::CLI 
+module QB::CLI
   
   # Play `//dev/setup.yml`
   # 
@@ -65,7 +65,7 @@ module QB::CLI
       raise "Can't find QB setup playbook at `#{ playbook_path.to_s }`"
     end
     
-    cmd = QB::Ansible::Cmds::Playbook.new \
+    cmd = QB::Ansible::Cmd::Playbook.new \
       chdir: project_root,
       extra_vars: {
         project_root: project_root,

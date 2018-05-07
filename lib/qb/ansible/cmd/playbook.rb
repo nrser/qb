@@ -12,14 +12,20 @@ require 'qb/util/bundler'
 require 'qb/ipc/stdio/server'
 
 
-module QB; end
-module QB::Ansible; end
-module QB::Ansible::Cmds; end
+# Namespace
+# ========================================================================
 
+module  QB
+module  Ansible
+module  Cmd
+
+
+# Definitions
+# ========================================================================
 
 # A command object that runs a playbook with all the QB specialness.
 # 
-class QB::Ansible::Cmds::Playbook < ::Cmds
+class Playbook < Cmds
   DEFAULT_PLAYBOOK_PATH = '.qb-playbook.yml'
   
   # Default executable to use, just uses a bare `ansible-playbook`, letting
@@ -241,4 +247,12 @@ class QB::Ansible::Cmds::Playbook < ::Cmds
     
   # end protected
   
-end # class QB::Ansible::Playbook
+end # class Playbook
+
+
+# Namespace
+# ========================================================================
+
+end # module  Cmd
+end # module  Ansible
+end # module  QB

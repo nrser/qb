@@ -243,7 +243,7 @@ module QB::CLI
     # stick the role path in front to make sure we get **that** role
     env.roles_path.unshift role.path.expand_path.dirname
     
-    cmd = QB::Ansible::Cmds::Playbook.new \
+    cmd = QB::Ansible::Cmd::Playbook.new \
       env: env,
       playbook: playbook,
       role_options: options,

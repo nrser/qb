@@ -2,7 +2,7 @@
 # =====================================================================
 
 # package
-require 'qb/ansible/cmds/playbook'
+require 'qb/ansible/cmd/playbook'
 
 
 # Declarations
@@ -14,9 +14,9 @@ module QB; end
 # Definitions
 # =======================================================================
 
-module QB::CLI 
+module QB::CLI
   
-  # Play an Ansible playbook (like `state.yml`) in the QB environment 
+  # Play an Ansible playbook (like `state.yml`) in the QB environment
   # (sets up path env vars, IO streams, etc.).
   # 
   # @param [Array<String>] args
@@ -46,7 +46,7 @@ module QB::CLI
       raise_on_not_found: false
     
     # If we did find an Ansible config, we're going to want to run in that
-    # directory and add it to the role search path so that we merge it's 
+    # directory and add it to the role search path so that we merge it's
     # values into our env vars (otherwise they would override the config
     # values).
     unless ansible_cfg_path.nil?
@@ -54,7 +54,7 @@ module QB::CLI
       chdir = ansible_cfg_path.dirname
     end
     
-    cmd = QB::Ansible::Cmds::Playbook.new \
+    cmd = QB::Ansible::Cmd::Playbook.new \
       chdir: chdir,
       playbook_path: playbook_path
     
