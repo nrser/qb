@@ -44,25 +44,6 @@ class   Image < QB::Data::Immutable
   # ======================================================================
   
   
-  
-  
-  def self.with_name name, &block
-    block.call \
-      case name
-      when QB::Docker::Image::Name
-        name
-      when String
-        QB::Docker::Image::Name.from_s name
-      when Hash
-        QB::Docker::Image::Name.from_data name
-      else
-        raise NRSER::TypeError.new \
-          "Not sure what to do with ", name,
-          name: name
-      end
-  end
-  
-  
   def self.names **opts
     QB::Docker::CLI.image_names **opts
   end
@@ -84,10 +65,14 @@ class   Image < QB::Data::Immutable
     end
   end
   
+  private_class_method :run_cmd
+  
   
   def self.run_cmd! cmd, stream: true
     run_cmd cmd, stream: stream, raise_on_fail: true
   end
+  
+  private_class_method :run_cmd!
   
   
   def self.build! name:,
