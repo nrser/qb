@@ -136,7 +136,8 @@ class   Image < QB::Data::Immutable
       pull: nil,
       build: nil,
       force: false,
-      push: false
+      push: false,
+      tags: []
     
     name = QB::Docker::Image::Name.from name
     
@@ -156,9 +157,7 @@ class   Image < QB::Data::Immutable
       logger.info "Forcing build...",
         name: name.to_s
         
-      build! name: name, **build
-      
-      QB::Docker::CLI.push?( name: name ) if push
+      build! name: name, push: push, tags: tags, **build
       
       return
     end
@@ -183,9 +182,7 @@ class   Image < QB::Data::Immutable
       name: name.to_s,
       path: build[:path]
     
-    build! name: name, **build
-    
-    QB::Docker::CLI.push( name: name ) if push
+    build! name: name, push: push, tags: tags, **build
     
   end # .ensure_present!
   
