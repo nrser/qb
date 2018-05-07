@@ -192,15 +192,17 @@ module QB::Package::Version::From
     
     identifier_for_ref = method :identifier_for
     
-    if source.include?( '-' ) && source.include?( '+' )
+    if  source.include?( '-' ) &&
+        source.include?( '+' ) &&
+        source.index( '-' ) < source.index( '+' )
       release_str, _, rest = source.partition '-'
       pre_str, _, build_str = rest.partition '+'
-    elsif source.include?( '-' )
-      release_str, _, pre_str = source.partition '-'
-      build_str = ''
     elsif source.include?( '+' )
       release_str, _, build_str = source.partition '+'
       pre_str = ''
+    elsif source.include?( '-' )
+      release_str, _, pre_str = source.partition '-'
+      build_str = ''
     else
       release_str = source
       pre_str = build_str = ''
