@@ -422,9 +422,12 @@ class   Version < QB::Util::Resource
   
   # Return a new {QB::Package::Version} with build information added.
   # 
+  # 
+  # 
   # @return [QB::Package::Version]
   # 
   def build_version *build, branch: nil, ref: nil, time: nil, dirty: nil
+    build.map! &:to_s
     
     repo_segments = [
       branch,
@@ -433,12 +436,16 @@ class   Version < QB::Util::Resource
       (self.class.to_time_segment(time) if dirty && time),
     ].compact
     
-    if repo_segments.empty?
+    if build.empty? && repo_segments.empty?
       raise ArgumentError,
-            "Need to provide at least one of branch, ref, dirty."
+            "Need to provide at least one arg: build, branch, ref, dirty."
     end
     
-    merge raw: nil, build: [*build, repo_segments.join( '-' )]
+    unless repo_segments.empty?
+      build = [*build, repo_segments.join( '-' )]
+    end
+    
+    merge raw: nil, build: build
   end
   
   
