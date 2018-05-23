@@ -223,6 +223,14 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'method_decorators', '~> 0.9.6'
   
   
+  ### Rocket Job
+  
+  spec.add_dependency 'rocketjob', '~> 3.0'
+  spec.add_dependency 'rails_semantic_logger', '~> 4.3.0'
+  spec.add_dependency 'rocketjob_mission_control', '~> 3.0'
+  spec.add_dependency 'puma', '~> 3.11.4'
+  
+  
   # Development-Only Extra Metadata
   # ============================================================================
   #
