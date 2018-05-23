@@ -44,6 +44,18 @@ module QB
   end
   
   
+  # Are we running the tests (RSpec)?
+  # 
+  # Sees if the `QB_IS_TEST_ENV` environment is "truthy".
+  # 
+  # @return [Boolean]
+  # 
+  def self.testing?
+    require 'nrser'
+    ENV['QB_IS_TEST_ENV'].truthy?
+  end # .testing?
+  
+  
   def self.gemspec
     Gem.loaded_specs[GEM_NAME]
   end

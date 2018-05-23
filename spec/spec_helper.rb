@@ -25,8 +25,14 @@ require 'support/ext'
 require 'support/shared'
 
 
+# Environment Detection
+# ============================================================================
+
+ENV['QB_IS_TEST_ENV'] = 'true'
+
+
 # Paths
-# =====================================================================
+# ============================================================================
 
 TEST_DIR = QB::ROOT / 'test'
 
@@ -51,7 +57,7 @@ TEMP_GEMS_DIR = TEMP_PACKAGES_DIR / 'gems'
 FileUtils.mkdir_p TEMP_GEMS_DIR
 
 # Config
-# =====================================================================
+# ============================================================================
 
 # Add the test roles dir to the roles path
 QB::Role::PATH.unshift TEST_ROLES_DIR
