@@ -222,6 +222,10 @@ Gem::Specification.new do |spec|
   # really like, once you got past the confusion of it)
   spec.add_dependency 'method_decorators', '~> 0.9.6'
   
+  ### Jobs
+  
+  spec.add_dependency 'resque', '~> 1.27.4'
+  
   
   # Development-Only Extra Metadata
   # ============================================================================
