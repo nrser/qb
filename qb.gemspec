@@ -224,7 +224,13 @@ Gem::Specification.new do |spec|
   
   ### Jobs
   
+  # Use Resque to manage jobs
   spec.add_dependency 'resque', '~> 1.27.4'
+  
+  # Add terminal notification on OSX
+  if RUBY_PLATFORM =~ /darwin/
+    spec.add_dependency 'terminal-notifier', '~> 2.0.0'
+  end
   
   
   # Development-Only Extra Metadata
