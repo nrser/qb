@@ -1,0 +1,23 @@
+---
+##############################################################################
+# Ansible metadata for `qb/git/lfs/package` role
+##############################################################################
+
+# `no` means duplicate invocations with the *same* parameters (vars) will not
+# be run.
+# 
+# This is *usually* what you want for idempotent roles: if roles A
+# and B both want a resource R in a particular state, they can both include
+# or depend on a role C that accepts that state as paramters and C will be
+# run only once.
+# 
+# However, non-idemptent roles - say one that logs message - will want to set
+# this value to `yes`.
+# 
+# https://docs.ansible.com/ansible/devel/user_guide/playbooks_reuse_roles.html#role-duplication-and-execution
+# 
+allow_duplicates: no
+
+dependencies: []
+# - role: role-name
+

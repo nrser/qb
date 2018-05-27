@@ -1,0 +1,9 @@
+---
+##############################################################################
+# Main tasks for `qb/git/lfs/package` role
+##############################################################################
+
+- name: >-
+    Manage `git-lfs` package on target distribution
+  include_tasks: >-
+    {{ role_path }}/tasks/distribution/{{ ansible_distribution }}.yaml

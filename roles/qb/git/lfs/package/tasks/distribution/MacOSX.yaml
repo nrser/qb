@@ -1,0 +1,8 @@
+- name: >-
+    Ensure `git-lfs` state is `{{ git_lfs_package_state }}` via Homebrew
+  homebrew:
+    name: git-lfs
+    state: >-
+      {{ git_lfs_package_state }}
+    update_homebrew: >-
+      {{ lookup( 'every', 'update_homebrew', days=1 ) }}
