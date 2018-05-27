@@ -1,7 +1,7 @@
 ---
 # tasks file for qb/ruby/gem/new
 
-- include: >-
+- include_tasks: >-
     {{ role_path }}/tasks/bundle_gem.yml
 
 - name: >-
