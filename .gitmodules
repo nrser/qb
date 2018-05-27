@@ -26,3 +26,6 @@
 	path = packages/python/ansible
 	url = git@github.com:nrser/ansible.git
 	branch = devel
+[submodule "dev/packages/gems/nrser-notify"]
+	path = dev/packages/gems/nrser-notify
+	url = git@github.com:nrser/nrser.rb-notify.git
