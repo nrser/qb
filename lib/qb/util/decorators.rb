@@ -10,6 +10,13 @@
 require 'method_decorators'
 
 
+
+# Namespace
+# ========================================================================
+
+module  QB
+module  Util
+
 # Definitions
 # =======================================================================
 
@@ -33,7 +40,7 @@ require 'method_decorators'
 #   A.new.get_stuff.class
 #   # => Enumerator
 #   
-module QB; module Util; module Decorators
+module Decorators
   
   # Wrap a method that yields, returning an {Enumerator} if no block is
   # given.
@@ -96,4 +103,11 @@ module QB; module Util; module Decorators
     end
   end # class NoPropsInKwds
   
-end; end; end # module QB::Util::Decorators
+end # module Decorators
+
+
+# /Namespace
+# ========================================================================
+
+end # module Util
+end # module QB
