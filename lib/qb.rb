@@ -51,7 +51,7 @@ module QB
   # Mixins
   # =====================================================================
   
-  include SemanticLogger::Loggable
+  include NRSER::Log::Mixin
   
   
   # Support for the old custom debug logging, now sent to {SemanticLogger}.
