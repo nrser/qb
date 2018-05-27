@@ -10,6 +10,10 @@
 # Deps
 # -----------------------------------------------------------------------
 require 'nrser'
+
+# Load notification support and the {NRSER::Log::Plugins::Notify} log plugin
+require 'nrser/notify/setup'
+
 require 'resque'
 
 
@@ -21,6 +25,9 @@ require 'qb/version'
 
 # Refinements
 # =======================================================================
+
+require 'nrser/refinements/types'
+using NRSER::Types
 
 
 # Namespace
@@ -68,71 +75,112 @@ module Jobs
   end
   
   
-  def self.setup!
-    logger.info "Setting up!"
-    
+  def self.setup! job
     # Resque.redis.namepsace = namespace
-    NRSER::Log.setup! dest: $stdout, sync: true, level: :trace
+    NRSER::Log.setup! dest: $stdout, sync: true, level: :info
+    
+    logger.level = :trace
+    
+    logger.trace "Setting up! (in fork)",
+      job: job,
+      job_class: job.class,
+      job_instance_vars: job.instance_variables.assoc_to { |sym|
+        job.instance_variable_get sym
+      },
+      job_payload: job.payload
+    
+    if job.payload['args'][0]['require_paths']
+      here = Pathname.new __dir__
+      
+      job.payload['args'][0]['require_paths'].each do |path|
+        req_rel_path = Pathname.new( path ).relative_path_from( here ).to_s
+        
+        if req_rel_path.end_with? '.rb'
+          req_rel_path = req_rel_path[0...-3]
+        end
+        
+        logger.trace "Requiring path",
+          path: path,
+          req_rel_path: req_rel_path
+        
+        require_relative req_rel_path
+      end
+    end
   end
   
   
-  def self.enqueue klass, *args
-    class_name = klass.name
-    load_path = klass.source_location[0]
+  def self.resolve_require_arg job_class, require_arg
+    
+    t.match require_arg,
+      # Used to indicate that no files need be required
+      t.false, [],
+      
+      # Default
+      t.nil, -> {
+        src_loc = job_class.source_location
+        
+        if src_loc.file.nil?
+          message = <<~END
+            Unable to determine source file for class #{ job_class }, it will
+            need to already be loaded or autoload for job to run.
+            
+            You can avoid this warning by passing `require: false`, which
+            indicates that no files need be required.
+          END
+          
+          logger.notify.warn message,
+            job_class: job_class
+          
+          []
+        else
+          [ src_loc.file ]
+        end
+      },
+      
+      t.array, require_arg
+    
+  end
+  
+  
+  def self.enqueue job_class, args: [], require: nil
+    
+    require_paths = resolve_require_arg job_class, require
     
     logger.trace "Enqueuing job...",
-      class: klass,
-      class_name: class_name,
-      load_path: load_path,
+      job_class: job_class,
+      require_paths: require_paths,
       args: args
       
-    result = Resque.enqueue self, class_name, load_path, *args
+    result = Resque.enqueue \
+      job_class,
+      require_paths: require_paths,
+      args: args
     
     logger.trace "Job enqued",
       result: result
   end
   
   
-  def self.perform class_name, class_path, *args
-    NRSER::Log.setup! dest: $stdout, sync: true, level: :trace
-    
-    logger.trace "Performing job...",
-      class_name: class_name,
-      class_path: class_path,
-      args: args
-    
-    logger.trace "Loading #{ class_path }..."
-    load class_path
-    logger.trace "Path loaded."
-    
-    logger.trace "Loading target class..."
-    klass = class_name.to_const
-    logger.trace "Class loaded", class: klass
-    
-    logger.trace "Calling #{ class_name }#run!...", args: args
-    klass.new.run! *args
-    logger.trace "Job done."
-  end
-  
-  
-  def self.can_notify?
-    lazy_var :@can_notify do
-      begin
-        require 'terminal-notifier'
-      rescue LoadError => error
-        false
-      else
-        true
-      end
-    end
-  end
-  
-  
-  def self.notify *args, &block
-    return false unless can_notify?
-    
-    TerminalNotifier.notify *args, &block
-  end
+  # def self.perform class_name, class_path, *args
+  #   NRSER::Log.setup! dest: $stdout, sync: true, level: :trace
+  # 
+  #   logger.trace "Performing job...",
+  #     class_name: class_name,
+  #     class_path: class_path,
+  #     args: args
+  # 
+  #   logger.trace "Loading #{ class_path }..."
+  #   load class_path
+  #   logger.trace "Path loaded."
+  # 
+  #   logger.trace "Loading target class..."
+  #   klass = class_name.to_const
+  #   logger.trace "Class loaded", class: klass
+  # 
+  #   logger.trace "Calling #{ class_name }#run!...", args: args
+  #   klass.new.run! *args
+  #   logger.trace "Job done."
+  # end
   
 end # module Jobs
 

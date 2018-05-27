@@ -10,6 +10,10 @@
 # Deps
 # -----------------------------------------------------------------------
 
+require 'resque-retry'
+require 'resque-lock-timeout'
+
+
 # Project / Package
 # -----------------------------------------------------------------------
 
@@ -42,39 +46,42 @@ class Job
   
   include NRSER::Log::Mixin
   
-  # Construction
+  # Add retry support
+  extend Resque::Plugins::Retry
+  
+  # Add job ID lock with timeout
+  extend Resque::Plugins::LockTimeout
+  
+  
+  # Config
+  # ============================================================================
+  
+  logger.level = :trace
+  
+  
+  # Class Methods
   # ========================================================================
   
-  
-  # Instance Methods
-  # ========================================================================
-  
-  
-  # Notifications
-  # --------------------------------------------------------------------------
-  
-  def name
-    self.class.name
+  def self.instance
+    @instance ||= new
   end
   
   
-  def notify_options **options
-    {
-      title: "#{ self.class.name }",
-      group: Process.pid,
-    }.merge **options
+  def self.perform payload
+    logger.trace "Performing job",
+      payload: payload
+    
+    instance.perform payload['args']
   end
   
   
-  def notify message, **options, &block
-    QB::Jobs.notify message, notify_options( **options ), &block
-  end
-  
-  
-  def run! *args
-    notify "Starting..."
-    perform *args
-    notify "SUCCESS"
+  def self.identifier payload
+    logger.trace "Getting job identifier",
+      payload: payload
+    
+    instance.identifier( payload['args'] ).tap { |identifier|
+      logger.trace "Got job identifier: #{ identifier.inspect }"
+    }
   end
   
 end # class Job

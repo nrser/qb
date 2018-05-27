@@ -1,3 +1,4 @@
-require_relative '../lib/qb/jobs'
+require 'qb/jobs'
+require 'qb/docker/jobs'
 
 QB::Jobs.setup!

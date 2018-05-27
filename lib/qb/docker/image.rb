@@ -93,6 +93,10 @@ class   Image < QB::Data::Immutable
     
     result = run_cmd! cmd, stream: _cmd_stream
     
+    if push
+      Rescue.enqueue QB::Docker::Jobs::Image::Push, name.to_s
+    end
+    
     tags.each do |tag_arg|
       cmd = QB::Docker::CLI.tag_cmd name, tag_arg
       tag = cmd.args[1]
@@ -104,6 +108,11 @@ class   Image < QB::Data::Immutable
       if result.ok?
         logger.info "Tagged #{ name } as #{ tag }.",
           cmd: cmd.last_prepared_cmd
+        
+        if push
+          Rescue.enqueue QB::Docker::Jobs::Image::Push, tag_arg
+        end
+        
       else
         logger.error "Failed to tag #{ name } as #{ tag }",
           tag_arg: tag_arg,

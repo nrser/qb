@@ -218,19 +218,15 @@ Gem::Specification.new do |spec|
   # Ruby lib wrapping `git` binary system calls for use in {QB::Repo::Git}
   spec.add_dependency 'git',              '~> 1.3'
   
-  # Trying out a method decoration gem, aimed to be like Python (which I did
-  # really like, once you got past the confusion of it)
-  spec.add_dependency 'method_decorators', '~> 0.9.6'
-  
   ### Jobs
   
   # Use Resque to manage jobs
   spec.add_dependency 'resque', '~> 1.27.4'
+  spec.add_dependency 'resque-lock-timeout', '~> 0.4.5'
+  spec.add_dependency 'resque-retry', '~> 1.5.0'
   
-  # Add terminal notification on OSX
-  if RUBY_PLATFORM =~ /darwin/
-    spec.add_dependency 'terminal-notifier', '~> 2.0.0'
-  end
+  # Add notify support for NRSER::Log
+  spec.add_dependency 'nrser-notify', '>= 0.1.0.dev'
   
   
   # Development-Only Extra Metadata
