@@ -1,0 +1,17 @@
+---
+##############################################################################
+# Main tasks for `qb/git/lfs/setup` role
+##############################################################################
+
+# TODO  This could/should be conditional on `git-lfs` not already being
+#       installed, but it's kinda complicated - local vs. user vs. global
+#       install, finding actual git dir for submods, etc. - and calling it
+#       multiple times doesn't seem to do harm.
+# 
+- name: >-
+    Run `git-lfs install` to add Git hooks for LFS
+  shell:
+    git lfs install
+  args:
+    chdir: >-
+      {{ qb_dir }}

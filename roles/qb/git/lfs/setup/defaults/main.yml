@@ -1,0 +1,9 @@
+---
+##############################################################################
+# Variable defaults for `qb/git/lfs/setup` role
+#
+# @see http://docs.ansible.com/ansible/latest/playbooks_reuse_roles.html#role-default-variables
+# 
+##############################################################################
+
+git_lfs_setup_upgrade: false
