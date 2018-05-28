@@ -18,6 +18,8 @@ require 'qb/data'
 require_relative './image/name'
 require_relative './image/tag'
 
+require 'qb/docker/jobs/image/push_job'
+
 
 # Refinements
 # =======================================================================
