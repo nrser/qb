@@ -137,6 +137,7 @@ module Jobs
   
   
   def self.enqueue job_class, args: [], require: nil
+    logger.level = :trace
     
     require_paths = resolve_require_arg job_class, require
     
