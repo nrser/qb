@@ -154,7 +154,7 @@ class   Image < QB::Data::Immutable
         QB::Docker::CLI.push name
       else
         QB::Jobs.enqueue \
-          QB::Docker::Jobs::Image::Push,
+          QB::Docker::Jobs::Image::PushJob,
           name.to_s
       end
     end
@@ -176,7 +176,7 @@ class   Image < QB::Data::Immutable
             QB::Docker::CLI.push tag
           else
             QB::Jobs.enqueue \
-              QB::Docker::Jobs::Image::Push,
+              QB::Docker::Jobs::Image::PushJob,
               tag.to_s
           end
         end
