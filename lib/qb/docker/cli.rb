@@ -287,7 +287,7 @@ module CLI
   +QB::Util::Decorators::NoPropsInKwds
   def self.pull name, **opts
     logger.info "Pulling #{ name }...",
-      name: name,
+      name: name.to_s,
       opts: opts
     
     result = pull_cmd( name, **opts ).capture
