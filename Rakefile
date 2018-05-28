@@ -10,7 +10,7 @@ task :default => :spec
 namespace :resque do
   
   task :setup do
-    ENV['COUNT'] = '1'
+    ENV['COUNT'] = '5'
     ENV['QUEUE'] = '*'
     
     require 'resque-retry'
