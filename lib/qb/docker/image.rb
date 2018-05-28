@@ -87,9 +87,8 @@ class   Image < QB::Data::Immutable
     logger.info "building...",
       name: name.to_s,
       path: path,
-      push: push,
       _cmd_stream: _cmd_stream,
-      cmd: cmd.prepare
+      cmd: cmd.prepare.gsub( "\\=", "=" ).gsub( "\\+", "+" )
     
     result = run_cmd! cmd, stream: _cmd_stream
     
