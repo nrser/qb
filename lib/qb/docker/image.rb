@@ -77,8 +77,6 @@ class   Image < QB::Data::Immutable
   
   def self.build! name:,
                   path:,
-                  push: false,
-                  tags: [],
                   _cmd_stream: true,
                   **build_opts
     
@@ -93,45 +91,17 @@ class   Image < QB::Data::Immutable
     
     result = run_cmd! cmd, stream: _cmd_stream
     
-    if push
-      Rescue.enqueue QB::Docker::Jobs::Image::Push, name.to_s
-    end
-    
-    tags.each do |tag_arg|
-      cmd = QB::Docker::CLI.tag_cmd name, tag_arg
-      tag = cmd.args[1]
-      logger.debug "Tagging #{ name } as #{ tag }",
-        tag_arg: tag_arg
-      
-      result = run_cmd cmd, stream: _cmd_stream
-      
-      if result.ok?
-        logger.info "Tagged #{ name } as #{ tag }.",
-          cmd: cmd.last_prepared_cmd
-        
-        if push
-          Rescue.enqueue QB::Docker::Jobs::Image::Push, tag_arg
-        end
-        
-      else
-        logger.error "Failed to tag #{ name } as #{ tag }",
-          tag_arg: tag_arg,
-          cmd: cmd.last_prepared_cmd
-      end
-    end
-    
-    QB::Docker::CLI.push( name ) if push
-    
     result
   end
   
   
-  def self.ensure_present! name:,
-      pull: nil,
-      build: nil,
-      force: false,
-      push: false,
-      tags: []
+  def self.ensure_present!  name:,
+                            pull: nil,
+                            build: nil,
+                            force: false,
+                            push: false,
+                            tags: [],
+                            sync: false
     
     name = QB::Docker::Image::Name.from name
     
@@ -176,7 +146,46 @@ class   Image < QB::Data::Immutable
       name: name.to_s,
       path: build[:path]
     
-    build! name: name, push: push, tags: tags, **build
+    build! name: name, **build
+    
+    if push
+      if sync
+        QB::Docker::CLI.push name
+      else
+        QB::Jobs.enqueue \
+          QB::Docker::Jobs::Image::Push,
+          name.to_s
+      end
+    end
+    
+    tags.each do |tag_arg|
+      cmd = QB::Docker::CLI.tag_cmd name, tag_arg
+      tag = cmd.args[1]
+      logger.debug "Tagging #{ name } as #{ tag }",
+        tag_arg: tag_arg
+      
+      result = run_cmd cmd, stream: _cmd_stream
+      
+      if result.ok?
+        logger.info "Tagged #{ name } as #{ tag }.",
+          cmd: cmd.last_prepared_cmd
+        
+        if push
+          if sync
+            QB::Docker::CLI.push tag
+          else
+            QB::Jobs.enqueue \
+              QB::Docker::Jobs::Image::Push,
+              tag.to_s
+          end
+        end
+        
+      else
+        logger.error "Failed to tag #{ name } as #{ tag }",
+          tag_arg: tag_arg,
+          cmd: cmd.last_prepared_cmd
+      end
+    end
     
   end # .ensure_present!
   

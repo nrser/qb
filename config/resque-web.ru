@@ -5,7 +5,5 @@ require 'resque-retry/server'
 require 'qb'
 require 'qb/jobs'
 
-# QB::Jobs.setup!
-
 # Run the server
 run Resque::Server.new

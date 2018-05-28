@@ -65,18 +65,12 @@ module Jobs
   end # .queue_name
   
   
-  # def self.redis
-  #   @redis ||= Redis.new
-  # end
-  
-  
   def self.queue
     'qb'
   end
   
   
-  def self.setup! job
-    # Resque.redis.namepsace = namespace
+  def self.after_fork_prepare_for_job job
     NRSER::Log.setup! dest: $stdout, sync: true, level: :info
     
     logger.level = :trace
@@ -139,7 +133,7 @@ module Jobs
       
       t.array, require_arg
     
-  end
+  end # .resolve_require_arg
   
   
   def self.enqueue job_class, args: [], require: nil
@@ -156,31 +150,10 @@ module Jobs
       require_paths: require_paths,
       args: args
     
-    logger.trace "Job enqued",
+    logger.trace "Job enqueued",
       result: result
-  end
-  
-  
-  # def self.perform class_name, class_path, *args
-  #   NRSER::Log.setup! dest: $stdout, sync: true, level: :trace
-  # 
-  #   logger.trace "Performing job...",
-  #     class_name: class_name,
-  #     class_path: class_path,
-  #     args: args
-  # 
-  #   logger.trace "Loading #{ class_path }..."
-  #   load class_path
-  #   logger.trace "Path loaded."
-  # 
-  #   logger.trace "Loading target class..."
-  #   klass = class_name.to_const
-  #   logger.trace "Class loaded", class: klass
-  # 
-  #   logger.trace "Calling #{ class_name }#run!...", args: args
-  #   klass.new.run! *args
-  #   logger.trace "Job done."
-  # end
+    
+  end # .enqueue
   
 end # module Jobs
 

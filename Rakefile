@@ -20,11 +20,12 @@ namespace :resque do
       require 'qb'
       require 'qb/jobs'
       
-      QB::Jobs.setup! job
-
+      QB::Jobs.after_fork_prepare_for_job job
     end
     
-    Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
+    Resque::Failure::MultipleWithRetrySuppression.classes = \
+      [ Resque::Failure::Redis ]
+    
     Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
   end
   

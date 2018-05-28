@@ -195,7 +195,7 @@ Gem::Specification.new do |spec|
   # ----------------------------------------------------------------------------
   
   # My guns
-  spec.add_dependency 'nrser',            '~> 0.3.3'
+  spec.add_dependency 'nrser',            '~> 0.3.6'
   
   # My favorite wrapper
   spec.add_dependency "cmds",             '~> 0.2.11'
@@ -226,7 +226,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'resque-retry', '~> 1.5.0'
   
   # Add notify support for NRSER::Log
-  spec.add_dependency 'nrser-notify', '>= 0.1.0.dev'
+  spec.add_dependency 'nrser-notify', '~> 0.1.1'
   
   
   # Development-Only Extra Metadata
