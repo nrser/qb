@@ -71,7 +71,7 @@ class Job
     logger.trace "Performing job",
       payload: payload
     
-    instance.perform payload['args']
+    instance.perform *payload['args']
   end
   
   
