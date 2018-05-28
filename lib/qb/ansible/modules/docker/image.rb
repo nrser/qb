@@ -226,8 +226,8 @@ class Image < QB::Ansible::Module
   #       the module will exit successfully.
   #       
   def main
-    logger.info \
-      "Starting `_image`...",
+    logger.trace \
+      "Starting `#main`...",
       path: path,
       from_image: from_image.to_s,
       build_arg: build_arg,
