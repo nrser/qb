@@ -114,16 +114,32 @@ class PushJob < QB::Jobs::Job
       group: notify_group,
     ).info "PUSHING Docker image #{ image_name }..."
     
-    result = QB::Docker::CLI.push image_name
+    # WARNING   Pushes to Google Container Registry get all Python-env
+    #           confused, probably because of the virtualenv that parent
+    #           project has setup.
+    #           
+    #           As a stop-gap, we run in the home dir, toss all ENV vars, and
+    #           wrap in a bash login shell.
+    # 
+    result = Cmds.new(
+      %{bash -l -c <%= push_cmd %>},
+      kwds: {
+        push_cmd: QB::Docker::CLI.push_cmd( image_name ).prepare,
+      },
+      chdir: ENV['HOME'],
+      unsetenv_others: true,
+    ).capture
     
     if result.ok?
-      notify "Docker image #{ image_name } PUSHED."
+      logger.notify(
+        group: notify_group,
+      ).info "PUSHED Docker image #{ image_name }"
       return nil
     end
     
     logger.notify(
       group: notify_group,
-    ).error "Pushing #{ image_name } failed:\n#{ result.err }"
+    ).error "FAILED Pushing #{ image_name }:\n#{ result.err }"
     
     result.assert
     
