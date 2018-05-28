@@ -155,7 +155,7 @@ class   Image < QB::Data::Immutable
       else
         QB::Jobs.enqueue \
           QB::Docker::Jobs::Image::PushJob,
-          name.to_s
+          args: [name.to_s]
       end
     end
     
@@ -165,7 +165,7 @@ class   Image < QB::Data::Immutable
       logger.debug "Tagging #{ name } as #{ tag }",
         tag_arg: tag_arg
       
-      result = run_cmd cmd, stream: _cmd_stream
+      result = run_cmd cmd, stream: false
       
       if result.ok?
         logger.info "Tagged #{ name } as #{ tag }.",
@@ -177,7 +177,7 @@ class   Image < QB::Data::Immutable
           else
             QB::Jobs.enqueue \
               QB::Docker::Jobs::Image::PushJob,
-              tag.to_s
+              args: [tag.to_s]
           end
         end
         
