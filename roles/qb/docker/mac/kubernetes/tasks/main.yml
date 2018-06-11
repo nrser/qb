@@ -5,7 +5,7 @@
 
 - name: |-
     Use the `docker-for-desktop` kubectl context
-  command: >-
+  shell: >-
     kubectl config use-context docker-for-desktop
 
 
@@ -14,7 +14,7 @@
     
     https://rominirani.com/tutorial-getting-started-with-kubernetes-with-docker-on-mac-7f58467203fd
   
-  command: >-
+  shell: >-
     kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
 
 
@@ -42,4 +42,4 @@
 
 - name: |-
     Init Helm
-  command: helm init
+  shell: helm init
