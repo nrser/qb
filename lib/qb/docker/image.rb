@@ -88,7 +88,7 @@ class   Image < QB::Data::Immutable
       name: name.to_s,
       path: path,
       _cmd_stream: _cmd_stream,
-      cmd: cmd.prepare.gsub( "\\=", "=" ).gsub( "\\+", "+" )
+      cmd: cmd.prepare.gsub( "\\=", "=" ).gsub( "\\+", "+" ).gsub("\\\\", "\\")
     
     result = run_cmd! cmd, stream: _cmd_stream
     
