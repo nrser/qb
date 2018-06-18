@@ -226,7 +226,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'resque-retry', '~> 1.5.0'
   
   # Add notify support for NRSER::Log
-  spec.add_dependency 'nrser-notify', '~> 0.1.1'
+  spec.add_dependency 'nrser-notify', '~> 0.1.2'
   
   
   # Development-Only Extra Metadata
