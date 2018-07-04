@@ -26,24 +26,81 @@ module Docker
 
 # Build a Docker image if needed. Features to deal with version-tagging.
 # 
+# @note Immutable.
+# 
 class Image < QB::Ansible::Module
   
-  # Arguments
-  # ========================================================================
+  # @!group Argument Attributes
+  # ==========================================================================
   
+  # @!attribute [r] name
+  #   Name that uniquely identifies the image.
+  #   
+  #   Used to:
+  #   
+  #   1.  Identify it in the local Docker daemon.
+  #   2.  Pull it from a remote repository.
+  #   3.  Tag it when built.
+  #   
+  #   @return [QB::Docker::Image::Name]
+  #   
   arg :name,
       type: QB::Docker::Image::Name
   
+  
+  # @!attribute [r] path
+  #   Path to the image source directory.
+  #   
+  #   @return [String | Pathname]
+  #   
   arg :path,
       type: t.dir_path
       # FIXME ( from_s: ->( s ) { Pathname.new( s ).expand_path } )
   
-  arg :from_image,
-      type: QB::Docker::Image::Name
   
+  # @!attribute [r] from_image
+  #   Image to build `FROM`, which will be provided as the `from_image` Docker
+  #   build arg.
+  #   
+  #   @return [QB::Docker::Image::Name?]
+  #   
+  #   @todo
+  #     This should be optional, and was switched to optional to hack a
+  #     specific descendent into working, but changes need to be made for
+  #     this role to actually handle a `nil` value.
+  #   
+  arg :from_image,
+      type: t.maybe( QB::Docker::Image::Name )
+  
+  
+  # @!attribute [r] fact_name
+  #   Name of fact to set in Ansible with the result.
+  #   
+  #   Exists so that build roles can not really need to do anything else except
+  #   for invoke this module, since they need to "return" values by setting
+  #   global variables (yuck a duck).
+  #   
+  #   @return [String]
+  #     Must not be empty.
+  #   
+  #   @todo This should be restricted to valid Ansible variable names.
+  #   
   arg :fact_name,
       type: t.non_empty_str?
   
+  
+  # @!attribute [r] build_arg
+  #   Map of additional Docker build arg names to values.
+  #   
+  #   @return [Hash<String, String>]
+  #   
+  #   @todo
+  #     I think this is singular instead of `build_args` to match the Ansible
+  #     `docker_image` module, but I don't think that's relevant anymore,
+  #     and singular is more confusing in my opinion... should be `build_args`?
+  #     
+  #     Should prob also be immutable.
+  #   
   arg :build_arg,
       type: t.hash_,
       aliases: [ :build_args, :buildargs ],
@@ -53,9 +110,22 @@ class Image < QB::Ansible::Module
       },
       default: ->{ {} }
   
+  
+  # @!attribute [r] include_from_image_build
+  #   Flag argument controlling whether the {QB::Package::Version#build}
+  #   segments in {#from_image}'s {QB::Docker::Image::Tag} should be added
+  #   to built images' own `.tag.version.build`.
+  #   
+  #   "From image" build information can be very useful as part of an image
+  #   tag, but it is not always necessary, and things can quickly get out of
+  #   hand when the stack of versioned images gets deep.
+  #   
+  #   @return [Boolean]
+  #   
   arg :include_from_image_build,
       type: t.bool,
       default: true
+  
   
   # @!attribute [r] now
   #   The time to use as now. Defaults to get the current time, but here so
@@ -68,6 +138,27 @@ class Image < QB::Ansible::Module
   arg :now,
       type: Time,
       default: ->{ Time.now.utc }
+  
+  
+  # @!attribute [r] force
+  #   Optional explicit control of {#force?}'s return value, which is
+  #   passed as the `force:` keyword to {QB::Docker::Image.ensure_present!}.
+  #   
+  #   @return [Boolean]
+  #     The `force:` keyword in {QB::Docker::Image.ensure_present!} will be
+  #     provided this value.
+  #   
+  #   @return [nil]
+  #     Force behavior will be determined by logic in {#force?} using
+  #     information about the {QB::Package::Version::Leveled#level} being
+  #     built and the state of source repo.
+  #   
+  #   @see #force?
+  # 
+  arg :force,
+      type: t.bool?
+  
+  # @!endgroup Argument Attributes # *****************************************
   
   
   # Helpers
@@ -94,6 +185,7 @@ class Image < QB::Ansible::Module
     
     [
       [
+        # TODO Remove `beiarea`, needs to moved to an arg of some type.
         (from_image.repository == 'beiarea' ? nil : from_image.repository),
         from_image.name,
       ].
@@ -207,7 +299,11 @@ class Image < QB::Ansible::Module
   
   
   def force?
-    source_base_version.dev? && repo_dirty?
+    if force.nil?
+      source_base_version.dev? && repo_dirty?
+    else
+      force
+    end
   end
   
   
