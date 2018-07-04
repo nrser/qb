@@ -3,10 +3,11 @@
 # Main tasks for `qb/docker/mac/kubernetes` role
 ##############################################################################
 
-- name: |-
-    Use the `docker-for-desktop` kubectl context
+- when: docker_mac_k8s_context != '-'
+  name: |-
+    Use the `{{ docker_mac_k8s_context }}` kubectl context
   shell: >-
-    kubectl config use-context docker-for-desktop
+    kubectl config use-context {{ docker_mac_k8s_context | quote }}
 
 
 - name: |-

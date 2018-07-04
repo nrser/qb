@@ -23,7 +23,7 @@ requirements:
     qb: '>= 0.4.0.dev'
 
 # Prefix for role variables
-var_prefix: kubernetes
+var_prefix: docker_mac_k8s
 
 # How to get a default for `DIRECTORY` arg if not provided by user.
 # 
@@ -43,10 +43,25 @@ save_options: false
 # Options to pass to `ansible-playbook`
 ansible_options: {}
 
-# Role CLI options that become Ansible vars
+
 options:
+# ============================================================================
+# 
+# Role CLI options that become Ansible vars. Template:
+# 
 # - name: example
 #   description: an example of a variable.
 #   required: false
 #   type: boolean # boolean (default) | string
 #   short: e
+# 
+
+- name: context
+  description: >-
+    `kubectl` context pointing to the target K8S cluster. Pass '-' to use
+    whatever the current context is.
+  required: false
+  type: string
+  short: c
+
+# /options *******************************************************************

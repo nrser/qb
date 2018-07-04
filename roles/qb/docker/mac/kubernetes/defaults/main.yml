@@ -5,3 +5,5 @@
 # @see http://docs.ansible.com/ansible/latest/playbooks_reuse_roles.html#role-default-variables
 # 
 ##############################################################################
+
+docker_mac_k8s_context: docker-for-desktop
