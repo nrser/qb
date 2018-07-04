@@ -99,7 +99,7 @@ module QB::Package::Version::From
     case value
     when QB::Package::Version::NUMBER_IDENTIFIER_RE
       value.to_i
-    when QB::Package::Version::MIXED_SEGMENT
+    when QB::Package::Version::MIXED_IDENTIFIER
       value
     else
       raise ArgumentError.new binding.erb <<~END
@@ -108,7 +108,7 @@ module QB::Package::Version::From
         Expected one of:
         
         1.  <%= QB::Package::Version::NUMBER_IDENTIFIER_RE %>
-        2.  <%= QB::Package::Version::MIXED_SEGMENT %>
+        2.  <%= QB::Package::Version::MIXED_IDENTIFIER %>
         
       END
     end

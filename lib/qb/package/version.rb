@@ -141,8 +141,8 @@ class   Version < QB::Util::Resource
   # Constants
   # =====================================================================
   
-  # Pattern to match string *identifiers* that are version "numlets" (the
-  # non-negative integer number part of version "numbers").
+  # Pattern to match *identifier* strings that should be treated as
+  # {NUMBER_IDENTIFIER} members (and hence cast to integers when parsing).
   # 
   # @return [Regexp]
   # 
@@ -155,9 +155,41 @@ class   Version < QB::Util::Resource
   # 
   IDENTIFIER_SEPARATOR = '.'
   
-  NUMBER_SEGMENT = t.non_neg_int
-  NAME_SEGMENT = t.str & /\A[0-9A-Za-z\-]+\z/
-  MIXED_SEGMENT = t.xor NUMBER_SEGMENT, NAME_SEGMENT
+  
+  # A type alias for the non-negative integers (`{0, 1, 2, ...}`) used to
+  # represent valid Semantic Version (v2) integer *identifiers*.
+  # 
+  # @see https://semver.org/#semantic-versioning-specification-semver
+  # 
+  NUMBER_IDENTIFIER = t.non_neg_int
+  
+  
+  # Members of this type are strings of format `[0-9A-Za-z-]`, representing
+  # the valid *identifiers* that may compose Semantic Version (v2) pre-release
+  # and build metadata segments.
+  # 
+  # {#prerelease} and {#build} include members of this type, along with
+  # members of {NUMBER_IDENTIFIER} (which together form the {MIXED_IDENTIFIER}
+  # type).
+  # 
+  # @see https://semver.org/#semantic-versioning-specification-semver
+  # 
+  # @return [NRSER::Types::Type]
+  # 
+  NAME_IDENTIFIER = t.str & /\A[0-9A-Za-z\-]+\z/
+  
+  
+  # Members of this type are strings and integers that are valid *identifiers*
+  # in Semantic Version (v2) pre-release and build metadata segments.
+  # 
+  # It is the {NRSER::Types.union} of {NUMBER_IDENTIFIER} and
+  # {NAME_IDENTIFIER}, and {#prerelease} and {#build} are arrays of this type.
+  # 
+  # @see https://semver.org/#semantic-versioning-specification-semver
+  # 
+  # @return [NRSER::Types::Type]
+  # 
+  MIXED_IDENTIFIER = t.or NUMBER_IDENTIFIER, NAME_IDENTIFIER
   
   
   # Reasonably simple regular expression to extract things that might be
@@ -196,21 +228,31 @@ class   Version < QB::Util::Resource
   prop :raw,            type:     t.maybe(t.str),
                         default:  nil
   
-  prop :major,          type:     NUMBER_SEGMENT
+  prop :major,          type:     NUMBER_IDENTIFIER
   
-  prop :minor,          type:     NUMBER_SEGMENT,
+  prop :minor,          type:     NUMBER_IDENTIFIER,
                         default:  0
   
-  prop :patch,          type:     NUMBER_SEGMENT,
+  prop :patch,          type:     NUMBER_IDENTIFIER,
                         default:  0
   
-  prop :revision,       type:     t.array( NUMBER_SEGMENT ),
+  prop :revision,       type:     t.array( NUMBER_IDENTIFIER ),
                         default:  ->{ [] }
   
-  prop :prerelease,     type:     t.array( MIXED_SEGMENT ),
+  prop :prerelease,     type:     t.array( MIXED_IDENTIFIER ),
                         default:  ->{ [] }
   
-  prop :build,          type:     t.array( MIXED_SEGMENT ),
+  
+  # @!attribute [r] build
+  #   Array of zero or more Semantic Versioning build metadata *identifiers*.
+  #   
+  #   @see https://semver.org/#spec-item-10
+  #   
+  #   @return [Array<String | Integer>]
+  #     Each entry is either a {NAME_IDENTIFIER} or {NUMBER_IDENTIFIER}
+  #     (collectively typed as {MIXED_IDENTIFIER}).
+  #   
+  prop :build,          type:     t.array( MIXED_IDENTIFIER ),
                         default:  ->{ [] }
   
   
