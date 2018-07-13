@@ -5,7 +5,7 @@ __metaclass__ = type
 
 import re
 
-
+from qb import logging
 
 # Constants
 # ============================================================================
@@ -14,6 +14,8 @@ import re
 # `::` (Ruby) or `.` (Python, Javascript).
 # 
 NAMESPACE_SPLIT_RE = re.compile(r'(?:\:\:)|\.|\#')
+
+logger = logging.getLogger('qb.strings')
 
 
 # Functions
@@ -117,9 +119,9 @@ def snake(name):
     return '_'.join([part.lower() for part in words(name)])
 
 
-def filepath(name):
+def name_to_filepath(name):
     '''
-    Turn a name into a file path.
+    Turn a 'name' into a file path.
 
     >>> filepath('TestGem::SomeClass')
     'test_gem/some_class'
@@ -139,6 +141,33 @@ def filepath(name):
     snaked = [snake(words_) for words_ in namespaces]
     joined = "/".join(snaked)
     return joined
+
+
+def filepath(name):
+    '''
+    DEPRECIATED - Renamed {.name_to_filepath}
+    '''
+
+    logger.warning(
+        "DEPRECIATED - qb.strings.filepath() has been " +
+        "renamed qb.strings.name_to_filepath()"
+    )
+
+    return name_to_filepath(name)
+
+
+def url_to_filepath(url):
+    '''
+    Turn a URL string into a filepath.
+
+    Useful for making temp / cache / destination paths for downloads.
+
+    >>> url_to_filepath('https://ftp.gnu.org/gnu/bash/bash-4.4.18.tar.gz')
+    'https/ftp.gnu.org/gnu/bash/bash-4.4.18.tar.gz'
+
+    '''
+
+    return url.replace('://', '/').replace(':', '-')
 
 
 # testing - call camel_case on first cli arg and print result

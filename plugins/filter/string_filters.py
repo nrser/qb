@@ -28,7 +28,18 @@ import sys
 import re
 import os
 
+# Deps
+# ----------------------------------------------------------------------------
+
 from ansible.errors import AnsibleError
+
+# Project
+# ----------------------------------------------------------------------------
+
+from qb import logging
+
+from qb.ansible.display_handler import DisplayHandler
+DisplayHandler.enable()
 
 import qb.strings
 
@@ -89,6 +100,10 @@ class FilterModule(object):
             'camel_case': camel_case,
             'cap_camel_case': cap_camel_case,
             'class_case': cap_camel_case,
+            'name_to_filepath': qb.strings.name_to_filepath,
+            'url_to_filepath': qb.strings.url_to_filepath,
+
+            # Depreciated:
             'to_filepath': qb.strings.filepath,
         }
 
