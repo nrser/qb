@@ -1,3 +1,0 @@
-- name: Install pip pacakges for Python.
-  include: >-
-    {{ role_path }}/tasks/packages/pip.yml
