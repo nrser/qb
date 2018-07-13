@@ -1,0 +1,10 @@
+---
+##############################################################################
+# Main tasks for `qb/python/sphinx/setup` role
+##############################################################################
+
+- name: Install Sphinx via `pip`
+  include_role:
+    name: qb/python/pip
+  vars:
+    pip_package_name: Sphinx

@@ -1,0 +1,10 @@
+---
+##############################################################################
+# Main tasks for `qb/python/pip` role
+##############################################################################
+
+- name: Manage a pip package
+  pip:
+    name:       "{{ pip_package_name }}"
+    state:      "{{ pip_package_state }}"
+    executable: "{{ pip_exe }}"
