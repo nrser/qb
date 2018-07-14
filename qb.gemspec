@@ -221,6 +221,19 @@ Gem::Specification.new do |spec|
   # Trying out a method decoration gem, aimed to be like Python (which I did
   # really like, once you got past the confusion of it)
   spec.add_dependency 'method_decorators', '~> 0.9.6'
+
+  ### IPC RPC
+
+  # Fuck Python, add 0MQ to run shit in Ruby process
+  # 
+  # Totally old and dead
+  # spec.add_dependency 'zmq', '~> 2.1.4'
+  # 
+  # Maybe not as dead..? Bundles zmq C libs with it too... nope, busted.
+  # spec.add_dependency 'rbczmq', '~> 1.8.1'
+
+  spec.add_dependency 'unicorn', '~> 5.4.0'
+  spec.add_dependency 'net_http_unix', '~> 0.2.2'
   
   
   # Development-Only Extra Metadata
