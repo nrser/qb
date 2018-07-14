@@ -10,5 +10,6 @@
 #
 ##
 
-ansible==2.4.1.0
-pathlib2==2.3.0
+ansible>=2.6.1,<2.7
+pathlib2>=2.3.0,<3
+requests-unixsocket>=0.1.5,<0.2
