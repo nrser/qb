@@ -62,6 +62,8 @@ def main *args
     [:setup, args.rest]
   when 'list', 'ls'
     [:list, *args.rest]
+  when '.dev'
+    [:dev, *args.rest]
   when 'root'
     puts QB::ROOT.to_s
     exit true

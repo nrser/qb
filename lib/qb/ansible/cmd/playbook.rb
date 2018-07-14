@@ -10,6 +10,7 @@ require 'cmds'
 # package
 require 'qb/util/bundler'
 require 'qb/ipc/stdio/server'
+require 'qb/ipc/rpc/server'
 
 
 # Namespace
@@ -233,9 +234,14 @@ class Playbook < Cmds
       QB::Util::Bundler.with_clean_env do
         # Start the STDIO server
         stdio_server = QB::IPC::STDIO::Server.new.start!
+
+        # Start the RPC server
+        rpc_server = QB::IPC::RPC::Server.new.start!
         
-        status = super *args, **kwds, &input_block
-        
+        status = QB::IPC::RPC::Server.run_around do
+          super *args, **kwds, &input_block
+        end
+
         # ...and stop it
         stdio_server.stop!
         

@@ -6,7 +6,13 @@ from ansible.errors import AnsibleError
 import subprocess
 import yaml
 import os
+
+import requests_unixsocket
+
 from ansible.parsing.yaml.dumper import AnsibleDumper
+
+from qb import logging
+logger = logging.getLogger('qb.interop')
 
 
 QB_ROOT = os.path.realpath(
@@ -21,7 +27,29 @@ QB_ROOT = os.path.realpath(
 INTEROP_RECEIVE_EXE = os.path.join( QB_ROOT, 'exe', '.qb_interop_receive' )
 
 
-def send_payload( payload ):
+RPC_SOCKET_VAR_NAME = 'QB_RPC_SOCKET'
+
+
+def send_payload_rpc(payload):
+    socket_path = os.environ[RPC_SOCKET_VAR_NAME]
+
+    requests_path = "http+unix://{}/send".format(
+        socket_path.replace('/', '%2F')
+    )
+
+    session = requests_unixsocket.Session()
+
+    response = session.post(requests_path, json=payload)
+
+    return response.json()['result']
+
+
+def send_payload(*args, **kwds):
+    return send_payload_rpc(*args, **kwds)
+
+
+def send_payload_subprocess( payload ):
+# def send_payload( payload ):
     '''
     Send a payload to QB Ruby code via a subprocess.
     '''
@@ -58,30 +86,40 @@ def send_payload( payload ):
     return result
 
 
-def send( data, method, *args, **kwds ):
+def send( receiver, method, *args, **kwds ):
     '''
     Load data as an object in ruby and send it a message (call a method).
     '''
-    
-    return send_payload({
-        'data': data,
+
+    payload = {
+        'receiver': receiver,
         'method': method,
-        'args': args,
-        'kwds': kwds,
-    })
+    }
+
+    if args:
+        payload['args'] = args
+    
+    if kwds:
+        payload['kwds'] = kwds
+    
+    return send_payload(payload)
 
 
 def send_const( name, method, *args, **kwds ):
     '''
     Send a message (call a method) to a Ruby constant by name.
     '''
+
+    # return send_payload({
+    #     'const': name,
+    #     'method': method,
+    #     'args': args,
+    #     'kwds': kwds,
+    # })
     
-    return send_payload({
-        'const': name,
-        'method': method,
-        'args': args,
-        'kwds': kwds,
-    })
+    # We auto-detect now!
+    send( name, method, *args, **kwds)
+
 
 
 # Testing with doctest

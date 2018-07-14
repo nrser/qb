@@ -21,7 +21,7 @@ module Interop
       
       obj.send method_name, *args
     end # #send_to_instance
-    
+
     
     # @todo Document receive method.
     # 

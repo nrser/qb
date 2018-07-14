@@ -6,6 +6,12 @@ import sys
 
 from ansible.errors import AnsibleError
 
+from qb import logging
+
+from qb.ansible.display_handler import DisplayHandler
+DisplayHandler.enable()
+logger = logging.getLogger('ruby_interop_filters')
+
 import qb.interop
 
 
@@ -16,8 +22,9 @@ class FilterModule( object ):
 
     def filters( self ):
         return {
+            'send':             qb.interop.send,
             'qb_send':          qb.interop.send,
-            'qb_send_const':    qb.interop.send_const,
+            'qb_send_const':    qb.interop.send,
         }
     # filters()
 # FilterModule
