@@ -154,7 +154,10 @@ class Server
       code.to_s,
       CONTENT_TYPE_JSON,
       [ values.to_json ]
-    ]
+  ].tap { |response|
+    logger.trace "Responding",
+      response: response
+  }
   end
 
 
