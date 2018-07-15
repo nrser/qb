@@ -40,17 +40,34 @@ def qb_send_const(*args, **kwds):
     return client.send(*args, **kwds)
 
 
+def _make_sender(receiver, method):
+    '''
+    Need this because Python `for` does not create a new variable or scope
+    or whatever so lambdas inside them just bind by reference, resulting 
+    in all the lambdas evaluating the loop variables to the last iteration.
+
+    :rtype:     lambda
+    :return:    A lambda that sends `*args* and `**kwds` to the receiver's
+                method on the QB RPC server.
+    '''
+
+    return lambda *args, **kwds: client.send(
+        receiver,
+        method,
+        *args,
+        **kwds
+    )
+
+
 def get_map():
     data_map = client.get('/plugins/filters')
 
     filter_map = {}
 
-    for filter_name, send_data in data_map.iteritems():
-        filter_map[filter_name] = lambda *args, **kwds: client.send(
-            send_data['receiver'],
-            send_data['method'],
-            *args,
-            **kwds
+    for filter_name, payload in data_map.iteritems():
+        filter_map[filter_name] = _make_sender(
+            payload['receiver'],
+            payload['method']
         )
 
     # Add the `send` filter itself    
