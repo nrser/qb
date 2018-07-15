@@ -9,7 +9,7 @@ import sys
 from ansible.errors import AnsibleError
 
 import qb
-import qb.interop
+from qb.ipc.rpc import client as rpc_client
 
 
 def get_semver_path():
@@ -113,9 +113,7 @@ def qb_version_parse(version_string):
     '''Parse version into QB::Package::Version
     '''
     
-    return qb.interop.send_const(
-        'QB::Package::Version', 'from', version_string
-    )
+    return rpc_client.send('QB::Package::Version', 'from', version_string)
 
 
 def qb_read_version(file_path):

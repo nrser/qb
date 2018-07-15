@@ -25,7 +25,7 @@ module QB::CLI
 
       logger.info "Got going...",
         pid: Process.pid,
-        socket_path: server.socket_path
+        socket_path: server.socket_path.to_s
       
       QB::ROOT.join( 'tmp', 'dev-server.sock' ).write server.socket_path
 

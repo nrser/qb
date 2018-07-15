@@ -17,6 +17,7 @@ require 'unicorn'
 # -----------------------------------------------------------------------
 
 require 'qb/ipc/rpc'
+require 'qb/ansible/plugins/filters'
 
 # Refinements
 # =======================================================================
@@ -176,9 +177,25 @@ class Server
     case path
     when '/send'
       handle_send payload
+    when '/plugins/filters'
+      handle_plugins_filters
     else
       respond_not_found
     end
+  end
+
+
+  def handle_plugins_filters
+    map = {}
+    
+    QB::Ansible::Plugins::Filters.methods( false ).each { |method|
+      map[method] = {
+        receiver: 'QB::Ansible::Plugins::Filters',
+        method:   method.to_s,
+      }
+    }
+    
+    respond_ok data: map
   end
 
 
@@ -187,7 +204,7 @@ class Server
     method = payload.fetch 'method'
     args = payload.fetch 'args', []
 
-    if payload['kwds']
+    if payload['kwds'] && !payload['kwds'].empty?
       args = [*args, payload['kwds'].to_options]
     end
 
@@ -224,7 +241,7 @@ class Server
     logger.trace "Got result, responding",
       result: result
 
-    respond_ok result: result
+    respond_ok data: result
   end
 
 
