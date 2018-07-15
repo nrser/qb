@@ -231,7 +231,8 @@ Gem::Specification.new do |spec|
   # 
   # Maybe not as dead..? Bundles zmq C libs with it too... nope, busted.
   # spec.add_dependency 'rbczmq', '~> 1.8.1'
-
+  
+  spec.add_dependency 'rack', '~> 2.0.5'
   spec.add_dependency 'unicorn', '~> 5.4.0'
   spec.add_dependency 'net_http_unix', '~> 0.2.2'
   
