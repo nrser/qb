@@ -1,0 +1,64 @@
+---
+##############################################################################
+# Main tasks for `qb/dev/ref/archive` role
+# ============================================================================
+# 
+# Downloads and extracts reference sources available in archive formats,
+# and adds an ignore line to `//dev/ref/.gitgnore`.
+# 
+##############################################################################
+
+
+- name: >-
+    Create download direcotry `{{ tmp_download_path | dirname }}`
+  file:
+    path: "{{ tmp_download_path | dirname }}"
+    state: directory
+
+
+- name: >-
+    Download archive file to `tmp_download_path={{ tmp_download_path }}
+  get_url:
+    url: "{{ url }}"
+    dest: "{{ tmp_download_path }}"
+    force: false
+
+
+- name: >-
+    Create directory for archive at `{{ dest }}`
+  file:
+    path: "{{ dest }}"
+    state: directory
+
+
+# Do this *before* extracting so we don't freak editors out about tons of
+# new files in the repo
+- name: >-
+    Add a line in `{{ dest | dirname }}/.gitignore` to ignore the 
+    `{{ dest | relpath( dest | dirname ) }}` directory
+  lineinfile:
+    dest: "{{ dest | dirname }}/.gitignore"
+    line: "/{{ dest | relpath( dest | dirname ) }}"
+    create: true
+
+
+- when: >-
+    ansible_distribution == 'MacOSX' and (tmp_download_path | is_tar)
+  name: >-
+    Install GNU tar (`gtar`) via Homebrew
+  homebrew:
+    name: gnu-tar
+
+
+- name: >-
+    Extract archive to `dest={{ dest }}`
+  unarchive:
+    src: "{{ tmp_download_path }}"
+    dest: "{{ dest }}"
+    # In GNU tar we can strip the top-level directory out so that the contents
+    # actually end up in the directory we want them too. This is probably
+    # not a great solution, but a proper one would seem to require actually 
+    # looking at the extracted contents and figuring out what we should do with
+    # them, which I'm not going into right now.
+    extra_opts: >-
+      {{ ['--strip-components', '1'] if (tmp_download_path | is_tar) else [] }}

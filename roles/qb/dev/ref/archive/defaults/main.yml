@@ -1,0 +1,24 @@
+---
+##############################################################################
+# Variable defaults for `qb/dev/ref/archive` role
+#
+# @see http://docs.ansible.com/ansible/latest/playbooks_reuse_roles.html#role-default-variables
+# 
+##############################################################################
+
+# When called through `qb setup` - which is what it's been built for - 
+# `project_root` will have been set already via `extra_vars` on the CLI.
+# 
+# In the case that it hasn't (which is untested) we'll use `qb_dir`.
+# 
+project_root: "{{ qb_dir }}"
+
+tmp_dir: /tmp/qb/downloads
+
+tmp_download_rel_path: "{{ url | url_to_filepath }}"
+
+tmp_download_path: "{{ tmp_dir | path_join( tmp_download_rel_path ) }}"
+
+dir_name: "{{ url | drop_ext }}"
+
+dest: "{{ project_root }}/dev/ref/{{ dir_name }}"
