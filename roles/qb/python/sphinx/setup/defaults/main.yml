@@ -1,0 +1,7 @@
+---
+##############################################################################
+# Variable defaults for `qb/python/sphinx/setup` role
+#
+# @see http://docs.ansible.com/ansible/latest/playbooks_reuse_roles.html#role-default-variables
+# 
+##############################################################################

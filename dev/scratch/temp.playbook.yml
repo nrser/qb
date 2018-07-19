@@ -1,0 +1,21 @@
+---
+- name: Temp Scratch Playbook
+
+  hosts: localhost
+
+  # Any tasks the need to run *before* the roles.
+  pre_tasks:
+    
+  # /pre_tasks
+
+  roles:
+  
+  # /roles
+  
+  tasks:
+  
+    - debug: msg={{ [1, 2, 3] | qb_send( 'first' ) }}
+  
+  # /tasks
+
+# / play

@@ -1,0 +1,9 @@
+---
+##############################################################################
+# Variable defaults for `qb/python/pip` role
+#
+# @see http://docs.ansible.com/ansible/latest/playbooks_reuse_roles.html#role-default-variables
+# 
+##############################################################################
+
+pip_package_state: present

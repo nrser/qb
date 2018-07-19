@@ -47,31 +47,31 @@ def resolve(*path_segments):
     return Path(*path_segments).resolve().__str__()
 
 
-def path_upcase_filename(path):
+def upcase_filename(path):
     '''
     Implemented pretty much just for `qb/osx/git/change_case` role...
     just upcase the file (or directory) name at `path`, leaving any "normal"
     file extension as is (will prob fuck up in weird file extension cases).
     
-    >>> path_upcase_filename('./a.txt')
+    >>> upcase_filename('./a.txt')
     './A.txt'
     
-    >>> path_upcase_filename('./a/b.txt')
+    >>> upcase_filename('./a/b.txt')
     './a/B.txt'
     
-    >>> path_upcase_filename('./a')
+    >>> upcase_filename('./a')
     './A'
     
-    >>> path_upcase_filename('./a/b')
+    >>> upcase_filename('./a/b')
     './a/B'
     
-    >>> path_upcase_filename('./a.b.txt')
+    >>> upcase_filename('./a.b.txt')
     './A.B.txt'
     
-    >>> path_upcase_filename('./products/sg-v1/')
+    >>> upcase_filename('./products/sg-v1/')
     './products/SG-V1'
     
-    >>> path_upcase_filename('./products/sg-v1')
+    >>> upcase_filename('./products/sg-v1')
     './products/SG-V1'
     '''
     
@@ -81,16 +81,33 @@ def path_upcase_filename(path):
     return os.path.join(dirname, filename.upper() + ext)
 
 
+def chomp_ext(path):
+    '''
+    >>> chomp_ext('google_appengine_1.9.23.zip')
+    'google_appengine_1.9.23'
+
+    >>> chomp_ext('bash-4.4.18.tar.gz')
+    'bash-4.4.18'
+    '''
+
+    r = re.compile('\.tar\.\w{2,3}\Z')
+
+    if r.search(path):
+        return r.sub('', path)
+    
+    return os.path.splitext(path)[0]
+
+
 class FilterModule(object):
     '''
-    Path manipualtion filter via Python's os.path module.
+    Path manipulation filter via Python's os.path module.
     '''
 
     def filters(self):
         return {
             'path_join': os.path.join,
             'path_resolve': resolve,
-            'path_upcase_filename': path_upcase_filename,
+            'path_upcase_filename': upcase_filename,
         }
 
 

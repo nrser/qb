@@ -3,10 +3,12 @@
 # Main tasks for `roles/temp` role
 ##############################################################################
 
-- qb.module:
-    name: '::QB::Ansible::Modules::Tester'
-    args:
-      x: ex
-  register: result
+- set_fact:
+    blah: yo
 
-- debug: var=result
+- debug:
+    msg: "HERE"
+    # msg: "{{ [1, 2, 3] | qb_send( 'first' ) }}"
+
+# - debug:
+#     var: vars

@@ -29,6 +29,10 @@
     full_name: erikhuda/thor
     version: v0.20.0
   
+  - role: qb/dev/ref/repo/git
+    full_name: defunkt/unicorn
+    version: v5.4.0
+  
   # /roles
   
   tasks:

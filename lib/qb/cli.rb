@@ -12,6 +12,7 @@ require_relative './cli/play'
 require_relative './cli/run'
 require_relative './cli/setup'
 require_relative './cli/list'
+require_relative './cli/dev'
 
 
 # Definitions

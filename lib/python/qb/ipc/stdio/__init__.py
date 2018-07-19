@@ -4,7 +4,24 @@ __metaclass__ = type
 import os
 import socket
 
+
 def path_env_var_name(name):
+    '''
+    Get the ENV var name whose value (if any) will be the file system path
+    to the UNIX socket file for that IO stream.
+
+    The names in current use:
+
+    >>> path_env_var_name('out')
+    'QB_STDIO_OUT'
+
+    >>> path_env_var_name('err')
+    'QB_STDIO_ERR'
+
+    >>> path_env_var_name('log')
+    'QB_STDIO_LOG'
+    '''
+
     return "QB_STDIO_{}".format(name.upper())
 
 

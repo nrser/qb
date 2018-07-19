@@ -1,6 +1,0 @@
----
-# tasks file for qb/setup
-
-- name: Install packages.
-  include: >-
-    {{ role_path }}/tasks/packages.yml

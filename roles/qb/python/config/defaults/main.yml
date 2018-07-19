@@ -1,0 +1,11 @@
+---
+##############################################################################
+# Variable defaults for `qb/python/config` role
+#
+# @see http://docs.ansible.com/ansible/latest/playbooks_reuse_roles.html#role-default-variables
+# 
+##############################################################################
+
+py_use_v2: false
+
+pip_exe: "pip{{ '2' if py_use_v2 else '' }}"

@@ -161,7 +161,7 @@ class QB::IPC::STDIO::Server
   # Instantiate a new `QB::IPC::STDIO::Server`.
   # 
   def initialize
-    @socket_dir = Dir.mktmpdir( 'qb_ipc_stdio' ).to_pn
+    @socket_dir = Dir.mktmpdir( 'qb-ipc-stdio' ).to_pn
     
     @in_service   = QB::IPC::STDIO::Server::InService.new \
                       name: :in,

@@ -5,36 +5,17 @@ import logging
 import threading
 import json
 
+import qb.logging
 import qb.ipc.stdio
 
 
+# FIXME     After adding central logging stuff
 def getLogger(name, level=logging.DEBUG, io_client=qb.ipc.stdio.client):
     logger = logging.getLogger(name)
     if level is not None:
         logger.setLevel(level)
     logger.addHandler(Handler(io_client=io_client))
     return Adapter(logger, {})
-
-
-class Adapter(logging.LoggerAdapter):
-    def process(self, msg, kwds):
-        payload = None
-        if 'payload' in kwds:
-            payload = kwds['payload']
-            del kwds['payload']
-        
-        if payload:
-            try:
-                msg = msg.format(**payload)
-            except:
-                pass
-            
-            if 'extra' not in kwds:
-                kwds['extra'] = {}
-            
-            kwds['extra']['payload'] = payload
-            
-        return msg, kwds
 
 
 class Handler(logging.Handler):
@@ -103,6 +84,9 @@ class Handler(logging.Handler):
     def emit(self, record):
         """
         Emit a record.
+
+        Doc coppied in (TOOD re-write):
+
         Pickles the record and writes it to the socket in binary format.
         If there is an error with the socket, silently drop the packet.
         If there was a problem with the socket, re-establishes the

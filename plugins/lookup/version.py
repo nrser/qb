@@ -14,7 +14,7 @@ except ImportError:
     from ansible.utils.display import Display
     display = Display()
 
-import qb.interop
+from qb.ipc.rpc import client as rpc_client
 
 
 class LookupModule(LookupBase):
@@ -43,7 +43,7 @@ class LookupModule(LookupBase):
         with open(path, 'r') as file:
             raw = file.read().strip()
             
-            version = qb.interop.send_const(
+            version = rpc_client.send(
                 'QB::Package::Version',
                 'from_string',
                 raw,
