@@ -1,0 +1,58 @@
+---
+##############################################################################
+# QB metadata for `qb/dev/ref/archive` role.
+# 
+# QB settings for this role.
+# 
+# @see http://www.rubydoc.info/gems/qb/file/doc/qb_roles/metadata.md
+#
+##############################################################################
+
+# Shown in help output, etc.
+description: >-
+  TODO describe qb/dev/ref/archive role
+
+# Gemspec-style requirements. Right now only `.gems.qb` is used.
+requirements:
+  # Using `vars` lookup (2.5+)
+  # 
+  # https://docs.ansible.com/ansible/2.5/plugins/lookup/vars.html
+  # 
+  ansible: '>= 2.5'
+
+  gems:
+    # Role options taking advantage of the {NRSER::Types} system require
+    # QB 0.4.
+    # 
+    # TODO  Change this to `>= 0.4.0` when 0.4.0 is released.
+    # 
+    qb: '>= 0.4.0.dev'
+
+# Prefix for role variables
+var_prefix: dev_ref_archive
+
+# How to get a default for `DIRECTORY` arg if not provided by user.
+# 
+# @see http://www.rubydoc.info/gems/qb/file/doc/qb_roles/metadata/default_dir.md
+# 
+default_dir: null
+
+# If `true`, QB will ensure `DIRECTORY` exists before starting the play.
+mkdir: false
+
+# Default user to become for play
+default_user: null
+
+# Save options in `.qb-options.yml` files
+save_options: true
+
+# Options to pass to `ansible-playbook`
+ansible_options: {}
+
+# Role CLI options that become Ansible vars
+options:
+# - name: example
+#   description: an example of a variable.
+#   required: false
+#   type: boolean # boolean (default) | string
+#   short: e

@@ -35,6 +35,14 @@ module Filters
   def self.drop_ext path
     File.basename File.basename( path, File.extname( path ) ), '.tar'
   end
+
+
+  def self.is_tar filepath
+    extname = File.extname filepath
+
+     extname == '.tar' ||
+      File.extname( File.basename( filepath, extname ) ) == '.tar'
+  end
   
 end # module Filters
 
