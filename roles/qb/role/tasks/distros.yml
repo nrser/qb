@@ -1,0 +1,39 @@
+---
+##############################################################################
+# Create distribution (OS) specific tasks
+##############################################################################
+
+- name: >-
+    Add distro-specifc include to `tasks/main.yml`
+  qb.yaml:
+    dest: "{{ role_dest }}/tasks/main.yml"
+    update:
+      $contains:
+        name: "Include distro (OS) specific "
+        include_tasks: !unsafe '{{ role_path }}/tasks/distros/{{ ansible_distribution }}/main.yml'
+
+
+- qb.yaml:
+    update:
+      x:
+        y: 2
+
+- with_items: role_distros
+  loop_control:
+    var_name: role_distro
+  name: >-
+    Create distro directories
+  file:
+    dest: "{{ role_dest }}/tasks/distros/{{ role_distro }}/"
+    state: directory
+
+
+- with_items: role_distros
+  loop_control:
+    var_name: role_distro
+  name: >-
+    Create distro `main.yml` files
+  template:
+    src: "tasks/distro.yml.j2"
+    dest: "{{ role_dest }}/tasks/distros/{{ role_distro }}/main.yml"
+    force: "{{ role_force }}"

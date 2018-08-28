@@ -1,0 +1,36 @@
+#!/usr/bin/env qb setup
+---
+- name: Setup development environment for nrser/qb project
+
+  hosts: localhost
+
+  # Any tasks the need to run *before* the roles.
+  pre_tasks:
+    
+  # /pre_tasks
+
+  roles:
+  
+  # - role: qb/atom/pkg
+  #   name: browser-plus
+  
+  # /roles
+  
+  tasks:
+    
+    # Talk to me about gems. Dirty.
+    - name: >-
+        Install gems
+      bundler:
+        gem_path: ./.bundle
+    
+    - name: >-
+        Do something else
+      command: er keen
+  
+  # /tasks
+
+# / play
+
+# Setup VSCode
+- import_playbook: ../vscode/setup.qb.yaml

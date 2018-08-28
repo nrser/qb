@@ -1,15 +1,13 @@
 ##
 # Python dependencies
-# 
-# TODO  Consider changing this to
-# 
-#           ansible>=2.4.1.0,<2.5
-#           pathlib2>=2.3.0,<3
-# 
-#       to allow more flexibility?
-#
 ##
 
 ansible>=2.6.1,<2.7
 pathlib2>=2.3.0,<3
 requests-unixsocket>=0.1.5,<0.2
+
+# "Please pin your dependency to ruamel.yaml<0.15 for production software."
+#  
+# https://yaml.readthedocs.io/en/latest/basicuse.html
+# 
+ruamel.yaml<0.15

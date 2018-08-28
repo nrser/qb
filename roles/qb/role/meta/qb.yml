@@ -47,6 +47,13 @@ vars:
   description: create tasks/main.yml
   short: t
 
+- name: distros
+  type: array
+  description: >-
+    Create "distribution" (Ansible's way of saying OS) specific tasks and
+    a switch file.
+  short: o 
+
 - name: templates
   type: boolean
   description: create a templates directory.

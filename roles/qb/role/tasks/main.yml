@@ -82,6 +82,9 @@
     force: "{{ role_force }}"
   when: role_tasks
 
+- when: role_distros
+  include_tasks: "{{ role_path }}/tasks/distros.yml"
+
 # templates
 # =========
 

@@ -1,0 +1,12 @@
+---
+- name: Setup development environment for nrser/qb project
+  hosts: localhost
+  pre_tasks: 
+  roles: 
+  tasks:
+  - name: Install gems
+    bundler:
+      gem_path: "./.bundle"
+  - name: Do something else
+    command: er keen
+- import_playbook: "../vscode/setup.qb.yaml"
