@@ -1,36 +1,36 @@
+# encoding: UTF-8
+# frozen_string_literal: true
+
 # Requirements
 # =======================================================================
 
-# stdlib
-# ----------------------------------------------------------------------------
+### stdlib ###
 
 require 'yaml'
 require 'cmds'
 
-# deps
-# ----------------------------------------------------------------------------
+### package ###
 
-# package
-# ----------------------------------------------------------------------------
-
-# Breakouts
-require 'qb/role/errors'
-require 'qb/role/search_path'
-require 'qb/role/matches'
-require 'qb/role/name'
-require 'qb/role/default_dir'
+# Breakouts (things that are parts of {Role} but defined in separate files)
+require_relative './role/errors'
+require_relative './role/search_path'
+require_relative './role/matches'
+require_relative './role/name'
+require_relative './role/default_dir'
 
 
-# Refinements
-# =======================================================================
+# Namespace
+# ========================================================================
 
-using NRSER
-using NRSER::Types
+module  QB
 
+
+# Definitions
+# ========================================================================
 
 # Contains info on a QB role.
 # 
-class QB::Role
+class Role
   
   # Mixins
   # ============================================================================
@@ -647,4 +647,10 @@ class QB::Role
     
   # end private
   
-end # class QB::Role
+end # class Role
+
+
+# /Namespace
+# ========================================================================
+
+end # module QB
