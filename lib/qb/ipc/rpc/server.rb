@@ -126,11 +126,22 @@ class Server
   # Construction
   # ========================================================================
   
-  # Instantiate a new `Server`.
-  def initialize
+  # Instantiate a new `Server`, which wraps a {::Unicorn::HttpServer} instance.
+  # 
+  # @param [::Symbol] unicorn_log_level
+  #   Log level for the Unicorn HTTP server. Defaults to `:warn` so that we 
+  #   don't see it's info log in `qb` `STDOUT`.
+  # 
+  def initialize unicorn_log_level: :warn
     @socket_dir = Dir.mktmpdir( 'qb-ipc-rpc' ).to_pn
     @socket_path = socket_dir + 'socket'
-    @http_server = ::Unicorn::HttpServer.new self, listeners: socket_path.to_s
+    
+    unicorn_logger = NRSER::Log[ "#{ self.class.name }#http_server" ]
+    unicorn_logger.level = unicorn_log_level
+    
+    @http_server = ::Unicorn::HttpServer.new self,
+      listeners: socket_path.to_s,
+      logger: unicorn_logger
   end # #initialize
   
   
