@@ -16,6 +16,7 @@ require 'active_support/concern'
 
 require 'qb/util'
 
+
 # Refinements
 # =======================================================================
 
@@ -26,12 +27,21 @@ require 'nrser/refinements/sugar'
 using NRSER::Sugar
 
 
-# Definitions
-# =======================================================================
+# Namespace
+# ========================================================================
 
 module  QB
 class   Options
 class   Option
+
+
+# Definitions
+# =======================================================================
+
+# This concern is just the stuff that interfaces the rest of 
+# {QB::Options::Option} with the built-in {OptionParser}, broken out because
+# {QB::Options::Option} was starting to get a little chubby.
+# 
 module  OptionParserConcern
   
   extend ActiveSupport::Concern
@@ -225,4 +235,12 @@ module  OptionParserConcern
     end
   end
   
-end; end; end; end # module QB::Options::Option::OptionParserConcern
+end # module OptionParserConcern
+
+
+# /Namespace
+# ========================================================================
+
+end # class   Option
+end # class   Options
+end # module  QB

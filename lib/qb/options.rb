@@ -1,17 +1,51 @@
+# frozen_string_literal: true
+# encoding: UTF-8
+
+# Requirements
+# ========================================================================
+
+# Stdlib
+# ------------------------------------------------------------------------
+
 require 'optparse'
+
+# Project / Package
+# ------------------------------------------------------------------------
 
 require_relative "./role/errors"
 require_relative './package/version'
+
+
+# Refinements
+# ========================================================================
 
 require 'nrser/refinements/types'
 using NRSER::Types
 
 
-class QB::Options
+# Namespace
+# ========================================================================
+
+module  QB
+
+
+# Definitions
+# ========================================================================
+
+# {Options} instances encapsulate CLI options for running a role (via
+# {QB::CLI.run}). The class is from back when *run* was the only thing QB
+# did, and it's reflected in the naming and organization. 
+# 
+class Options
   
   # Sub-Tree Requirements
   # ========================================================================
-  
+  # 
+  # TODO  Is there a reason these *need* to be here versus up top (sometimes
+  #       there is with statics/constants), or was this just what I was feeling
+  #       at some point (I think there was a period in there)?
+  # 
+
   require_relative './options/types'
   require_relative './options/option'
   
@@ -397,4 +431,10 @@ class QB::Options
     
   # end protected
   
-end # class QB::Options
+end # class Options
+
+
+# /Namespace
+# ========================================================================
+
+end # module QB

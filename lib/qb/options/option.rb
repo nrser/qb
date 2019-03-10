@@ -40,12 +40,15 @@ class   Options
 # Definitions
 # ========================================================================
 
+# Base class for all options, which can be fed into an {OptionParser} to 
+# extract them from CLI args.
+# 
 class Option
   
   # Constants
   # ========================================================================
   
-  EXAMPLES_KEYS = ['examples', 'example']
+  EXAMPLES_KEYS = ['examples', 'example'].freeze
   
   
   # Mixins
@@ -59,29 +62,23 @@ class Option
   # Attributes
   # ========================================================================
   
-  # the role that this option is for
-  attr_reader :role
-  
-  # array of strings representing how this option was included
-  # empty for top-level options
-  attr_reader :include_path
-  
-  # the name of the option in the qb metadata, equal to #meta['name']
-  attr_reader :meta_name
-  
-  # the name that this option will be available in the cli as
+  # The name that this option will be available in the cli as
+  # 
+  # @return [String]
+  # 
   attr_reader :cli_name
   
-  # the name that the value will be passed to ansible as
-  attr_reader :var_name
   
-  # the value of the option, or `nil` if we never assign one
+  # The value of the option, or `nil` if we never assign one
+  # 
+  # @return [Object]
+  # 
   attr_accessor :value
   
   
-  # TODO document `type` attribute.
+  # What type of values the option accepts.
   # 
-  # @return [attr_type]
+  # @return [NRSER::Types::Type]
   #     
   attr_reader :type
   
@@ -89,132 +86,15 @@ class Option
   # Construction
   # ======================================================================
   
-  def initialize role, meta, include_path
-    @role = role
-    @meta = meta.with_indifferent_access
-    @include_path = include_path
-    
-    @meta_name = meta.fetch 'name'
-    
-    @cli_name = if @include_path.empty?
-      QB::Options.cli_ize_name @meta_name
-    else
-      QB::Options.cli_ize_name "#{ @include_path.join('-') }-#{ @meta_name }"
-    end
-    
-    @var_name = if self.meta?( :var_name )
-      # prefer an explicit, exact variable name if provided
-      self.meta( :var_name, type: Types.var_name )
-    elsif role.var_prefix
-      QB::Options.var_ize_name "#{ role.var_prefix }_#{ meta_name }"
-    else
-      QB::Options.var_ize_name meta_name
-    end
-    
-    # Will be set when we find it out!
-    @value = nil
-    
-    # Initialize `@type` var
-    init_type!
+  def initialize cli_name:, type:, value: nil
+    @cli_name = t.NonEmptyString.check! cli_name
+    @value = value
+    @type = t.Type.check! type
   end
   
-  
-  protected
-  # ========================================================================
-    
-    # Initialize `@type` to the {NRSER::Types::Type} loaded from the option
-    # meta's `type` value.
-    # 
-    # @protected
-    # 
-    # @return [nil]
-    # 
-    def init_type!
-      type_meta = meta[:type]
-      
-      if type_meta.nil?
-        raise QB::Role::MetadataError.new \
-          "Option", meta_name, "for role", role.name, "missing `type`",
-          role_meta_path: role.meta_path,
-          option_meta: meta
-      end
-      
-      if  t.non_empty_str === type_meta &&
-          type_meta.include?( '::' )
-        
-        const = type_meta.safe_constantize
-        
-        if  const &&
-            const.is_a?( Class ) &&
-            ( const < NRSER::Types::Type ||
-              const < NRSER::Props )
-          @type = const
-          return
-        end
-        
-      end
-      
-      message = t.match type_meta,
-        t.non_empty_str, ->( str ) {
-          NRSER::Message.new str
-        },
-        
-        t.pair( value: (t.hash_ | t.array) ), ->( hash_pair ) {
-          name, params = hash_pair.first
-          
-          NRSER::Message.from( name, params ).symbolize_options
-        }
-      
-      @type = [
-        QB::Options::Types,
-        t,
-      ].find_map { |mod|
-        if mod.respond_to? message.symbol
-          begin
-            type = message.send_to mod
-          rescue Exception => error
-            logger.warn "Type factory failed",
-              { message: message },
-              error
-            
-            nil
-          else
-            type if type.is_a?( t::Type )
-          end
-        end
-      }
-      
-      if @type.nil?
-        raise QB::Role::MetadataError.new \
-          "Unable to find type factory for", type_meta,
-          role_meta_path: role.meta_path,
-          option_meta: meta,
-          message: message
-      end
-      
-    end # #init_type!
-    
-  public # end protected *****************************************************
-  
-  
+
   # Instance Methods
   # ========================================================================
-  
-  def meta *keys, type: t.any, default: nil
-    return @meta if keys.empty?
-    
-    keys.each do |key|
-      return type.check!( @meta[key] ) unless @meta[key].nil?
-    end
-    
-    type.check! default
-  end
-  
-  
-  def meta? *keys
-    keys.any? { |key| @meta.key? key }
-  end
-  
   
   def value_data
     if value.respond_to? :to_data
@@ -231,15 +111,6 @@ class Option
   # 
   def required?
     meta :required, :require, type: t.bool, default: false
-  end
-  
-  
-  # Should we save the option value in `./.qb-options.yml`?
-  # 
-  # @return [Boolean]
-  # 
-  def save?
-    meta :save, type: t.bool, default: true
   end
   
   
@@ -317,5 +188,5 @@ end # class Option
 # /Namespace
 # ============================================================================
 
-end # class Options
+end # class  Options
 end # module QB

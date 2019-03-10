@@ -11,6 +11,8 @@ require 'cmds'
 
 ### package ###
 
+require_relative './role/option'
+
 # Breakouts (things that are parts of {Role} but defined in separate files)
 require_relative './role/errors'
 require_relative './role/search_path'
@@ -326,7 +328,7 @@ class Role
         role = QB::Role.require role_name
         role.options QB::Role.get_include_path(role, option_meta, include_path)
       else
-        QB::Options::Option.new self, option_meta, include_path
+        Option.new self, option_meta, include_path
       end
     }.flatten
   end # #options
