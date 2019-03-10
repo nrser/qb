@@ -24,13 +24,20 @@ module  Cmd
 # Definitions
 # ========================================================================
 
-# A command object that runs a playbook with all the QB specialness.
+# A command object that runs a playbook with all the QB special-ness.
 # 
 class Playbook < Cmds
+
+  # Constants
+  # ======================================================================
+
   DEFAULT_PLAYBOOK_PATH = '.qb-playbook.yml'
   
   # Default executable to use, just uses a bare `ansible-playbook`, letting
   # shell path resolution do it's thing.
+  # 
+  # @return [String]
+  # 
   DEFAULT_EXE = 'ansible-playbook'
   
   TEMPLATE = <<-END
@@ -44,13 +51,6 @@ class Playbook < Cmds
     
     <%= playbook_path %>
   END
-  
-  # Constants
-  # ======================================================================
-  
-  
-  # Class Methods
-  # ======================================================================
   
   
   # Attributes
