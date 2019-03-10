@@ -80,7 +80,15 @@ def get_map():
     return filter_map
 
 
-_map = get_map()
+# Calling get_map() this at top-level causes doctest to fail... not sure why it
+# was here? Trying to just do it on-demand and cache the results...
+_map = None
+
+def get_map_cached():
+    global _map
+    if _map is None:
+        _map = get_map()
+    return _map
 
 
 class FilterModule( object ):
@@ -89,14 +97,16 @@ class FilterModule( object ):
     '''
 
     def filters( self ):
-        global _map
-        return _map
+        # global _map
+        # return _map
+        return get_map_cached()
     # filters()
 # FilterModule
 
 
-# Testing with doctest
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
+# Testing with doctest - there are no doctests in here, and the file fails
+# because the RPC server of course isn't present
+# if __name__ == '__main__':
+#     import doctest
+#     doctest.testmod()
     
