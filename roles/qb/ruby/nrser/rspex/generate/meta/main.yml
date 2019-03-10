@@ -1,8 +1,0 @@
----
-# meta file for qb/ruby/nrser/rspex/generate
-
-allow_duplicates: yes
-
-dependencies:
-- role: nrser.rb
-

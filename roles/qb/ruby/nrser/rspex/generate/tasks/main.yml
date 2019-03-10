@@ -1,9 +1,0 @@
----
-# tasks file for qb/ruby/nrser/rspex/generate
-
-- include_tasks: >-
-    {{ role_path }}/tasks/helpers.yml
-
-- when: class
-  include_tasks: >-
-    {{ role_path }}/tasks/class.yml
