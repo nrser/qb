@@ -210,7 +210,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "octokit",          "~> 4.0"
   
   # Much better logging
-  spec.add_dependency 'semantic_logger',  '~> 4.2'
+  spec.add_dependency 'semantic_logger',  '~> 4.2', '< 4.4'
   
   # With much more awesome printing!
   spec.add_dependency 'awesome_print',    '~> 1.8'
