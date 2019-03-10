@@ -195,7 +195,7 @@ Gem::Specification.new do |spec|
   # ----------------------------------------------------------------------------
   
   # My guns
-  spec.add_dependency 'nrser',            '~> 0.3.3'
+  spec.add_dependency 'nrser',            '~> 0.3.12'
   
   # My favorite wrapper
   spec.add_dependency "cmds",             '~> 0.2.11'
@@ -208,9 +208,6 @@ Gem::Specification.new do |spec|
   
   # GitHub API client
   spec.add_dependency "octokit",          "~> 4.0"
-  
-  # Much better logging
-  spec.add_dependency 'semantic_logger',  '~> 4.2', '< 4.4'
   
   # With much more awesome printing!
   spec.add_dependency 'awesome_print',    '~> 1.8'
