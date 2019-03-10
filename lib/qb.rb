@@ -48,10 +48,19 @@ module QB
   USER_ROLES_DIR = ENV['HOME'].to_pn / '.ansible' / 'roles'
   
   
+  # Extensions we recognize for YAML files.
+  # 
+  # See {Util.find_yaml_file!}.
+  # 
+  # @return [::Array<::String>]
+  # 
+  YAML_FILE_EXTS = [ '.yaml', '.yml' ]
+  
+  
   # Mixins
   # =====================================================================
   
-  include SemanticLogger::Loggable
+  include NRSER::Log::Mixin
   
   
   # Support for the old custom debug logging, now sent to {SemanticLogger}.
