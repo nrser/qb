@@ -10,7 +10,7 @@
     git_check_is_clean: >-
       {{
         git_root_facts.git
-          | qb_send( 'clean?', ignore=git_check_clean_ignore )
+          | send( 'clean?', ignore=git_check_clean_ignore )
       }}
 
 # - name: >
