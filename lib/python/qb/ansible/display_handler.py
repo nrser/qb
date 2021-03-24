@@ -111,11 +111,10 @@ class DisplayHandler(logging.Handler):
             self.format(record)
 
             if record.levelname == 'DEBUG':
-                self.display.debug(record.message)
+                return self.display.verbose(record.message, caplevel=1)
 
             elif record.levelname == 'INFO':
-                # `verbose` I guess?
-                self.display.verbose(record.message)
+                return self.display.verbose(record.message, caplevel=0)
 
             elif record.levelname == 'WARNING':
                 self.display.warning(record.message)
