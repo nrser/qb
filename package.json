@@ -6,6 +6,6 @@
   "author": "nrser <neil@ztkae.com>",
   "license": "see LICENSE.txt",
   "dependencies": {
-    "semver": "^5.3.0"
+    "semver": "^5.7.2"
   }
 }
